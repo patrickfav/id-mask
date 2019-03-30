@@ -17,7 +17,8 @@ before_install:
   - tar xvf secrets.tar
 
 script:
-  - ./mvnw clean install -X -Djarsigner.skip=false checkstyle:check
+  - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then ./mvnw clean install -Djarsigner.skip=true checkstyle:check; fi'
+  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then ./mvnw clean install -Djarsigner.skip=false checkstyle:check; fi'
 
 after_success:
   - ./mvnw test jacoco:report coveralls:report
@@ -34,9 +35,9 @@ deploy:
       secure: "e/QacQA1ue+r7FaVlyR81OOlPSh15nmNZaICF0OoPOXQaJh5+iC/2kXfVivns3thvVAymnUmDYvXLEBydyABue7bF3OxIywj6w0zVmbzLx1yG9WpMzUgnLAGsFkXou7j0HfELWX+t4pyHZuJitEtVqi7pHm/zZ3IpVCwfcm0Rms8LIk9jNlOTc8EUGU7h3K1HPNdm+lru3Pyn+sdHtlxl3Ncu8VpvfvsRMbW1taLZQKAEcfixtevpKmgh+n+bgXfWvTCoVp1p4rZH4Vb9zk6bgw7MeUP6qCErgu9u2z9MlRfFQkIvMCg0Hl5mSruFTAgzhBicLONP+ZUCjrUb2YiS66P3nzucFEYSsBHrkZrhE5K6V1MxW103IqJlvDu6h4HzwuiNqBjZh/qJ0HhrdWe/YA3l+kY/4xaClrEqoHC/WXmY5Pz6IHJ+wbtDJGkCsBcWp5WbrmqfAidlOWGqbNAbHiOeQe3DW1CXkGs62BN+IHclgrjnOQxDRk+hWnRtqDMldaelMXF/t/RhPYU3uMUiFkzDMjFBblGt8nNm+Me3x7kXE3Y52RJBDcxB1Lx86mlx0FeI2ZNo5XvND2Jd7ipUq9DLlWO0rCWukQFw4b9z62ax1453UC7zA6T2QJJORXeuKVuct581c/ltzVju1vrtPt39hcXs91G4B1tMypSLds="
     file_glob: true
     file:
-      - "target/hkdf-*.jar"
-      - "target/*.sha256"
-      - "target/checksum-sha256.txt"
+      - "modules/id-mask/target/id-mask-*.jar"
+      - "modules/id-mask/target/*.sha256"
+      - "modules/id-mask/target/checksum-sha256.txt"
     skip_cleanup: true
     on:
       branch: master
