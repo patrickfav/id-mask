@@ -24,7 +24,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>3.0.0</version>
                 <configuration>
                     <excludes>**/AutoValue_Config.java</excludes>
                     <configLocation>checkstyle.xml</configLocation>
