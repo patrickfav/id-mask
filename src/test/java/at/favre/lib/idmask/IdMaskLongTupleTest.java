@@ -8,7 +8,7 @@ import java.util.Random;
 import static org.junit.Assert.assertEquals;
 
 public class IdMaskLongTupleTest {
-    private IdMask<LongTuple> idMask = new IdMask.LongIdTupleMask(Config.builder().key(Bytes.random(16).array()).build());
+    private IdMask<LongTuple> idMask = new IdMask.LongIdTupleMask(Config.builder().key(Bytes.random(16).array()).cacheDecode(false).cacheEncode(false).build());
 
     @Test
     public void testEncodeDecode() {

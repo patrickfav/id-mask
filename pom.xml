@@ -19,7 +19,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <autoValueVersion>1.6.2</autoValueVersion>
+        <autoValueVersion>1.6.3</autoValueVersion>
     </properties>
     <repositories>
         <repository>
