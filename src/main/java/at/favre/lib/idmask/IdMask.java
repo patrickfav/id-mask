@@ -17,7 +17,8 @@ public interface IdMask<T> {
 
         BaseIdMask(Config config) {
             this.config = config;
-            this.engine = new IdMaskEngine.Default(config.key(), config.mode());
+            this.engine = new IdMaskEngine.Default(config.key(), config.mode(), config.encoding(),
+                    config.secureRandom(), config.securityProvider());
         }
 
         String _encode(byte[] id) {

@@ -37,12 +37,12 @@ public interface IdMaskEngine {
         private ThreadLocal<Cipher> cipherWrapper = new ThreadLocal<>();
 
         public Default(byte[] key, Mode mode) {
-            this(key, mode, new ByteToTextEncoding.Base64());
+            this(key, mode, new ByteToTextEncoding.Base64(), new SecureRandom(), null);
         }
 
-        public Default(byte[] key, Mode mode, ByteToTextEncoding encoding) {
-            this.secureRandom = new SecureRandom();
-            this.provider = null;
+        public Default(byte[] key, Mode mode, ByteToTextEncoding encoding, SecureRandom secureRandom, Provider provider) {
+            this.secureRandom = secureRandom;
+            this.provider = provider;
             this.encoding = Objects.requireNonNull(encoding, "encoding");
             this.mode = Objects.requireNonNull(mode, "mode");
             this.hkdf = HKDF.fromHmacSha512();
@@ -53,8 +53,8 @@ public interface IdMaskEngine {
         public String mask(byte[] id) {
             Objects.requireNonNull(id, "id");
 
-            if (id.length > MAX_ID_LENGTH) {
-                throw new IllegalArgumentException(String.format("id must be longer than %d bytes", MAX_ID_LENGTH));
+            if (id.length <= 0 || id.length > MAX_ID_LENGTH) {
+                throw new IllegalArgumentException(String.format("id length must be between 1 and %d bytes", MAX_ID_LENGTH));
             }
 
             try {
@@ -66,13 +66,15 @@ public interface IdMaskEngine {
                 byte[] macKey = Bytes.from(keys, 32, 32).array();
 
                 Cipher cipher = getCipher();
-                cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(currentKey, "AES"), new IvParameterSpec(iv));
+                cipher.init(Cipher.ENCRYPT_MODE,
+                        new SecretKeySpec(currentKey, "AES"),
+                        new IvParameterSpec(iv));
                 byte[] encryptedId = cipher.doFinal(Bytes.from(id).array());
                 byte version = (byte) 0x01;
                 byte[] mac = Bytes.from(macCipherText(macKey, encryptedId, iv, new byte[]{version}), 0, mode.getMacByteLength()).array();
 
                 ByteBuffer bb = ByteBuffer.allocate(1 + id.length + mode.getMacByteLength() + mode.getEntropyByteLength());
-                bb.put(obfuscateVersion((byte) 0x01, entropy));
+                bb.put(obfuscateVersion((byte) 0x01, Bytes.from(keys, 16, 1).array()));
                 bb.put(entropy);
                 bb.put(encryptedId);
                 bb.put(mac);
@@ -106,14 +108,13 @@ public interface IdMaskEngine {
             bb.get(payload);
             bb.get(mac);
 
-            version = obfuscateVersion(version, entropy);
-
             byte[] keys = hkdf.expand(internalKey, entropy, 64);
 
             byte[] currentKey = Bytes.from(keys, 0, 16).array();
             byte[] iv = Bytes.from(keys, 16, 16).array();
             byte[] macKey = Bytes.from(keys, 32, 32).array();
 
+            version = obfuscateVersion(version, Bytes.from(keys, 16, 1).array());
             byte[] refMac = Bytes.from(macCipherText(macKey, payload, iv, new byte[]{version}), 0, mode.getMacByteLength()).array();
 
             if (!Bytes.wrap(mac).equalsConstantTime(refMac)) {
