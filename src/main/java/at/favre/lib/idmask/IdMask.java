@@ -40,7 +40,7 @@ public interface IdMask<T> {
         byte[] _decode(String encoded) {
             byte[] raw;
             if (config.cacheDecode()) {
-                if ((raw = config.cacheImpl().getRaw(encoded)) != null) {
+                if ((raw = config.cacheImpl().getBytes(encoded)) != null) {
                     return Bytes.wrap(raw).copy().array();
                 }
             }
