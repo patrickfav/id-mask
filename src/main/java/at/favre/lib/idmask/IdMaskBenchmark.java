@@ -17,15 +17,14 @@ import java.util.concurrent.TimeUnit;
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 public class IdMaskBenchmark {
 
-
     @State(Scope.Thread)
     public static class MyState {
         @Param({"SMALL_SIZE_WEAK_SECURITY",
                 "LARGER_SIZE_AND_VERY_HIGH_SECURITY"})
-        public Mode mode;
-        public long id;
-        public IdMaskEngine idMaskEngine;
-        public Hashids hashids;
+        private Mode mode;
+        private long id;
+        private IdMaskEngine idMaskEngine;
+        private Hashids hashids;
 
         @Setup
         public void setup() {

@@ -4,7 +4,6 @@ import java.util.UUID;
 
 public class IdMaskFactory {
 
-
     IdMask<Long> createForLongIds(Config config) {
         return new IdMask.LongIdMask(config);
     }

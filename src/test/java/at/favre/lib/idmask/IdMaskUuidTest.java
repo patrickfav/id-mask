@@ -3,7 +3,6 @@ package at.favre.lib.idmask;
 import at.favre.lib.bytes.Bytes;
 import org.junit.Test;
 
-import java.util.Random;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
