@@ -19,6 +19,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <autoValueVersion>1.6.2</autoValueVersion>
     </properties>
     <repositories>
         <repository>
@@ -43,6 +44,7 @@
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>3.0.0</version>
                 <configuration>
+                    <excludes>**/AutoValue_Config.java</excludes>
                     <configLocation>checkstyle.xml</configLocation>
                 </configuration>
                 <dependencies>
@@ -201,31 +203,29 @@
         <dependency>
             <groupId>com.google.auto.value</groupId>
             <artifactId>auto-value-annotations</artifactId>
-            <version>1.6.2</version>
+            <version>${autoValueVersion}</version>
         </dependency>
         <dependency>
             <groupId>com.google.auto.value</groupId>
             <artifactId>auto-value</artifactId>
-            <version>1.6.2</version>
+            <version>${autoValueVersion}</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>15.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.markenwerk</groupId>
+            <artifactId>utils-lrucache</artifactId>
+            <version>1.0.1</version>
         </dependency>
         <!-- test -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.8.1</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>1.11</version>
             <scope>test</scope>
         </dependency>
         <dependency>
