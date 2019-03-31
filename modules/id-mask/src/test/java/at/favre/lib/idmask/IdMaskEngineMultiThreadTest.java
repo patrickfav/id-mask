@@ -15,8 +15,31 @@ public class IdMaskEngineMultiThreadTest {
     private final ExecutorService executor = Executors.newFixedThreadPool(24);
 
     @Test
-    public void test() throws InterruptedException {
-        final IdMaskEngine idMaskEngine = new IdMaskEngine.Default(Bytes.from(192731092837120938L).array(), Mode.MEDIUM_SIZE_AND_SECURITY);
+    public void test16Byte() throws InterruptedException {
+        final IdMaskEngine idMaskEngine = new IdMaskEngine.SixteenByteEngine(Bytes.from(192731092837120938L).array(), Mode.MEDIUM_SIZE_AND_SECURITY);
+        for (int i = 0; i < 1600; i++) {
+            executor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    byte[] id = Bytes.random(16).array();
+                    String maskedId = idMaskEngine.mask(id);
+                    assertNotNull(maskedId);
+                    assertArrayEquals(id, idMaskEngine.unmask(maskedId));
+                }
+            });
+        }
+
+        Thread.sleep(500);
+
+        executor.shutdown();
+        executor.awaitTermination(5000, TimeUnit.MILLISECONDS);
+
+    }
+
+
+    @Test
+    public void test8Byte() throws InterruptedException {
+        final IdMaskEngine idMaskEngine = new IdMaskEngine.EightByteEncryptionEngine(Bytes.from(192731092837120938L).array());
         for (int i = 0; i < 1600; i++) {
             executor.submit(new Runnable() {
                 @Override
@@ -35,5 +58,4 @@ public class IdMaskEngineMultiThreadTest {
         executor.awaitTermination(5000, TimeUnit.MILLISECONDS);
 
     }
-
 }

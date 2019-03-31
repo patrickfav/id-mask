@@ -12,13 +12,11 @@ public interface IdMask<T> {
 
     abstract class BaseIdMask {
         private final IdMaskEngine engine;
-
         private final Config config;
 
-        BaseIdMask(Config config) {
+        BaseIdMask(IdMaskEngine engine, Config config) {
+            this.engine = engine;
             this.config = config;
-            this.engine = new IdMaskEngine.Default(config.key(), config.mode(), config.encoding(),
-                    config.secureRandom(), config.securityProvider());
         }
 
         String _encode(byte[] id) {
@@ -59,7 +57,8 @@ public interface IdMask<T> {
     final class LongIdMask extends BaseIdMask implements IdMask<Long> {
 
         LongIdMask(Config config) {
-            super(config);
+            super(new IdMaskEngine.EightByteEncryptionEngine(config.key(), config.securityProvider(),
+                    config.secureRandom(), config.encoding()), config);
         }
 
         @Override
@@ -77,7 +76,8 @@ public interface IdMask<T> {
     final class LongIdTupleMask extends BaseIdMask implements IdMask<LongTuple> {
 
         LongIdTupleMask(Config config) {
-            super(config);
+            super(new IdMaskEngine.SixteenByteEngine(config.key(), config.mode(), config.encoding(),
+                    config.secureRandom(), config.securityProvider()), config);
         }
 
         @Override
@@ -95,7 +95,8 @@ public interface IdMask<T> {
     final class UuidMask extends BaseIdMask implements IdMask<UUID> {
 
         UuidMask(Config config) {
-            super(config);
+            super(new IdMaskEngine.SixteenByteEngine(config.key(), config.mode(), config.encoding(),
+                    config.secureRandom(), config.securityProvider()), config);
         }
 
         @Override

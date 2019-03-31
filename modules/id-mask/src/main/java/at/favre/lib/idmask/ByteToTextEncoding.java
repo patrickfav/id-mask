@@ -19,4 +19,16 @@ public interface ByteToTextEncoding {
             return Bytes.parseBase64(encoded).array();
         }
     }
+
+    final class Base32 implements ByteToTextEncoding {
+        @Override
+        public String encode(byte[] bytes) {
+            return Bytes.wrap(bytes).encodeBase32();
+        }
+
+        @Override
+        public byte[] decode(CharSequence encoded) {
+            return Bytes.parseBase32(encoded).array();
+        }
+    }
 }
