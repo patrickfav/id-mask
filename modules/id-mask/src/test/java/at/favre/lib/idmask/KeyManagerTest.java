@@ -3,8 +3,7 @@ package at.favre.lib.idmask;
 import at.favre.lib.bytes.Bytes;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 public class KeyManagerTest {
 
@@ -31,6 +30,19 @@ public class KeyManagerTest {
     }
 
     @Test
-    public void getActiveKey() {
+    public void testIdKey() {
+        byte[] random = Bytes.random(16).array();
+        byte[] randomRef = Bytes.wrap(random).copy().array();
+        final int id = 2;
+        KeyManager.IdKey idKey = new KeyManager.IdKey(id, random);
+        assertArrayEquals(randomRef, idKey.getKeyBytes());
+        assertEquals(id, idKey.getKeyId());
+
+        assertEquals(idKey.hashCode(), new KeyManager.IdKey(id, random).hashCode());
+        assertEquals(idKey, new KeyManager.IdKey(id, random));
+
+        idKey.clear();
+
+        assertFalse(Bytes.wrap(randomRef).equals(idKey.getKeyBytes()));
     }
 }
