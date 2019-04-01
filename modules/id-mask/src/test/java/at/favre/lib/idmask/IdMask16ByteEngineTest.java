@@ -7,7 +7,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.*;
 
-public class IdMaskEngineTest {
+public class IdMask16ByteEngineTest {
     private IdMaskEngine idMaskEngine = new IdMaskEngine.SixteenByteEngine(Bytes.random(16).array(), Mode.MEDIUM_SIZE_AND_SECURITY);
 
     @Test

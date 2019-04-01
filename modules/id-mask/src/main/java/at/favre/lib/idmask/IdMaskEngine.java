@@ -20,8 +20,8 @@ public interface IdMaskEngine {
     String mask(byte[] id);
 
     byte[] unmask(String maskedId);
-
     abstract class BaseEngine {
+
         private ThreadLocal<Cipher> cipherWrapper = new ThreadLocal<>();
         final Provider provider;
         final SecureRandom secureRandom;
@@ -93,7 +93,7 @@ public interface IdMaskEngine {
                 c.init(Cipher.ENCRYPT_MODE, secretKey);
                 byte[] cipherText = c.doFinal(message);
 
-                ByteBuffer bb = ByteBuffer.allocate(LENGTH * 3);
+                ByteBuffer bb = ByteBuffer.allocate(random.length + cipherText.length);
                 bb.put(random);
                 bb.put(cipherText);
 
@@ -143,6 +143,8 @@ public interface IdMaskEngine {
         private static final String ALGORITHM = "AES/CBC/NoPadding";
         private static final String HMAC_ALGORITHM = "HmacSHA256";
         private static final int MAX_ID_LENGTH = 16;
+        private static final int MAC_LENGTH = 8;
+        private static final int RANDOM_LENGTH = 16;
 
         //private final Mode mode;
 
@@ -166,7 +168,7 @@ public interface IdMaskEngine {
             }
 
             try {
-                byte[] entropy = getRandomBytes(16);
+                byte[] entropy = getRandomBytes(RANDOM_LENGTH);
                 byte[] keys = hkdf.expand(internalKey, entropy, 64);
 
                 byte[] currentKey = Bytes.from(keys, 0, 16).array();
@@ -179,7 +181,7 @@ public interface IdMaskEngine {
                         new IvParameterSpec(iv));
                 byte[] encryptedId = cipher.doFinal(Bytes.from(id).xor(entropy).array());
                 byte version = (byte) 0x01;
-                byte[] mac = Bytes.from(macCipherText(macKey, encryptedId, iv, new byte[]{version}), 0, 16).array();
+                byte[] mac = Bytes.from(macCipherText(macKey, encryptedId, iv, new byte[]{version}), 0, MAC_LENGTH).array();
 
                 ByteBuffer bb = ByteBuffer.allocate(1 + encryptedId.length + mac.length + entropy.length);
                 bb.put(obfuscateVersion((byte) 0x01, Bytes.from(keys, 16, 1).array()));
@@ -203,11 +205,11 @@ public interface IdMaskEngine {
 
             ByteBuffer bb = ByteBuffer.wrap(encoding.decode(maskedId));
             byte version = bb.get();
-            byte[] entropy = new byte[16];
+            byte[] entropy = new byte[RANDOM_LENGTH];
             bb.get(entropy);
             byte[] payload = new byte[16];
             bb.get(payload);
-            byte[] mac = new byte[16];
+            byte[] mac = new byte[MAC_LENGTH];
             bb.get(mac);
 
             byte[] keys = hkdf.expand(internalKey, entropy, 64);
@@ -217,8 +219,7 @@ public interface IdMaskEngine {
             byte[] macKey = Bytes.from(keys, 32, 32).array();
 
             version = obfuscateVersion(version, Bytes.from(keys, 16, 1).array());
-            byte[] refMac = Bytes.from(macCipherText(macKey, payload, iv, new byte[]{version}), 0, 16).array();
-
+            byte[] refMac = Bytes.from(macCipherText(macKey, payload, iv, new byte[]{version}), 0, MAC_LENGTH).array();
             if (!Bytes.wrap(mac).equalsConstantTime(refMac)) {
                 throw new SecurityException("mac does not match");
             }
