@@ -112,13 +112,15 @@ public interface IdMaskEngine {
                 byte[] cipherText = c.doFinal(message);
 
                 final ByteBuffer bb;
-
+                byte version = 1;
                 if (randomizeIds) {
                     bb = ByteBuffer.allocate(1 + random.length + cipherText.length);
+                    bb.put(version);
                     bb.put(random);
                     bb.put(cipherText);
                 } else {
                     bb = ByteBuffer.allocate(1 + cipherText.length);
+                    bb.put(version);
                     bb.put(cipherText);
                 }
 
@@ -134,9 +136,11 @@ public interface IdMaskEngine {
 
             ByteBuffer bb = ByteBuffer.wrap(encoding.decode(maskedId));
 
-            if (bb.remaining() != (randomizeIds ? 3 : 2) * getSupportedIdByteLength()) {
+            if (bb.remaining() != 1 + (randomizeIds ? 3 : 2) * getSupportedIdByteLength()) {
                 throw new IllegalArgumentException("unexpected message id length " + bb.remaining());
             }
+
+            byte version = bb.get();
 
             final byte[] entropyData = getEntropyBytes(getSupportedIdByteLength());
             if (randomizeIds) {
