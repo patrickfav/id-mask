@@ -3,6 +3,8 @@ package at.favre.lib.idmask;
 import at.favre.lib.bytes.Bytes;
 import org.junit.Test;
 
+import java.security.SecureRandom;
+
 import static org.junit.Assert.*;
 
 public class IdMask8ByteEngineTest {
@@ -21,8 +23,27 @@ public class IdMask8ByteEngineTest {
     }
 
     @Test
-    public void testShouldNotReturnSameMaskedId() {
-        IdMaskEngine idMaskEngine = new IdMaskEngine.EightByteEncryptionEngine(Bytes.from(130984671309784536L).array());
+    public void testRandomizedShouldBeLongerThanDeterministic() {
+        byte[] key = Bytes.from(87587659785921233L).array();
+        byte[] id = Bytes.from(Bytes.from(9182746139874612986L)).array();
+
+        IdMaskEngine idMaskRandomized = new IdMaskEngine.EightByteEncryptionEngine(key, null, new SecureRandom(), new ByteToTextEncoding.Base64(), true);
+        IdMaskEngine idMaskDeterministic = new IdMaskEngine.EightByteEncryptionEngine(key, null, new SecureRandom(), new ByteToTextEncoding.Base64(), false);
+
+        String maskedId1 = idMaskRandomized.mask(id);
+        String maskedId2 = idMaskDeterministic.mask(id);
+
+        assertNotEquals(maskedId1, maskedId2);
+        assertTrue(maskedId1.length() > maskedId2.length());
+
+        System.out.println(maskedId1);
+        System.out.println(maskedId2);
+    }
+
+    @Test
+    public void testRandomizedIdsShouldNotReturnSameMaskedId() {
+        IdMaskEngine idMaskEngine = new IdMaskEngine.EightByteEncryptionEngine(Bytes.from(130984671309784536L).array(),
+                null, new SecureRandom(), new ByteToTextEncoding.Base64(), true);
         byte[] id = Bytes.from(7239562391234L).array();
 
         String maskedId1 = idMaskEngine.mask(id);
@@ -35,6 +56,34 @@ public class IdMask8ByteEngineTest {
         assertNotEquals(maskedId1, maskedId4);
         assertNotEquals(maskedId2, maskedId3);
         assertNotEquals(maskedId3, maskedId4);
+
+        assertArrayEquals(id, idMaskEngine.unmask(maskedId1));
+        assertArrayEquals(id, idMaskEngine.unmask(maskedId2));
+        assertArrayEquals(id, idMaskEngine.unmask(maskedId3));
+        assertArrayEquals(id, idMaskEngine.unmask(maskedId4));
+
+        System.out.println(maskedId1);
+        System.out.println(maskedId2);
+        System.out.println(maskedId3);
+        System.out.println(maskedId4);
+    }
+
+    @Test
+    public void testDeterministicIdsShouldReturnSameMaskedId() {
+        IdMaskEngine idMaskEngine = new IdMaskEngine.EightByteEncryptionEngine(Bytes.from(130984671309784536L).array(),
+                null, new SecureRandom(), new ByteToTextEncoding.Base64(), false);
+        byte[] id = Bytes.from(7239562391234L).array();
+
+        String maskedId1 = idMaskEngine.mask(id);
+        String maskedId2 = idMaskEngine.mask(id);
+        String maskedId3 = idMaskEngine.mask(id);
+        String maskedId4 = idMaskEngine.mask(id);
+
+        assertEquals(maskedId1, maskedId2);
+        assertEquals(maskedId1, maskedId3);
+        assertEquals(maskedId1, maskedId4);
+        assertEquals(maskedId2, maskedId3);
+        assertEquals(maskedId3, maskedId4);
 
         assertArrayEquals(id, idMaskEngine.unmask(maskedId1));
         assertArrayEquals(id, idMaskEngine.unmask(maskedId2));
@@ -77,5 +126,15 @@ public class IdMask8ByteEngineTest {
     @Test(expected = NullPointerException.class)
     public void testUnmaskNullInput() {
         idMaskEngine.unmask(null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testUnmaskEncodedTooShort() {
+        idMaskEngine.unmask("1234567");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testUnmaskEncodedTooLong() {
+        idMaskEngine.unmask(Bytes.allocate(IdMaskEngine.BaseEngine.MAX_MASKED_ID_ENCODED_LENGTH / 2).encodeHex());
     }
 }

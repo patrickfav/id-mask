@@ -58,7 +58,7 @@ public interface IdMask<T> {
 
         LongIdMask(Config config) {
             super(new IdMaskEngine.EightByteEncryptionEngine(config.key(), config.securityProvider(),
-                    config.secureRandom(), config.encoding()), config);
+                    config.secureRandom(), config.encoding(), config.randomizedIds()), config);
         }
 
         @Override
@@ -76,8 +76,8 @@ public interface IdMask<T> {
     final class LongIdTupleMask extends BaseIdMask implements IdMask<LongTuple> {
 
         LongIdTupleMask(Config config) {
-            super(new IdMaskEngine.SixteenByteEngine(config.key(), config.mode(), config.encoding(),
-                    config.secureRandom(), config.securityProvider()), config);
+            super(new IdMaskEngine.SixteenByteEngine(config.key(), config.highSecurityMode(), config.encoding(),
+                    config.secureRandom(), config.securityProvider(), config.randomizedIds()), config);
         }
 
         @Override
@@ -95,8 +95,8 @@ public interface IdMask<T> {
     final class UuidMask extends BaseIdMask implements IdMask<UUID> {
 
         UuidMask(Config config) {
-            super(new IdMaskEngine.SixteenByteEngine(config.key(), config.mode(), config.encoding(),
-                    config.secureRandom(), config.securityProvider()), config);
+            super(new IdMaskEngine.SixteenByteEngine(config.key(), config.highSecurityMode(), config.encoding(),
+                    config.secureRandom(), config.securityProvider(), config.randomizedIds()), config);
         }
 
         @Override

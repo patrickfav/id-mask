@@ -14,6 +14,10 @@ public abstract class Config {
 
     abstract ByteToTextEncoding encoding();
 
+    abstract boolean randomizedIds();
+
+    abstract boolean highSecurityMode();
+
     @Nullable
     abstract Provider securityProvider();
 
@@ -31,6 +35,8 @@ public abstract class Config {
         return new AutoValue_Config.Builder()
                 .mode(Mode.MEDIUM_SIZE_AND_SECURITY)
                 .encoding(new ByteToTextEncoding.Base64())
+                .highSecurityMode(false)
+                .randomizedIds(false)
                 .securityProvider(null)
                 .cacheImpl(new Cache.SimpleLruCache())
                 .cacheDecode(true)
@@ -46,6 +52,10 @@ public abstract class Config {
         public abstract Builder key(byte[] key);
 
         public abstract Builder encoding(ByteToTextEncoding encoding);
+
+        public abstract Builder highSecurityMode(boolean isHighSecurityMode);
+
+        public abstract Builder randomizedIds(boolean isRandomized);
 
         public abstract Builder securityProvider(Provider provider);
 

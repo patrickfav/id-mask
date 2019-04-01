@@ -1,7 +1,6 @@
 package at.favre.lib.idmask;
 
 import at.favre.lib.bytes.Bytes;
-import at.favre.lib.bytes.BytesTransformer;
 import at.favre.lib.crypto.HKDF;
 
 import javax.crypto.Cipher;
@@ -20,27 +19,41 @@ public interface IdMaskEngine {
     String mask(byte[] id);
 
     byte[] unmask(String maskedId);
-    abstract class BaseEngine {
 
+    abstract class BaseEngine {
+        static int MAX_MASKED_ID_ENCODED_LENGTH = 768;
+        static int MIN_MASKED_ID_ENCODED_LENGTH = 8;
         private ThreadLocal<Cipher> cipherWrapper = new ThreadLocal<>();
         final Provider provider;
         final SecureRandom secureRandom;
         final ByteToTextEncoding encoding;
         final HKDF hkdf;
         final byte[] internalKey;
+        final boolean randomizeIds;
+        final int supportedIdByteLength;
 
-        BaseEngine(byte[] key, Provider provider, SecureRandom secureRandom, ByteToTextEncoding encoding) {
+        BaseEngine(int supportedIdByteLength, byte[] key, Provider provider, SecureRandom secureRandom, ByteToTextEncoding encoding, boolean randomizeIds) {
             this.hkdf = HKDF.fromHmacSha512();
             this.provider = provider;
             this.secureRandom = secureRandom;
             this.encoding = Objects.requireNonNull(encoding, "encoding");
             this.internalKey = hkdf.extract(null, key);
+            this.randomizeIds = randomizeIds;
+            this.supportedIdByteLength = supportedIdByteLength;
         }
 
-        byte[] getRandomBytes(int size) {
-            byte[] rnd = new byte[size];
-            secureRandom.nextBytes(rnd);
-            return rnd;
+        public int getSupportedIdByteLength() {
+            return supportedIdByteLength;
+        }
+
+        byte[] getEntropyBytes(int size) {
+            if (randomizeIds) {
+                byte[] rnd = new byte[size];
+                secureRandom.nextBytes(rnd);
+                return rnd;
+            } else {
+                return Bytes.allocate(size).array();
+            }
         }
 
         synchronized Cipher getCipher() {
@@ -62,40 +75,52 @@ public interface IdMaskEngine {
             }
         }
 
+        void checkInput(String maskedId) {
+            if (Objects.requireNonNull(maskedId, "maskedId").length() > MAX_MASKED_ID_ENCODED_LENGTH || maskedId.length() < MIN_MASKED_ID_ENCODED_LENGTH) {
+                throw new IllegalArgumentException("encoded masked id too long or short, must be between " + MIN_MASKED_ID_ENCODED_LENGTH + " and " + MAX_MASKED_ID_ENCODED_LENGTH + " chars");
+            }
+        }
+
         protected abstract String getCipherAlgorithm();
 
     }
 
     final class EightByteEncryptionEngine extends BaseEngine implements IdMaskEngine {
         private static final String ALGORITHM = "AES/ECB/NoPadding";
-        private static final int LENGTH = 8;
 
         EightByteEncryptionEngine(byte[] key) {
-            super(key, null, new SecureRandom(), new ByteToTextEncoding.Base64());
+            this(key, null, new SecureRandom(), new ByteToTextEncoding.Base64(), false);
         }
 
-        EightByteEncryptionEngine(byte[] key, Provider provider, SecureRandom secureRandom, ByteToTextEncoding encoding) {
-            super(key, provider, secureRandom, encoding);
+        public EightByteEncryptionEngine(byte[] key, Provider provider, SecureRandom secureRandom, ByteToTextEncoding encoding, boolean randomizeIds) {
+            super(8, key, provider, secureRandom, encoding, randomizeIds);
         }
 
         @Override
         public String mask(byte[] id) {
-            if (id.length != LENGTH) {
+            if (id.length != getSupportedIdByteLength()) {
                 throw new IllegalArgumentException("input must be 8 byte long");
             }
 
-            byte[] random = getRandomBytes(LENGTH);
+            byte[] random = getEntropyBytes(getSupportedIdByteLength());
             byte[] message = Bytes.wrap(random).append(id).array();
-            SecretKey secretKey = new SecretKeySpec(Bytes.wrap(internalKey).resize(16, BytesTransformer.ResizeTransformer.Mode.RESIZE_KEEP_FROM_ZERO_INDEX).array(), "AES");
-            try {
+            SecretKey secretKey = new SecretKeySpec(Bytes.from(internalKey, 0, 16).array(), "AES");
 
+            try {
                 Cipher c = getCipher();
                 c.init(Cipher.ENCRYPT_MODE, secretKey);
                 byte[] cipherText = c.doFinal(message);
 
-                ByteBuffer bb = ByteBuffer.allocate(random.length + cipherText.length);
-                bb.put(random);
-                bb.put(cipherText);
+                final ByteBuffer bb;
+
+                if (randomizeIds) {
+                    bb = ByteBuffer.allocate(1 + random.length + cipherText.length);
+                    bb.put(random);
+                    bb.put(cipherText);
+                } else {
+                    bb = ByteBuffer.allocate(1 + cipherText.length);
+                    bb.put(cipherText);
+                }
 
                 return encoding.encode(bb.array());
             } catch (Exception e) {
@@ -105,16 +130,19 @@ public interface IdMaskEngine {
 
         @Override
         public byte[] unmask(String maskedId) {
-            Objects.requireNonNull(maskedId, "maskedId");
+            checkInput(maskedId);
 
             ByteBuffer bb = ByteBuffer.wrap(encoding.decode(maskedId));
 
-            if (bb.remaining() != 3 * LENGTH) {
-                throw new IllegalArgumentException("invalid message length");
+            if (bb.remaining() != (randomizeIds ? 3 : 2) * getSupportedIdByteLength()) {
+                throw new IllegalArgumentException("unexpected message id length " + bb.remaining());
             }
 
-            byte[] random = new byte[LENGTH];
-            bb.get(random);
+            final byte[] entropyData = getEntropyBytes(getSupportedIdByteLength());
+            if (randomizeIds) {
+                bb.get(entropyData);
+            }
+
             byte[] cipherText = new byte[bb.remaining()];
             bb.get(cipherText);
             try {
@@ -123,11 +151,11 @@ public interface IdMaskEngine {
                 c.init(Cipher.DECRYPT_MODE, secretKey);
                 byte[] message = c.doFinal(cipherText);
 
-                if (!Bytes.from(message, 0, LENGTH).equalsConstantTime(random)) {
-                    throw new SecurityException("internal random does not match, probably forgery attempt");
+                if (!Bytes.from(message, 0, getSupportedIdByteLength()).equalsConstantTime(entropyData)) {
+                    throw new SecurityException("internal reference entropy does not match, probably forgery attempt");
                 }
 
-                return Bytes.from(message, 8, LENGTH).array();
+                return Bytes.from(message, 8, getSupportedIdByteLength()).array();
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             }
@@ -142,33 +170,32 @@ public interface IdMaskEngine {
     final class SixteenByteEngine extends BaseEngine implements IdMaskEngine {
         private static final String ALGORITHM = "AES/CBC/NoPadding";
         private static final String HMAC_ALGORITHM = "HmacSHA256";
-        private static final int MAX_ID_LENGTH = 16;
-        private static final int MAC_LENGTH = 8;
-        private static final int RANDOM_LENGTH = 16;
+        private static final int MAC_LENGTH_SHORT = 8;
+        private static final int MAC_LENGTH_LONG = 16;
 
-        //private final Mode mode;
+        private final boolean highSecurityMode;
 
         private Mac hmac;
 
-        public SixteenByteEngine(byte[] key, Mode mode) {
-            this(key, mode, new ByteToTextEncoding.Base64(), new SecureRandom(), null);
+        SixteenByteEngine(byte[] key) {
+            this(key, false, new ByteToTextEncoding.Base64(), new SecureRandom(), null, false);
         }
 
-        public SixteenByteEngine(byte[] key, Mode mode, ByteToTextEncoding encoding, SecureRandom secureRandom, Provider provider) {
-            super(key, provider, secureRandom, encoding);
-            //this.mode = Objects.requireNonNull(mode, "mode");
+        public SixteenByteEngine(byte[] key, boolean highSecurityMode, ByteToTextEncoding encoding, SecureRandom secureRandom, Provider provider, boolean randomizeIds) {
+            super(16, key, provider, secureRandom, encoding, randomizeIds);
+            this.highSecurityMode = highSecurityMode;
         }
 
         @Override
         public String mask(byte[] id) {
             Objects.requireNonNull(id, "id");
 
-            if (id.length != MAX_ID_LENGTH) {
-                throw new IllegalArgumentException(String.format("id length must be between 1 and %d bytes", MAX_ID_LENGTH));
+            if (id.length != getSupportedIdByteLength()) {
+                throw new IllegalArgumentException(String.format("id length must be between 1 and %d bytes", getSupportedIdByteLength()));
             }
 
             try {
-                byte[] entropy = getRandomBytes(RANDOM_LENGTH);
+                byte[] entropy = getEntropyBytes(getSupportedIdByteLength());
                 byte[] keys = hkdf.expand(internalKey, entropy, 64);
 
                 byte[] currentKey = Bytes.from(keys, 0, 16).array();
@@ -181,11 +208,15 @@ public interface IdMaskEngine {
                         new IvParameterSpec(iv));
                 byte[] encryptedId = cipher.doFinal(Bytes.from(id).xor(entropy).array());
                 byte version = (byte) 0x01;
-                byte[] mac = Bytes.from(macCipherText(macKey, encryptedId, iv, new byte[]{version}), 0, MAC_LENGTH).array();
+                byte[] mac = Bytes.from(macCipherText(macKey, encryptedId, iv, new byte[]{version}), 0, getMacLength()).array();
 
-                ByteBuffer bb = ByteBuffer.allocate(1 + encryptedId.length + mac.length + entropy.length);
+                ByteBuffer bb = ByteBuffer.allocate(1 + encryptedId.length + mac.length + (randomizeIds ? entropy.length : 0));
                 bb.put(obfuscateVersion((byte) 0x01, Bytes.from(keys, 16, 1).array()));
-                bb.put(entropy);
+
+                if (randomizeIds) {
+                    bb.put(entropy);
+                }
+
                 bb.put(encryptedId);
                 bb.put(mac);
 
@@ -201,15 +232,21 @@ public interface IdMaskEngine {
 
         @Override
         public byte[] unmask(String maskedId) {
-            Objects.requireNonNull(maskedId, "maskedId");
+            checkInput(maskedId);
 
             ByteBuffer bb = ByteBuffer.wrap(encoding.decode(maskedId));
+
+            checkDecodedLength(bb.remaining());
+
             byte version = bb.get();
-            byte[] entropy = new byte[RANDOM_LENGTH];
-            bb.get(entropy);
-            byte[] payload = new byte[16];
+            byte[] entropy = getEntropyBytes(getSupportedIdByteLength());
+            if (randomizeIds) {
+                bb.get(entropy);
+            }
+            byte[] payload = new byte[getSupportedIdByteLength()];
             bb.get(payload);
-            byte[] mac = new byte[MAC_LENGTH];
+
+            byte[] mac = new byte[getMacLength()];
             bb.get(mac);
 
             byte[] keys = hkdf.expand(internalKey, entropy, 64);
@@ -219,7 +256,7 @@ public interface IdMaskEngine {
             byte[] macKey = Bytes.from(keys, 32, 32).array();
 
             version = obfuscateVersion(version, Bytes.from(keys, 16, 1).array());
-            byte[] refMac = Bytes.from(macCipherText(macKey, payload, iv, new byte[]{version}), 0, MAC_LENGTH).array();
+            byte[] refMac = Bytes.from(macCipherText(macKey, payload, iv, new byte[]{version}), 0, getMacLength()).array();
             if (!Bytes.wrap(mac).equalsConstantTime(refMac)) {
                 throw new SecurityException("mac does not match");
             }
@@ -230,6 +267,17 @@ public interface IdMaskEngine {
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             }
+        }
+
+        private void checkDecodedLength(int size) {
+            int expectedLength = 1 + getSupportedIdByteLength() + (randomizeIds ? getSupportedIdByteLength() : 0) + getMacLength();
+            if (size != expectedLength) {
+                throw new IllegalArgumentException("unexpected message id length " + size);
+            }
+        }
+
+        private int getMacLength() {
+            return highSecurityMode ? MAC_LENGTH_LONG : MAC_LENGTH_SHORT;
         }
 
         private byte[] macCipherText(byte[] rawEncryptionKey, byte[] cipherText, byte[] iv, byte[] associatedData) {
