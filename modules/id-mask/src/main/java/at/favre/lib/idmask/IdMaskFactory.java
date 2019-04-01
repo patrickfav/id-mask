@@ -2,17 +2,21 @@ package at.favre.lib.idmask;
 
 import java.util.UUID;
 
-public class IdMaskFactory {
+@SuppressWarnings("WeakerAccess")
+public final class IdMaskFactory {
 
-    IdMask<Long> createForLongIds(Config config) {
+    private IdMaskFactory() {
+    }
+
+    public static IdMask<Long> createForLongIds(Config config) {
         return new IdMask.LongIdMask(config);
     }
 
-    IdMask<LongTuple> createForLongTuples(Config config) {
+    public static IdMask<LongTuple> createForLongTuples(Config config) {
         return new IdMask.LongIdTupleMask(config);
     }
 
-    IdMask<UUID> createForUuids(Config config) {
+    public static IdMask<UUID> createForUuids(Config config) {
         return new IdMask.UuidMask(config);
     }
 
