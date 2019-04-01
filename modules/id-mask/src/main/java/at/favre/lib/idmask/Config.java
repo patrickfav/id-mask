@@ -8,7 +8,6 @@ import java.security.SecureRandom;
 
 @AutoValue
 public abstract class Config {
-    abstract Mode mode();
 
     abstract byte[] key();
 
@@ -33,7 +32,6 @@ public abstract class Config {
 
     public static Builder builder() {
         return new AutoValue_Config.Builder()
-                .mode(Mode.MEDIUM_SIZE_AND_SECURITY)
                 .encoding(new ByteToTextEncoding.Base64())
                 .highSecurityMode(false)
                 .randomizedIds(false)
@@ -46,8 +44,6 @@ public abstract class Config {
 
     @AutoValue.Builder
     public abstract static class Builder {
-
-        public abstract Builder mode(Mode mode);
 
         public abstract Builder key(byte[] key);
 
