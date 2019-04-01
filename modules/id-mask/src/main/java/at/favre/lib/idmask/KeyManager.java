@@ -11,11 +11,21 @@ public interface KeyManager {
     IdKey getActiveKey();
 
     final class Factory {
+        private static final int DEFAULT_KEY_ID = 0;
+
         private Factory() {
         }
 
         public static KeyManager withKey(IdKey activeKey) {
             return new KeyManager.Default(activeKey);
+        }
+
+        public static KeyManager withKey(int id, byte[] key) {
+            return new KeyManager.Default(new IdKey(id, key));
+        }
+
+        public static KeyManager withKey(byte[] key) {
+            return new KeyManager.Default(new IdKey(DEFAULT_KEY_ID, key));
         }
 
         public static KeyManager withKeyAndLegacyKeys(IdKey activeKey, IdKey... legacyKeys) {

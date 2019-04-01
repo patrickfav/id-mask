@@ -8,7 +8,7 @@ import java.util.Random;
 import static org.junit.Assert.assertEquals;
 
 public class IdMaskLongIdTest {
-    private IdMask<Long> idMask = new IdMask.LongIdMask(Config.builder().key(Bytes.random(16).array()).cacheDecode(false).cacheEncode(false).build());
+    private IdMask<Long> idMask = new IdMask.LongIdMask(Config.builder().keyManager(KeyManager.Factory.withKey(Bytes.random(16).array())).cacheDecode(false).cacheEncode(false).build());
 
     @Test
     public void testEncodeDecode() {
@@ -36,7 +36,7 @@ public class IdMaskLongIdTest {
 
     @Test
     public void testDecodeCache() {
-        IdMask<Long> idMask = new IdMask.LongIdMask(Config.builder().key(Bytes.random(16).array()).cacheDecode(true).cacheEncode(false).build());
+        IdMask<Long> idMask = new IdMask.LongIdMask(Config.builder().keyManager(KeyManager.Factory.withKey(Bytes.random(16).array())).cacheDecode(true).cacheEncode(false).build());
         long id = new Random().nextLong();
         String encoded = idMask.encode(id);
 
@@ -48,7 +48,7 @@ public class IdMaskLongIdTest {
 
     @Test
     public void testEncodeCache() {
-        IdMask<Long> idMask = new IdMask.LongIdMask(Config.builder().key(Bytes.random(16).array()).cacheDecode(false).cacheEncode(true).build());
+        IdMask<Long> idMask = new IdMask.LongIdMask(Config.builder().keyManager(KeyManager.Factory.withKey(Bytes.random(16).array())).cacheDecode(false).cacheEncode(true).build());
         long id = new Random().nextLong();
         String encoded = idMask.encode(id);
 

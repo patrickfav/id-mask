@@ -45,4 +45,23 @@ public class KeyManagerTest {
 
         assertFalse(Bytes.wrap(randomRef).equals(idKey.getKeyBytes()));
     }
+
+    @Test
+    public void testSimpleConstructor1() {
+        KeyManager.IdKey idKey = new KeyManager.IdKey(0, Bytes.random(16).array());
+        KeyManager keyManager = KeyManager.Factory.withKey(idKey.getKeyId(), idKey.getKeyBytes());
+        assertEquals(idKey, keyManager.getActiveKey());
+        assertEquals(idKey, keyManager.getById(idKey.getKeyId()));
+        assertNull(keyManager.getById(2));
+    }
+
+    @Test
+    public void testSimpleConstructor2() {
+        KeyManager.IdKey idKey = new KeyManager.IdKey(0, Bytes.random(16).array());
+
+        KeyManager keyManager = KeyManager.Factory.withKey(idKey.getKeyBytes());
+        assertEquals(idKey, keyManager.getActiveKey());
+        assertEquals(idKey, keyManager.getById(idKey.getKeyId()));
+        assertNull(keyManager.getById(2));
+    }
 }

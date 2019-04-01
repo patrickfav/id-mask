@@ -57,7 +57,7 @@ public interface IdMask<T> {
     final class LongIdMask extends BaseIdMask implements IdMask<Long> {
 
         LongIdMask(Config config) {
-            super(new IdMaskEngine.EightByteEncryptionEngine(config.key(), config.securityProvider(),
+            super(new IdMaskEngine.EightByteEncryptionEngine(config.keyManager().getActiveKey().getKeyBytes(), config.securityProvider(),
                     config.secureRandom(), config.encoding(), config.randomizedIds()), config);
         }
 
@@ -76,7 +76,7 @@ public interface IdMask<T> {
     final class LongIdTupleMask extends BaseIdMask implements IdMask<LongTuple> {
 
         LongIdTupleMask(Config config) {
-            super(new IdMaskEngine.SixteenByteEngine(config.key(), config.highSecurityMode(), config.encoding(),
+            super(new IdMaskEngine.SixteenByteEngine(config.keyManager().getActiveKey().getKeyBytes(), config.highSecurityMode(), config.encoding(),
                     config.secureRandom(), config.securityProvider(), config.randomizedIds()), config);
         }
 
@@ -95,7 +95,7 @@ public interface IdMask<T> {
     final class UuidMask extends BaseIdMask implements IdMask<UUID> {
 
         UuidMask(Config config) {
-            super(new IdMaskEngine.SixteenByteEngine(config.key(), config.highSecurityMode(), config.encoding(),
+            super(new IdMaskEngine.SixteenByteEngine(config.keyManager().getActiveKey().getKeyBytes(), config.highSecurityMode(), config.encoding(),
                     config.secureRandom(), config.securityProvider(), config.randomizedIds()), config);
         }
 

@@ -9,13 +9,13 @@ import java.security.SecureRandom;
 @AutoValue
 public abstract class Config {
 
-    abstract byte[] key();
-
     abstract ByteToTextEncoding encoding();
 
     abstract boolean randomizedIds();
 
     abstract boolean highSecurityMode();
+
+    abstract KeyManager keyManager();
 
     @Nullable
     abstract Provider securityProvider();
@@ -45,7 +45,7 @@ public abstract class Config {
     @AutoValue.Builder
     public abstract static class Builder {
 
-        public abstract Builder key(byte[] key);
+        public abstract Builder keyManager(KeyManager keyManager);
 
         public abstract Builder encoding(ByteToTextEncoding encoding);
 
