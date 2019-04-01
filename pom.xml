@@ -96,7 +96,7 @@
                 </executions>
                 <configuration>
                     <excludes>
-                        <exclude>**/generated-sources/**</exclude>
+                        <exclude>at/favre/lib/idmask/AutoValue_**</exclude>
                     </excludes>
                 </configuration>
             </plugin>
