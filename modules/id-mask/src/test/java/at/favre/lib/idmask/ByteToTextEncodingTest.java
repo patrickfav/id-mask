@@ -15,7 +15,7 @@ public class ByteToTextEncodingTest {
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                {new ByteToTextEncoding.Base64()}, {new ByteToTextEncoding.Base32()}
+                {new ByteToTextEncoding.Base64()}, {new ByteToTextEncoding.Base32()}, {new ByteToTextEncoding.Base16()}
         });
     }
 
@@ -31,6 +31,8 @@ public class ByteToTextEncodingTest {
             byte[] random = Bytes.random(i).array();
             String encoded = encoding.encode(random);
             assertArrayEquals(random, encoding.decode(encoded));
+
+            System.out.println(encoded);
         }
     }
 

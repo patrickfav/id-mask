@@ -23,12 +23,24 @@ public interface ByteToTextEncoding {
     final class Base32 implements ByteToTextEncoding {
         @Override
         public String encode(byte[] bytes) {
-            return Bytes.wrap(bytes).encodeBase32();
+            return Bytes.wrap(bytes).encodeBase32().replaceAll("=", "");
         }
 
         @Override
         public byte[] decode(CharSequence encoded) {
             return Bytes.parseBase32(encoded).array();
+        }
+    }
+
+    final class Base16 implements ByteToTextEncoding {
+        @Override
+        public String encode(byte[] bytes) {
+            return Bytes.wrap(bytes).encodeHex();
+        }
+
+        @Override
+        public byte[] decode(CharSequence encoded) {
+            return Bytes.parseHex(encoded).array();
         }
     }
 }
