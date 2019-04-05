@@ -161,9 +161,9 @@ public interface KeyManager {
         public IdKey(int keyId, byte[] keyBytes) {
             Bytes bytes = Bytes.wrap(keyBytes);
             if (!bytes.validate(
-                    and(atLeast(8), atMost(32), notOnlyOf((byte) 0))
+                    and(atLeast(8), atMost(64), notOnlyOf((byte) 0))
             ) || bytes.entropy() < 2.5) {
-                throw new IllegalArgumentException("key must be at least 8 byte, at most 32 byte and must not only contain zeros, also must have high entropy");
+                throw new IllegalArgumentException("key must be at least 8 byte, at most 64 byte and must not only contain zeros, also must have high entropy");
             }
 
             if (keyId < 0 || keyId > 16) {
