@@ -3,14 +3,15 @@ package at.favre.lib.idmask;
 import at.favre.lib.bytes.Bytes;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class KeyManagerTest {
 
     @Test
     public void testSingleKeyManager() {
         KeyManager.IdKey idKey = new KeyManager.IdKey(0, Bytes.random(16).array());
-        KeyManager keyManager = KeyManager.Factory.withKey(idKey);
+        KeyManager keyManager = KeyManager.Factory.with(idKey);
         assertEquals(idKey, keyManager.getActiveKey());
         assertEquals(idKey, keyManager.getById(idKey.getKeyId()));
         assertNull(keyManager.getById(2));
@@ -30,26 +31,9 @@ public class KeyManagerTest {
     }
 
     @Test
-    public void testIdKey() {
-        byte[] random = Bytes.random(16).array();
-        byte[] randomRef = Bytes.wrap(random).copy().array();
-        final int id = 2;
-        KeyManager.IdKey idKey = new KeyManager.IdKey(id, random);
-        assertArrayEquals(randomRef, idKey.getKeyBytes());
-        assertEquals(id, idKey.getKeyId());
-
-        assertEquals(idKey.hashCode(), new KeyManager.IdKey(id, random).hashCode());
-        assertEquals(idKey, new KeyManager.IdKey(id, random));
-
-        idKey.clear();
-
-        assertFalse(Bytes.wrap(randomRef).equals(idKey.getKeyBytes()));
-    }
-
-    @Test
     public void testSimpleConstructor1() {
         KeyManager.IdKey idKey = new KeyManager.IdKey(0, Bytes.random(16).array());
-        KeyManager keyManager = KeyManager.Factory.withKey(idKey.getKeyId(), idKey.getKeyBytes());
+        KeyManager keyManager = KeyManager.Factory.with(idKey.getKeyId(), idKey.getKeyBytes());
         assertEquals(idKey, keyManager.getActiveKey());
         assertEquals(idKey, keyManager.getById(idKey.getKeyId()));
         assertNull(keyManager.getById(2));
@@ -59,7 +43,7 @@ public class KeyManagerTest {
     public void testSimpleConstructor2() {
         KeyManager.IdKey idKey = new KeyManager.IdKey(0, Bytes.random(16).array());
 
-        KeyManager keyManager = KeyManager.Factory.withKey(idKey.getKeyBytes());
+        KeyManager keyManager = KeyManager.Factory.with(idKey.getKeyBytes());
         assertEquals(idKey, keyManager.getActiveKey());
         assertEquals(idKey, keyManager.getById(idKey.getKeyId()));
         assertNull(keyManager.getById(2));

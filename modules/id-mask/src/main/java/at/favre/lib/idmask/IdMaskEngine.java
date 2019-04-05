@@ -28,21 +28,26 @@ public interface IdMaskEngine {
         final SecureRandom secureRandom;
         final ByteToTextEncoding encoding;
         final HKDF hkdf;
-        final byte[] internalKey;
+        final KeyManager keyManager;
         final boolean randomizeIds;
         final int supportedIdByteLength;
 
-        BaseEngine(int supportedIdByteLength, byte[] key, Provider provider, SecureRandom secureRandom, ByteToTextEncoding encoding, boolean randomizeIds) {
+        BaseEngine(int supportedIdByteLength, KeyManager keyManager, Provider provider, SecureRandom secureRandom, ByteToTextEncoding encoding, boolean randomizeIds) {
             this.hkdf = HKDF.fromHmacSha512();
             this.provider = provider;
             this.secureRandom = secureRandom;
             this.encoding = Objects.requireNonNull(encoding, "encoding");
-            this.internalKey = hkdf.extract(null, key);
+            this.keyManager = KeyManager.CachedValueConverter.wrap(keyManager, new KeyManager.CachedValueConverter.ValueConverter() {
+                @Override
+                public byte[] convert(KeyManager.IdKey original) {
+                    return hkdf.extract(Bytes.from(original.getKeyId()).array(), original.getKeyBytes());
+                }
+            });
             this.randomizeIds = randomizeIds;
             this.supportedIdByteLength = supportedIdByteLength;
         }
 
-        public int getSupportedIdByteLength() {
+        int getSupportedIdByteLength() {
             return supportedIdByteLength;
         }
 
@@ -83,17 +88,21 @@ public interface IdMaskEngine {
 
         protected abstract String getCipherAlgorithm();
 
+        byte[] getCurrentIdKey() {
+            return keyManager.getActiveKey().getKeyBytes();
+        }
+
     }
 
     final class EightByteEncryptionEngine extends BaseEngine implements IdMaskEngine {
         private static final String ALGORITHM = "AES/ECB/NoPadding";
 
-        EightByteEncryptionEngine(byte[] key) {
-            this(key, null, new SecureRandom(), new ByteToTextEncoding.Base64(), false);
+        EightByteEncryptionEngine(KeyManager keyManager) {
+            this(keyManager, null, new SecureRandom(), new ByteToTextEncoding.Base64(), false);
         }
 
-        public EightByteEncryptionEngine(byte[] key, Provider provider, SecureRandom secureRandom, ByteToTextEncoding encoding, boolean randomizeIds) {
-            super(8, key, provider, secureRandom, encoding, randomizeIds);
+        public EightByteEncryptionEngine(KeyManager keyManager, Provider provider, SecureRandom secureRandom, ByteToTextEncoding encoding, boolean randomizeIds) {
+            super(8, keyManager, provider, secureRandom, encoding, randomizeIds);
         }
 
         @Override
@@ -104,7 +113,7 @@ public interface IdMaskEngine {
 
             byte[] random = getEntropyBytes(getSupportedIdByteLength());
             byte[] message = Bytes.wrap(random).append(id).array();
-            SecretKey secretKey = new SecretKeySpec(Bytes.from(internalKey, 0, 16).array(), "AES");
+            SecretKey secretKey = new SecretKeySpec(Bytes.from(getCurrentIdKey(), 0, 16).array(), "AES");
 
             try {
                 Cipher c = getCipher();
@@ -150,7 +159,7 @@ public interface IdMaskEngine {
             byte[] cipherText = new byte[bb.remaining()];
             bb.get(cipherText);
             try {
-                SecretKey secretKey = new SecretKeySpec(Bytes.from(internalKey, 0, 16).array(), "AES");
+                SecretKey secretKey = new SecretKeySpec(Bytes.from(getCurrentIdKey(), 0, 16).array(), "AES");
                 Cipher c = getCipher();
                 c.init(Cipher.DECRYPT_MODE, secretKey);
                 byte[] message = c.doFinal(cipherText);
@@ -181,12 +190,12 @@ public interface IdMaskEngine {
 
         private Mac hmac;
 
-        SixteenByteEngine(byte[] key) {
-            this(key, false, new ByteToTextEncoding.Base64(), new SecureRandom(), null, false);
+        SixteenByteEngine(KeyManager keyManager) {
+            this(keyManager, false, new ByteToTextEncoding.Base64(), new SecureRandom(), null, false);
         }
 
-        public SixteenByteEngine(byte[] key, boolean highSecurityMode, ByteToTextEncoding encoding, SecureRandom secureRandom, Provider provider, boolean randomizeIds) {
-            super(16, key, provider, secureRandom, encoding, randomizeIds);
+        public SixteenByteEngine(KeyManager keyManager, boolean highSecurityMode, ByteToTextEncoding encoding, SecureRandom secureRandom, Provider provider, boolean randomizeIds) {
+            super(16, keyManager, provider, secureRandom, encoding, randomizeIds);
             this.highSecurityMode = highSecurityMode;
         }
 
@@ -200,7 +209,7 @@ public interface IdMaskEngine {
 
             try {
                 byte[] entropy = getEntropyBytes(getSupportedIdByteLength());
-                byte[] keys = hkdf.expand(internalKey, entropy, 64);
+                byte[] keys = hkdf.expand(getCurrentIdKey(), entropy, 64);
 
                 byte[] currentKey = Bytes.from(keys, 0, 16).array();
                 byte[] iv = Bytes.from(keys, 16, 16).array();
@@ -253,7 +262,7 @@ public interface IdMaskEngine {
             byte[] mac = new byte[getMacLength()];
             bb.get(mac);
 
-            byte[] keys = hkdf.expand(internalKey, entropy, 64);
+            byte[] keys = hkdf.expand(getCurrentIdKey(), entropy, 64);
 
             byte[] currentKey = Bytes.from(keys, 0, 16).array();
             byte[] iv = Bytes.from(keys, 16, 16).array();
