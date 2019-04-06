@@ -15,7 +15,7 @@ public class IdMask8ByteEngineTest {
         byte[] id = Bytes.from(397849238741629487L).array();
         IdMaskEngine idMaskEngine = new IdMaskEngine.EightByteEncryptionEngine(KeyManager.Factory.with(192731092837120938L));
         for (int i = 0; i < 10; i++) {
-            String maskedId = idMaskEngine.mask(id);
+            CharSequence maskedId = idMaskEngine.mask(id);
             assertNotNull(maskedId);
             assertArrayEquals(id, idMaskEngine.unmask(maskedId));
             System.out.println(maskedId);
@@ -30,8 +30,8 @@ public class IdMask8ByteEngineTest {
         IdMaskEngine idMaskRandomized = new IdMaskEngine.EightByteEncryptionEngine(key, null, new SecureRandom(), new ByteToTextEncoding.Base64(), true);
         IdMaskEngine idMaskDeterministic = new IdMaskEngine.EightByteEncryptionEngine(key, null, new SecureRandom(), new ByteToTextEncoding.Base64(), false);
 
-        String maskedId1 = idMaskRandomized.mask(id);
-        String maskedId2 = idMaskDeterministic.mask(id);
+        CharSequence maskedId1 = idMaskRandomized.mask(id);
+        CharSequence maskedId2 = idMaskDeterministic.mask(id);
 
         assertNotEquals(maskedId1, maskedId2);
         assertTrue(maskedId1.length() > maskedId2.length());
@@ -46,10 +46,10 @@ public class IdMask8ByteEngineTest {
                 null, new SecureRandom(), new ByteToTextEncoding.Base64(), true);
         byte[] id = Bytes.from(7239562391234L).array();
 
-        String maskedId1 = idMaskEngine.mask(id);
-        String maskedId2 = idMaskEngine.mask(id);
-        String maskedId3 = idMaskEngine.mask(id);
-        String maskedId4 = idMaskEngine.mask(id);
+        CharSequence maskedId1 = idMaskEngine.mask(id);
+        CharSequence maskedId2 = idMaskEngine.mask(id);
+        CharSequence maskedId3 = idMaskEngine.mask(id);
+        CharSequence maskedId4 = idMaskEngine.mask(id);
 
         assertNotEquals(maskedId1, maskedId2);
         assertNotEquals(maskedId1, maskedId3);
@@ -74,10 +74,10 @@ public class IdMask8ByteEngineTest {
                 null, new SecureRandom(), new ByteToTextEncoding.Base64(), false);
         byte[] id = Bytes.from(7239562391234L).array();
 
-        String maskedId1 = idMaskEngine.mask(id);
-        String maskedId2 = idMaskEngine.mask(id);
-        String maskedId3 = idMaskEngine.mask(id);
-        String maskedId4 = idMaskEngine.mask(id);
+        CharSequence maskedId1 = idMaskEngine.mask(id);
+        CharSequence maskedId2 = idMaskEngine.mask(id);
+        CharSequence maskedId3 = idMaskEngine.mask(id);
+        CharSequence maskedId4 = idMaskEngine.mask(id);
 
         assertEquals(maskedId1, maskedId2);
         assertEquals(maskedId1, maskedId3);
@@ -101,7 +101,7 @@ public class IdMask8ByteEngineTest {
         IdMaskEngine idMaskEngine = new IdMaskEngine.EightByteEncryptionEngine(KeyManager.Factory.withRandom());
         for (int i = 0; i < 10; i++) {
             byte[] id = Bytes.random(8).array();
-            String maskedId = idMaskEngine.mask(id);
+            CharSequence maskedId = idMaskEngine.mask(id);
             assertNotNull(maskedId);
             assertArrayEquals(id, idMaskEngine.unmask(maskedId));
             System.out.println(maskedId);
@@ -113,7 +113,7 @@ public class IdMask8ByteEngineTest {
         byte[] id = Bytes.from(93875623985763L).array();
         for (int i = 0; i < 16; i++) {
             IdMaskEngine idMaskEngine = new IdMaskEngine.EightByteEncryptionEngine(KeyManager.Factory.with(i, Bytes.random(16).array()));
-            String maskedId = idMaskEngine.mask(id);
+            CharSequence maskedId = idMaskEngine.mask(id);
             assertNotNull(maskedId);
             assertArrayEquals(id, idMaskEngine.unmask(maskedId));
             System.out.println(maskedId);
@@ -133,9 +133,9 @@ public class IdMask8ByteEngineTest {
         IdMaskEngine engine3 = new IdMaskEngine.EightByteEncryptionEngine(KeyManager.Factory.withKeyAndLegacyKeys(k3, k2, k1));
 
         // encrypt with 3 different keys, having backwards compatibility
-        String maskedId1 = engine1.mask(id);
-        String maskedId2 = engine2.mask(id);
-        String maskedId3 = engine3.mask(id);
+        CharSequence maskedId1 = engine1.mask(id);
+        CharSequence maskedId2 = engine2.mask(id);
+        CharSequence maskedId3 = engine3.mask(id);
 
         // encryption with different key must be different
         assertNotEquals(maskedId1, maskedId2);

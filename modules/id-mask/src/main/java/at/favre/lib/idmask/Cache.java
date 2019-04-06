@@ -15,8 +15,8 @@ public interface Cache {
 
     @SuppressWarnings("WeakerAccess")
     final class SimpleLruCache implements Cache {
-        private final LruCache<String, String> lruCacheEncode;
-        private final LruCache<String, byte[]> lruCacheDecode;
+        private final LruCache<CharSequence, String> lruCacheEncode;
+        private final LruCache<CharSequence, byte[]> lruCacheDecode;
 
         public SimpleLruCache() {
             this(512);

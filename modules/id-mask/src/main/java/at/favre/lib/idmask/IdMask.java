@@ -27,7 +27,7 @@ public interface IdMask<T> {
                 }
             }
 
-            encoded = engine.mask(id);
+            encoded = engine.mask(id).toString();
 
             if (config.cacheEncode()) {
                 config.cacheImpl().cache(id, encoded);

@@ -23,7 +23,7 @@ public class IdMaskEngineMultiThreadTest {
                 @Override
                 public void run() {
                     byte[] id = Bytes.random(16).array();
-                    String maskedId = idMaskEngine.mask(id);
+                    CharSequence maskedId = idMaskEngine.mask(id);
                     assertNotNull(maskedId);
                     assertArrayEquals(id, idMaskEngine.unmask(maskedId));
                 }
@@ -46,7 +46,7 @@ public class IdMaskEngineMultiThreadTest {
                 @Override
                 public void run() {
                     byte[] id = Bytes.random(8).array();
-                    String maskedId = idMaskEngine.mask(id);
+                    CharSequence maskedId = idMaskEngine.mask(id);
                     assertNotNull(maskedId);
                     assertArrayEquals(id, idMaskEngine.unmask(maskedId));
                 }

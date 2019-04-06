@@ -14,15 +14,40 @@ import java.security.Provider;
 import java.security.SecureRandom;
 import java.util.Objects;
 
+/**
+ * The underlying engine responsible for encrypting the provided id
+ */
 public interface IdMaskEngine {
 
-    String mask(byte[] id);
+    /**
+     * Mask (or encrypt) given id as bytes. This process is reversible with {@link #unmask(CharSequence)}
+     *
+     * @param plainId (aka plaintext) to mask
+     * @return masked (aka cipher text)
+     */
+    CharSequence mask(byte[] plainId);
 
-    byte[] unmask(String maskedId);
+    /**
+     * Unmask (or decrypt) given masked id.
+     *
+     * @param maskedId to unmask
+     * @return unmaksed, plain id as passed in {@link #mask(byte[])}
+     */
+    byte[] unmask(CharSequence maskedId);
 
-    int MAX_ENGINE_ID = 0x0F; //15
-    int MAX_KEY_ID = 0x0F; //15
+    /**
+     * Internal maximal engine id used in version byte
+     */
+    int MAX_ENGINE_ID = 0x0F; //4 bit or 0-15
 
+    /**
+     * Internal maximal key id used in version byte
+     */
+    int MAX_KEY_ID = 0x0F; //4 bit or 0-15
+
+    /**
+     * Base implementation of the engine
+     */
     abstract class BaseEngine {
         static int MAX_MASKED_ID_ENCODED_LENGTH = 768;
         static int MIN_MASKED_ID_ENCODED_LENGTH = 8;
@@ -38,7 +63,7 @@ public interface IdMaskEngine {
         BaseEngine(int supportedIdByteLength, KeyManager keyManager, Provider provider, SecureRandom secureRandom, ByteToTextEncoding encoding, boolean randomizeIds) {
             this.hkdf = HKDF.fromHmacSha512();
             this.provider = provider;
-            this.secureRandom = secureRandom;
+            this.secureRandom = Objects.requireNonNull(secureRandom, "secureRandom");
             this.encoding = Objects.requireNonNull(encoding, "encoding");
             this.keyManager = KeyManager.CachedValueConverter.wrap(keyManager, new KeyManager.CachedValueConverter.ValueConverter() {
                 @Override
@@ -50,10 +75,35 @@ public interface IdMaskEngine {
             this.supportedIdByteLength = supportedIdByteLength;
         }
 
+        /**
+         * The used cipher algorithm transformation
+         *
+         * @return cipher transformation
+         */
+        protected abstract String getCipherAlgorithm();
+
+        /**
+         * Return the engine id. Every implementation or crypto scheme should have its own id which will be
+         * encoded with the version byte. An id must be checked against the engine id if it is the correct one.
+         *
+         * @return 4bit engine id (0-15)
+         */
+        protected abstract byte engineId();
+
+        /**
+         * Get the supported byte length of ids that can be handled by the engine
+         *
+         * @return byte length
+         */
         int getSupportedIdByteLength() {
             return supportedIdByteLength;
         }
 
+        /**
+         * Create entropy bytes for further cryptographic functions
+         * @param size of the entropy
+         * @return entropy bytes
+         */
         byte[] getEntropyBytes(int size) {
             if (randomizeIds) {
                 byte[] rnd = new byte[size];
@@ -83,15 +133,17 @@ public interface IdMaskEngine {
             }
         }
 
-        void checkInput(String maskedId) {
+        /**
+         * Parameter input validation for masked ids
+         *
+         * @param maskedId to validate
+         * @throws IllegalArgumentException if input is not valid
+         */
+        void checkInput(CharSequence maskedId) {
             if (Objects.requireNonNull(maskedId, "maskedId").length() > MAX_MASKED_ID_ENCODED_LENGTH || maskedId.length() < MIN_MASKED_ID_ENCODED_LENGTH) {
                 throw new IllegalArgumentException("encoded masked id too long or short, must be between " + MIN_MASKED_ID_ENCODED_LENGTH + " and " + MAX_MASKED_ID_ENCODED_LENGTH + " chars");
             }
         }
-
-        protected abstract String getCipherAlgorithm();
-
-        protected abstract byte engineId();
 
         byte createVersionByte(byte keyId, byte[] cipherText) {
             byte engineId = engineId();
@@ -149,13 +201,13 @@ public interface IdMaskEngine {
         }
 
         @Override
-        public String mask(byte[] id) {
-            if (id.length != getSupportedIdByteLength()) {
+        public CharSequence mask(byte[] plainId) {
+            if (plainId.length != getSupportedIdByteLength()) {
                 throw new IllegalArgumentException("input must be 8 byte long");
             }
 
             byte[] random = getEntropyBytes(getSupportedIdByteLength());
-            byte[] message = Bytes.wrap(random).append(id).array();
+            byte[] message = Bytes.wrap(random).append(plainId).array();
             SecretKey secretKey = new SecretKeySpec(Bytes.from(getCurrentIdKey(), 0, 16).array(), "AES");
 
             try {
@@ -183,7 +235,7 @@ public interface IdMaskEngine {
         }
 
         @Override
-        public byte[] unmask(String maskedId) {
+        public byte[] unmask(CharSequence maskedId) {
             checkInput(maskedId);
 
             ByteBuffer bb = ByteBuffer.wrap(encoding.decode(maskedId));
@@ -240,7 +292,7 @@ public interface IdMaskEngine {
 
         private final boolean highSecurityMode;
 
-        private Mac hmac;
+        private ThreadLocal<Mac> macThreadLocal = new ThreadLocal<>();
 
         SixteenByteEngine(KeyManager keyManager) {
             this(keyManager, false, new ByteToTextEncoding.Base64(), new SecureRandom(), null, false);
@@ -252,10 +304,10 @@ public interface IdMaskEngine {
         }
 
         @Override
-        public String mask(byte[] id) {
-            Objects.requireNonNull(id, "id");
+        public CharSequence mask(byte[] plainId) {
+            Objects.requireNonNull(plainId, "id");
 
-            if (id.length != getSupportedIdByteLength()) {
+            if (plainId.length != getSupportedIdByteLength()) {
                 throw new IllegalArgumentException(String.format("id length must be between 1 and %d bytes", getSupportedIdByteLength()));
             }
 
@@ -271,7 +323,7 @@ public interface IdMaskEngine {
                 cipher.init(Cipher.ENCRYPT_MODE,
                         new SecretKeySpec(currentKey, "AES"),
                         new IvParameterSpec(iv));
-                byte[] encryptedId = cipher.doFinal(Bytes.from(id).xor(entropy).array());
+                byte[] encryptedId = cipher.doFinal(Bytes.from(plainId).xor(entropy).array());
                 byte version = createVersionByte((byte) keyManager.getActiveKeyId(), encryptedId);
                 byte[] mac = Bytes.from(macCipherText(macKey, encryptedId, iv, new byte[]{version}), 0, getMacLength()).array();
 
@@ -292,7 +344,7 @@ public interface IdMaskEngine {
         }
 
         @Override
-        public byte[] unmask(String maskedId) {
+        public byte[] unmask(CharSequence maskedId) {
             checkInput(maskedId);
 
             ByteBuffer bb = ByteBuffer.wrap(encoding.decode(maskedId));
@@ -346,20 +398,20 @@ public interface IdMaskEngine {
             SecretKey macKey = createMacKey(rawEncryptionKey);
 
             try {
-                createHmacInstance();
+                Mac hmac = createHmacInstance();
                 hmac.init(macKey);
                 hmac.update(iv);
                 hmac.update(cipherText);
+
+                if (associatedData != null) {
+                    hmac.update(associatedData);
+                }
+
+                return hmac.doFinal();
             } catch (InvalidKeyException e) {
                 // due to key generation in createMacKey(byte[]) this actually can not happen
                 throw new IllegalStateException("error during HMAC calculation");
             }
-
-            if (associatedData != null) {
-                hmac.update(associatedData);
-            }
-
-            return hmac.doFinal();
         }
 
         private SecretKey createMacKey(byte[] rawEncryptionKey) {
@@ -367,17 +419,22 @@ public interface IdMaskEngine {
             return new SecretKeySpec(derivedMacKey, HMAC_ALGORITHM);
         }
 
-        private synchronized void createHmacInstance() {
-            if (hmac == null) {
+        private synchronized Mac createHmacInstance() {
+            Mac mac = macThreadLocal.get();
+            if (mac == null) {
                 try {
                     if (provider != null) {
-                        hmac = Mac.getInstance(HMAC_ALGORITHM, provider);
+                        mac = Mac.getInstance(HMAC_ALGORITHM, provider);
                     } else {
-                        hmac = Mac.getInstance(HMAC_ALGORITHM);
+                        mac = Mac.getInstance(HMAC_ALGORITHM);
                     }
                 } catch (Exception e) {
                     throw new IllegalStateException("could not get cipher instance", e);
                 }
+                macThreadLocal.set(mac);
+                return macThreadLocal.get();
+            } else {
+                return mac;
             }
         }
 
@@ -390,6 +447,5 @@ public interface IdMaskEngine {
         protected byte engineId() {
             return ENGINE_ID;
         }
-
     }
 }

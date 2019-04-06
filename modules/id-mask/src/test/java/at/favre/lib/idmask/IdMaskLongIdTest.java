@@ -53,7 +53,7 @@ public class IdMaskLongIdTest {
         String encoded = idMask.encode(id);
 
         for (int i = 0; i < 10000; i++) {
-            String encodedRef = idMask.encode(id);
+            CharSequence encodedRef = idMask.encode(id);
             assertEquals(encoded, encodedRef);
         }
     }

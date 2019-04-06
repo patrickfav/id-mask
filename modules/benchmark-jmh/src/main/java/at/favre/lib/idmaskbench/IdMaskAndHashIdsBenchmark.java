@@ -1,11 +1,16 @@
-package at.favre.lib.idmask;
+package at.favre.lib.idmaskbench;
 
 import at.favre.lib.bytes.Bytes;
+import at.favre.lib.idmask.Config;
+import at.favre.lib.idmask.IdMask;
+import at.favre.lib.idmask.IdMaskFactory;
+import at.favre.lib.idmask.KeyManager;
 import org.hashids.Hashids;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 
 import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /*
@@ -40,8 +45,8 @@ public class IdMaskAndHashIdsBenchmark {
     @State(Scope.Thread)
     public static class BenchmarkState {
         private long id;
-        private IdMaskEngine idMaskEngine;
-        private IdMaskEngine idMaskEngine16Byte;
+        private IdMask<Long> idMaskEngine;
+        private IdMask<UUID> idMaskEngine16Byte;
         private Hashids hashids;
 
         @Setup
@@ -49,21 +54,21 @@ public class IdMaskAndHashIdsBenchmark {
             //noinspection StatementWithEmptyBody
             while ((id = new Random().nextLong()) > 9005199254740992L) ;
 
-            idMaskEngine = new IdMaskEngine.EightByteEncryptionEngine(KeyManager.Factory.with(Bytes.random(16).array()));
-            idMaskEngine16Byte = new IdMaskEngine.SixteenByteEngine(KeyManager.Factory.with(Bytes.random(16).array()));
+            idMaskEngine = IdMaskFactory.createForLongIds(Config.builder().keyManager(KeyManager.Factory.with(Bytes.random(16).array())).build());
+            idMaskEngine16Byte = IdMaskFactory.createForUuids(Config.builder().keyManager(KeyManager.Factory.with(Bytes.random(16).array())).build());
             hashids = new Hashids(Bytes.random(16).encodeBase64());
         }
     }
 
     @Benchmark
     public void benchmarkIdMask8Byte(BenchmarkState state, Blackhole blackhole) {
-        blackhole.consume(state.idMaskEngine.mask(Bytes.from(state.id).array()));
+        blackhole.consume(state.idMaskEngine.encode(state.id));
         state.id++;
     }
 
     @Benchmark
     public void benchmarkIdMask16Byte(BenchmarkState state, Blackhole blackhole) {
-        blackhole.consume(state.idMaskEngine16Byte.mask(Bytes.from(0L, state.id).array()));
+        blackhole.consume(state.idMaskEngine16Byte.encode(Bytes.from(0L, state.id).toUUID()));
         state.id++;
     }
 
@@ -75,15 +80,15 @@ public class IdMaskAndHashIdsBenchmark {
 
     @Benchmark
     public void benchmarkMaskAndUnmask8Byte(BenchmarkState state, Blackhole blackhole) {
-        String encoded = state.idMaskEngine.mask(Bytes.from(state.id).array());
-        blackhole.consume(state.idMaskEngine.unmask(encoded));
+        String encoded = state.idMaskEngine.encode(state.id);
+        blackhole.consume(state.idMaskEngine.decode(encoded));
         state.id++;
     }
 
     @Benchmark
     public void benchmarkMaskAndUnmask16Byte(BenchmarkState state, Blackhole blackhole) {
-        String encoded = state.idMaskEngine16Byte.mask(Bytes.from(0L, state.id).array());
-        blackhole.consume(state.idMaskEngine16Byte.unmask(encoded));
+        String encoded = state.idMaskEngine16Byte.encode(Bytes.from(0L, state.id).toUUID());
+        blackhole.consume(state.idMaskEngine16Byte.decode(encoded));
         state.id++;
     }
 
