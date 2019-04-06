@@ -54,8 +54,14 @@ public class IdMaskAndHashIdsBenchmark {
             //noinspection StatementWithEmptyBody
             while ((id = new Random().nextLong()) > 9005199254740992L) ;
 
-            idMaskEngine = IdMaskFactory.createForLongIds(Config.builder().keyManager(KeyManager.Factory.with(Bytes.random(16).array())).build());
-            idMaskEngine16Byte = IdMaskFactory.createForUuids(Config.builder().keyManager(KeyManager.Factory.with(Bytes.random(16).array())).build());
+            idMaskEngine = IdMaskFactory.createForLongIds(
+                    Config.builder().keyManager(KeyManager.Factory.with(Bytes.random(16).array()))
+                            .cacheEncode(false).cacheDecode(false)
+                            .build());
+            idMaskEngine16Byte = IdMaskFactory.createForUuids(
+                    Config.builder().keyManager(KeyManager.Factory.with(Bytes.random(16).array()))
+                            .cacheEncode(false).cacheDecode(false)
+                            .build());
             hashids = new Hashids(Bytes.random(16).encodeBase64());
         }
     }
