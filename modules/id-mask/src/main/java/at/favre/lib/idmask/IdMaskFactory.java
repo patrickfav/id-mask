@@ -20,4 +20,7 @@ public final class IdMaskFactory {
         return new IdMask.UuidMask(config);
     }
 
+    public static IdMask<byte[]> createFor128bitNumbers(Config config) {
+        return new IdMask.ByteArray128bitMask(config);
+    }
 }

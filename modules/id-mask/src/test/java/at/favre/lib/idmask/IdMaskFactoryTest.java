@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import java.util.UUID;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 public class IdMaskFactoryTest {
@@ -37,5 +38,15 @@ public class IdMaskFactoryTest {
         UUID decoded = idMask.decode(encoded);
 
         assertEquals(uuid, decoded);
+    }
+
+    @Test
+    public void createFo128bitNumbers() {
+        byte[] id = Bytes.random(16).array();
+        IdMask<byte[]> idMask = IdMaskFactory.createFor128bitNumbers(Config.builder().keyManager(KeyManager.Factory.with(Bytes.random(16).array())).build());
+        String encoded = idMask.encode(id);
+        byte[] decoded = idMask.decode(encoded);
+
+        assertArrayEquals(id, decoded);
     }
 }

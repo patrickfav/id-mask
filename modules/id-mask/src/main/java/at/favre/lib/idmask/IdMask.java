@@ -111,4 +111,22 @@ public interface IdMask<T> {
         }
     }
 
+    final class ByteArray128bitMask extends BaseIdMask implements IdMask<byte[]> {
+
+        ByteArray128bitMask(Config config) {
+            super(new IdMaskEngine.SixteenByteEngine(config.keyManager(), config.highSecurityMode(), config.encoding(),
+                    config.secureRandom(), config.securityProvider(), config.randomizedIds()), config);
+        }
+
+        @Override
+        public String encode(byte[] id) {
+            return _encode(Bytes.from(id).array());
+        }
+
+        @Override
+        public byte[] decode(String encoded) {
+            return _decode(encoded);
+        }
+    }
+
 }

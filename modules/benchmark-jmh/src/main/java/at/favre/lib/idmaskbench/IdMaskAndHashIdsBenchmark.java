@@ -10,7 +10,6 @@ import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 
 import java.util.Random;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /*
@@ -46,7 +45,7 @@ public class IdMaskAndHashIdsBenchmark {
     public static class BenchmarkState {
         private long id;
         private IdMask<Long> idMaskEngine;
-        private IdMask<UUID> idMaskEngine16Byte;
+        private IdMask<byte[]> idMaskEngine16Byte;
         private Hashids hashids;
 
         @Setup
@@ -58,7 +57,7 @@ public class IdMaskAndHashIdsBenchmark {
                     Config.builder().keyManager(KeyManager.Factory.with(Bytes.random(16).array()))
                             .cacheEncode(false).cacheDecode(false)
                             .build());
-            idMaskEngine16Byte = IdMaskFactory.createForUuids(
+            idMaskEngine16Byte = IdMaskFactory.createFor128bitNumbers(
                     Config.builder().keyManager(KeyManager.Factory.with(Bytes.random(16).array()))
                             .cacheEncode(false).cacheDecode(false)
                             .build());
@@ -74,7 +73,7 @@ public class IdMaskAndHashIdsBenchmark {
 
     @Benchmark
     public void benchmarkIdMask16Byte(BenchmarkState state, Blackhole blackhole) {
-        blackhole.consume(state.idMaskEngine16Byte.encode(Bytes.from(0L, state.id).toUUID()));
+        blackhole.consume(state.idMaskEngine16Byte.encode(Bytes.from(0L, state.id).array()));
         state.id++;
     }
 
@@ -93,7 +92,7 @@ public class IdMaskAndHashIdsBenchmark {
 
     @Benchmark
     public void benchmarkMaskAndUnmask16Byte(BenchmarkState state, Blackhole blackhole) {
-        String encoded = state.idMaskEngine16Byte.encode(Bytes.from(0L, state.id).toUUID());
+        String encoded = state.idMaskEngine16Byte.encode(Bytes.from(0L, state.id).array());
         blackhole.consume(state.idMaskEngine16Byte.decode(encoded));
         state.id++;
     }
