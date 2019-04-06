@@ -5,6 +5,7 @@ import at.favre.lib.bytes.Bytes;
 import java.util.*;
 
 import static at.favre.lib.bytes.BytesValidators.*;
+import static at.favre.lib.idmask.IdMaskEngine.MAX_KEY_ID;
 
 public interface KeyManager {
 
@@ -166,7 +167,7 @@ public interface KeyManager {
                 throw new IllegalArgumentException("key must be at least 8 byte, at most 64 byte and must not only contain zeros, also must have high entropy");
             }
 
-            if (keyId < 0 || keyId > 16) {
+            if (keyId < 0 || keyId > MAX_KEY_ID) {
                 throw new IllegalArgumentException("key id must be between 0 and 16");
             }
 

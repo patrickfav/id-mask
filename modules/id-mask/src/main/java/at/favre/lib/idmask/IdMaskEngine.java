@@ -20,6 +20,9 @@ public interface IdMaskEngine {
 
     byte[] unmask(String maskedId);
 
+    int MAX_ENGINE_ID = 0x0F; //15
+    int MAX_KEY_ID = 0x0F; //15
+
     abstract class BaseEngine {
         static int MAX_MASKED_ID_ENCODED_LENGTH = 768;
         static int MIN_MASKED_ID_ENCODED_LENGTH = 8;
@@ -88,14 +91,54 @@ public interface IdMaskEngine {
 
         protected abstract String getCipherAlgorithm();
 
+        protected abstract byte engineId();
+
+        byte createVersionByte(byte keyId, byte[] cipherText) {
+            byte engineId = engineId();
+            if (keyId < 0 || keyId > MAX_KEY_ID || engineId < 0 || engineId > MAX_ENGINE_ID) {
+                throw new IllegalArgumentException("key and engine id must can only be 4 bit long");
+            }
+
+            return Bytes.from(keyId).leftShift(4).or(Bytes.from(engineId)).xor(Bytes.from(cipherText, 0, 1)).toByte();
+        }
+
+        byte getKeyIdFromVersion(byte obfuscatedVersion, byte[] cipherText) {
+            return Bytes.from(obfuscatedVersion).xor(Bytes.from(cipherText, 0, 1)).rightShift(4).and(Bytes.from((byte) 0b00001111)).toByte();
+        }
+
+        byte getEngineIdFromVersion(byte obfuscatedVersion, byte[] cipherText) {
+            return Bytes.from(obfuscatedVersion).xor(Bytes.from(cipherText, 0, 1)).and(Bytes.from((byte) 0b00001111)).toByte();
+        }
+
         byte[] getCurrentIdKey() {
             return keyManager.getActiveKey().getKeyBytes();
         }
 
+        byte[] getKeyForId(byte keyId) {
+            KeyManager.IdKey key;
+            if ((key = keyManager.getById(keyId)) == null) {
+                return null;
+            }
+            return key.getKeyBytes();
+        }
+
+        byte[] checkAndGetCurrentKey(byte version, byte[] cipherText) {
+            if (getEngineIdFromVersion(version, cipherText) != engineId()) {
+                throw new SecurityException("wrong id-engine used according to version byte");
+            }
+
+            byte[] currentSecretKey = getKeyForId(getKeyIdFromVersion(version, cipherText));
+
+            if (currentSecretKey == null) {
+                throw new IllegalStateException("unknown key id");
+            }
+            return currentSecretKey;
+        }
     }
 
     final class EightByteEncryptionEngine extends BaseEngine implements IdMaskEngine {
         private static final String ALGORITHM = "AES/ECB/NoPadding";
+        private static final int ENGINE_ID = 0;
 
         EightByteEncryptionEngine(KeyManager keyManager) {
             this(keyManager, null, new SecureRandom(), new ByteToTextEncoding.Base64(), false);
@@ -121,7 +164,7 @@ public interface IdMaskEngine {
                 byte[] cipherText = c.doFinal(message);
 
                 final ByteBuffer bb;
-                byte version = 1;
+                byte version = createVersionByte((byte) keyManager.getActiveKeyId(), cipherText);
                 if (randomizeIds) {
                     bb = ByteBuffer.allocate(1 + random.length + cipherText.length);
                     bb.put(version);
@@ -158,8 +201,11 @@ public interface IdMaskEngine {
 
             byte[] cipherText = new byte[bb.remaining()];
             bb.get(cipherText);
+
+            byte[] currentSecretKey = checkAndGetCurrentKey(version, cipherText);
+
             try {
-                SecretKey secretKey = new SecretKeySpec(Bytes.from(getCurrentIdKey(), 0, 16).array(), "AES");
+                SecretKey secretKey = new SecretKeySpec(Bytes.from(currentSecretKey, 0, 16).array(), "AES");
                 Cipher c = getCipher();
                 c.init(Cipher.DECRYPT_MODE, secretKey);
                 byte[] message = c.doFinal(cipherText);
@@ -178,6 +224,11 @@ public interface IdMaskEngine {
         protected String getCipherAlgorithm() {
             return ALGORITHM;
         }
+
+        @Override
+        protected byte engineId() {
+            return ENGINE_ID;
+        }
     }
 
     final class SixteenByteEngine extends BaseEngine implements IdMaskEngine {
@@ -185,6 +236,7 @@ public interface IdMaskEngine {
         private static final String HMAC_ALGORITHM = "HmacSHA256";
         private static final int MAC_LENGTH_SHORT = 8;
         private static final int MAC_LENGTH_LONG = 16;
+        private static final int ENGINE_ID = 1;
 
         private final boolean highSecurityMode;
 
@@ -220,11 +272,11 @@ public interface IdMaskEngine {
                         new SecretKeySpec(currentKey, "AES"),
                         new IvParameterSpec(iv));
                 byte[] encryptedId = cipher.doFinal(Bytes.from(id).xor(entropy).array());
-                byte version = (byte) 0x01;
+                byte version = createVersionByte((byte) keyManager.getActiveKeyId(), encryptedId);
                 byte[] mac = Bytes.from(macCipherText(macKey, encryptedId, iv, new byte[]{version}), 0, getMacLength()).array();
 
                 ByteBuffer bb = ByteBuffer.allocate(1 + encryptedId.length + mac.length + (randomizeIds ? entropy.length : 0));
-                bb.put(obfuscateVersion((byte) 0x01, Bytes.from(keys, 16, 1).array()));
+                bb.put(version);
 
                 if (randomizeIds) {
                     bb.put(entropy);
@@ -237,10 +289,6 @@ public interface IdMaskEngine {
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             }
-        }
-
-        private byte obfuscateVersion(byte b, byte[] entropy) {
-            return (byte) (b ^ entropy[0]);
         }
 
         @Override
@@ -256,27 +304,28 @@ public interface IdMaskEngine {
             if (randomizeIds) {
                 bb.get(entropy);
             }
-            byte[] payload = new byte[getSupportedIdByteLength()];
-            bb.get(payload);
+            byte[] cipherText = new byte[getSupportedIdByteLength()];
+            bb.get(cipherText);
 
             byte[] mac = new byte[getMacLength()];
             bb.get(mac);
 
-            byte[] keys = hkdf.expand(getCurrentIdKey(), entropy, 64);
+            byte[] currentSecretKey = checkAndGetCurrentKey(version, cipherText);
+
+            byte[] keys = hkdf.expand(currentSecretKey, entropy, 64);
 
             byte[] currentKey = Bytes.from(keys, 0, 16).array();
             byte[] iv = Bytes.from(keys, 16, 16).array();
             byte[] macKey = Bytes.from(keys, 32, 32).array();
 
-            version = obfuscateVersion(version, Bytes.from(keys, 16, 1).array());
-            byte[] refMac = Bytes.from(macCipherText(macKey, payload, iv, new byte[]{version}), 0, getMacLength()).array();
+            byte[] refMac = Bytes.from(macCipherText(macKey, cipherText, iv, new byte[]{version}), 0, getMacLength()).array();
             if (!Bytes.wrap(mac).equalsConstantTime(refMac)) {
                 throw new SecurityException("mac does not match");
             }
             try {
                 Cipher cipher = getCipher();
                 cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(currentKey, "AES"), new IvParameterSpec(iv));
-                return Bytes.wrap(cipher.doFinal(payload)).xor(entropy).array();
+                return Bytes.wrap(cipher.doFinal(cipherText)).xor(entropy).array();
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             }
@@ -335,6 +384,11 @@ public interface IdMaskEngine {
         @Override
         protected String getCipherAlgorithm() {
             return ALGORITHM;
+        }
+
+        @Override
+        protected byte engineId() {
+            return ENGINE_ID;
         }
 
     }

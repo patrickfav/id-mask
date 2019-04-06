@@ -9,8 +9,8 @@ public class IdKeyTest {
 
     @Test
     public void testCreateValidKeys() {
-        for (int i = 8; i < 33; i++) {
-            for (int keyId = 0; keyId < 17; keyId++) {
+        for (int i = 8; i < 65; i++) {
+            for (int keyId = 0; keyId < 15; keyId++) {
                 new KeyManager.IdKey(keyId, Bytes.random(i).array());
             }
         }
@@ -45,12 +45,12 @@ public class IdKeyTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testKeyBytesTooBig() {
-        new KeyManager.IdKey(1, Bytes.random(33).array());
+        new KeyManager.IdKey(1, Bytes.random(65).array());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testKeyIdTooBig() {
-        new KeyManager.IdKey(17, Bytes.random(16).array());
+        new KeyManager.IdKey(16, Bytes.random(16).array());
     }
 
     @Test(expected = IllegalArgumentException.class)

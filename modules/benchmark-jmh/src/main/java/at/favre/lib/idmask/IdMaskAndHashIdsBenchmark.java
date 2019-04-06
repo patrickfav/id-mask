@@ -49,8 +49,8 @@ public class IdMaskAndHashIdsBenchmark {
             //noinspection StatementWithEmptyBody
             while ((id = new Random().nextLong()) > 9005199254740992L) ;
 
-            idMaskEngine = new IdMaskEngine.EightByteEncryptionEngine(Bytes.random(16).array());
-            idMaskEngine16Byte = new IdMaskEngine.SixteenByteEngine(Bytes.random(16).array());
+            idMaskEngine = new IdMaskEngine.EightByteEncryptionEngine(KeyManager.Factory.with(Bytes.random(16).array()));
+            idMaskEngine16Byte = new IdMaskEngine.SixteenByteEngine(KeyManager.Factory.with(Bytes.random(16).array()));
             hashids = new Hashids(Bytes.random(16).encodeBase64());
         }
     }

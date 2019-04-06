@@ -108,6 +108,67 @@ public class IdMask8ByteEngineTest {
         }
     }
 
+    @Test
+    public void testVariousKeyIds() {
+        byte[] id = Bytes.from(93875623985763L).array();
+        for (int i = 0; i < 16; i++) {
+            IdMaskEngine idMaskEngine = new IdMaskEngine.EightByteEncryptionEngine(KeyManager.Factory.with(i, Bytes.random(16).array()));
+            String maskedId = idMaskEngine.mask(id);
+            assertNotNull(maskedId);
+            assertArrayEquals(id, idMaskEngine.unmask(maskedId));
+            System.out.println(maskedId);
+        }
+    }
+
+    @Test
+    public void testMultiKeySupport() {
+        byte[] id = Bytes.from(1L).array();
+
+        KeyManager.IdKey k1 = new KeyManager.IdKey(0, Bytes.random(16).array());
+        KeyManager.IdKey k2 = new KeyManager.IdKey(1, Bytes.random(16).array());
+        KeyManager.IdKey k3 = new KeyManager.IdKey(2, Bytes.random(16).array());
+
+        IdMaskEngine engine1 = new IdMaskEngine.EightByteEncryptionEngine(KeyManager.Factory.with(k1));
+        IdMaskEngine engine2 = new IdMaskEngine.EightByteEncryptionEngine(KeyManager.Factory.withKeyAndLegacyKeys(k2, k1));
+        IdMaskEngine engine3 = new IdMaskEngine.EightByteEncryptionEngine(KeyManager.Factory.withKeyAndLegacyKeys(k3, k2, k1));
+
+        // encrypt with 3 different keys, having backwards compatibility
+        String maskedId1 = engine1.mask(id);
+        String maskedId2 = engine2.mask(id);
+        String maskedId3 = engine3.mask(id);
+
+        // encryption with different key must be different
+        assertNotEquals(maskedId1, maskedId2);
+        assertNotEquals(maskedId2, maskedId3);
+
+        // raw id must be same because all engines support key1
+        assertArrayEquals(id, engine1.unmask(maskedId1));
+        assertArrayEquals(id, engine2.unmask(maskedId1));
+        assertArrayEquals(id, engine3.unmask(maskedId1));
+
+        // raw must be the same for all engines supporting key2
+        try {
+            assertArrayEquals(id, engine1.unmask(maskedId2));
+            fail();
+        } catch (IllegalStateException ignored) {
+        }
+        assertArrayEquals(id, engine2.unmask(maskedId2));
+        assertArrayEquals(id, engine3.unmask(maskedId2));
+
+        // raw must be the same for all engines supporting key3
+        try {
+            assertArrayEquals(id, engine1.unmask(maskedId3));
+            fail();
+        } catch (IllegalStateException ignored) {
+        }
+        try {
+            assertArrayEquals(id, engine2.unmask(maskedId3));
+            fail();
+        } catch (IllegalStateException ignored) {
+        }
+        assertArrayEquals(id, engine3.unmask(maskedId3));
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void testTooLongId() {
         idMaskEngine.mask(Bytes.allocate(17).array());
