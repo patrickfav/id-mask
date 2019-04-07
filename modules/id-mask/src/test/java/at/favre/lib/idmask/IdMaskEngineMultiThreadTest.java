@@ -3,22 +3,16 @@ package at.favre.lib.idmask;
 import at.favre.lib.bytes.Bytes;
 import org.junit.Test;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNotNull;
 
-public class IdMaskEngineMultiThreadTest {
-
-    private final ExecutorService executor = Executors.newFixedThreadPool(24);
+public class IdMaskEngineMultiThreadTest extends AMultiThreadTest {
 
     @Test
     public void test16Byte() throws InterruptedException {
         final IdMaskEngine idMaskEngine = new IdMaskEngine.SixteenByteEngine(
                 KeyManager.Factory.with(Bytes.from(192731092837120938L).array()));
-        for (int i = 0; i < 1600; i++) {
+        for (int i = 0; i < ROUNDS; i++) {
             executor.submit(new Runnable() {
                 @Override
                 public void run() {
@@ -30,18 +24,14 @@ public class IdMaskEngineMultiThreadTest {
             });
         }
 
-        Thread.sleep(500);
-
-        executor.shutdown();
-        executor.awaitTermination(5000, TimeUnit.MILLISECONDS);
-
+        shutdown();
     }
 
     @Test
     public void test8Byte() throws InterruptedException {
         final IdMaskEngine idMaskEngine = new IdMaskEngine.EightByteEncryptionEngine(
                 KeyManager.Factory.with(Bytes.from(192731092837120938L).array()));
-        for (int i = 0; i < 1600; i++) {
+        for (int i = 0; i < ROUNDS; i++) {
             executor.submit(new Runnable() {
                 @Override
                 public void run() {
@@ -53,10 +43,6 @@ public class IdMaskEngineMultiThreadTest {
             });
         }
 
-        Thread.sleep(500);
-
-        executor.shutdown();
-        executor.awaitTermination(5000, TimeUnit.MILLISECONDS);
-
+        shutdown();
     }
 }
