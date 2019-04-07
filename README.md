@@ -1,13 +1,11 @@
 # ID Mask
 
-
+Id mask is a library for masking public (database) ids to hide the actual value of the id. This should make it harder for an attacker to guess or understand provided ids. Additionally it is possible to generate non-deterministic ids for e.g. shareable links or single use tokens. This library has a similar goal as [HashIds](https://hashids.org/) but depends in contrast on cryptographically strong algorithms.
 
 [![Download](https://api.bintray.com/packages/patrickfav/maven/id-mask/images/download.svg)](https://bintray.com/patrickfav/maven/id-mask/_latestVersion)
 [![Build Status](https://travis-ci.org/patrickfav/id-mask.svg?branch=master)](https://travis-ci.org/patrickfav/id-mask)
 [![Javadocs](https://www.javadoc.io/badge/at.favre.lib/id-mask.svg)](https://www.javadoc.io/doc/at.favre.lib/id-mask)
 [![Coverage Status](https://coveralls.io/repos/github/patrickfav/id-mask/badge.svg?branch=master)](https://coveralls.io/github/patrickfav/id-mask?branch=master) [![Maintainability](https://api.codeclimate.com/v1/badges/fc50d911e4146a570d4e/maintainability)](https://codeclimate.com/github/patrickfav/id-mask/maintainability)
-
-
 
 ## Quickstart
 
@@ -19,15 +17,54 @@ Add dependency to your `pom.xml` ([check latest release](https://github.com/patr
         <version>{latest-version}</version>
     </dependency>
 
-A very simple example:
+A very simple example using 64 bit integers (long):
 
 ```java
-tba.
+byte[] key = Bytes.random(16).array();
+long id = ...
+
+IdMask<Long> idMask = IdMaskFactory.createForLongIds(
+        Config.builder().keyManager(KeyManager.Factory.with(key)).build());
+
+String maskedId = idMask.mask(id);
+long originalId = idMask.unmask(maskedId);
+```
+
+and using UUIDs
+
+```java
+byte[] key = Bytes.random(16).array();
+UUID id = UUID.fromString("eb1c6999-5fc1-4d5f-b98a-792949c38c45");
+
+IdMask<UUID> idMask = IdMaskFactory.createForUuids(
+    Config.builder().keyManager(KeyManager.Factory.with(key)).build());
+
+String maskedId = idMask.mask(id);
+//example: rK0wpnG1lwvG0xiZn5swxOYmAvxhA4A7yg
+UUID originalId = idMask.unmask(maskedId);
 ```
 
 ### Full Example
 
-tba.
+```java
+byte[] key = Bytes.random(16).array();
+byte[] id128bit = Bytes.random(16).array();
+
+IdMask<byte[]> idMask = IdMaskFactory.createFor128bitNumbers(
+        Config.builder()
+                .keyManager(KeyManager.Factory.with(key))
+                .randomizedIds(true) //non-deterministic output
+                .enableCache(true)
+                .cacheImpl(new Cache.SimpleLruMemCache(64))
+                .encoding(new ByteToTextEncoding.Base32())
+                .secureRandom(new SecureRandom())
+                .securityProvider(Security.getProvider("BC"))
+                .build());
+
+String maskedId = idMask.mask(id128bit);
+//example: RAKESQ32V37ORV5JX7FAWCFVV2PITRN5KMOKYBJBLNS42WCEA3FI2FIBXLKJGMTSZY
+byte[] originalId = idMask.unmask(maskedId);
+```
 
 ## Download
 
