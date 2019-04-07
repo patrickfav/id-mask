@@ -284,7 +284,7 @@ public interface IdMaskEngine {
             }
 
             if (!Bytes.from(message, 0, getSupportedIdByteLength()).equalsConstantTime(entropyData)) {
-                throw new SecurityException("internal reference entropy does not match, probably forgery attempt");
+                throw new SecurityException("internal reference entropy does not match, probably forgery attempt or incorrect key");
             }
 
             return Bytes.from(message, 8, getSupportedIdByteLength()).array();

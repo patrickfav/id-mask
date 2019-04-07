@@ -243,4 +243,21 @@ public class IdMask8ByteEngineTest {
         } catch (IllegalArgumentException ignored) {
         }
     }
+
+    @Test
+    public void testIncorrectKey() {
+        KeyManager manager1 = KeyManager.Factory.with(0, Bytes.random(16).array());
+        IdMaskEngine idMaskEngine = new IdMaskEngine.EightByteEncryptionEngine(manager1);
+        byte[] id = Bytes.from(509186513786L).array();
+        CharSequence masked = idMaskEngine.mask(id);
+
+        KeyManager manager2 = KeyManager.Factory.with(0, Bytes.random(16).array());
+        idMaskEngine = new IdMaskEngine.EightByteEncryptionEngine(manager2);
+
+        try {
+            idMaskEngine.unmask(masked);
+            fail();
+        } catch (SecurityException ignored) {
+        }
+    }
 }

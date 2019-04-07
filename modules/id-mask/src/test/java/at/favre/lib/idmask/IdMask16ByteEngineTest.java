@@ -218,6 +218,23 @@ public class IdMask16ByteEngineTest {
         }
     }
 
+    @Test
+    public void testIncorrectKey() {
+        KeyManager manager1 = KeyManager.Factory.with(0, Bytes.random(16).array());
+        IdMaskEngine idMaskEngine = new IdMaskEngine.SixteenByteEngine(manager1);
+        byte[] id = Bytes.random(16).array();
+        CharSequence masked = idMaskEngine.mask(id);
+
+        KeyManager manager2 = KeyManager.Factory.with(0, Bytes.random(16).array());
+        idMaskEngine = new IdMaskEngine.SixteenByteEngine(manager2);
+
+        try {
+            idMaskEngine.unmask(masked);
+            fail();
+        } catch (SecurityException ignored) {
+        }
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void testTooLongId() {
         idMaskEngine.mask(Bytes.allocate(17).array());
