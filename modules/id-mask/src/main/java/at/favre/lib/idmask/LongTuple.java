@@ -14,8 +14,8 @@ public final class LongTuple {
     /**
      * Create new instance with given long numbers
      *
-     * @param num1
-     * @param num2
+     * @param num1 first 64 bit integer
+     * @param num2 second 64 bit integer
      */
     public LongTuple(long num1, long num2) {
         this.num1 = num1;

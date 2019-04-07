@@ -71,7 +71,7 @@ public abstract class Config {
      *     <li>Default security provider</li>
      *     <li>Using in-memory-lru cache and enables it</li>
      *     <li>Default secure random</li>
-     *     <li>Deterministic ids & high security mode disabled</li>
+     *     <li>Deterministic ids &amp; high security mode disabled</li>
      * </ul>
      *
      * @return builder

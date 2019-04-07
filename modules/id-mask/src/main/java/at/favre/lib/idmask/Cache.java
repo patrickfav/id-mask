@@ -39,7 +39,7 @@ public interface Cache {
 
     /**
      * Simple In-Memory LRU cache.
-     * Per default has {@link #CACHE_SIZE} size for mask & unmask cache.
+     * Per default has {@link #CACHE_SIZE} size for mask &amp; unmask cache.
      * <p>
      * See: https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)
      */
