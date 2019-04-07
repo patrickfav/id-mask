@@ -213,7 +213,7 @@ public class IdMask8ByteEngineTest {
         try {
             idMaskEngine.unmask(forged);
             fail();
-        } catch (IllegalStateException ignored) {
+        } catch (SecurityException ignored) {
         }
     }
 
@@ -231,7 +231,7 @@ public class IdMask8ByteEngineTest {
         try {
             idMaskEngine.unmask(forged);
             fail();
-        } catch (IllegalStateException ignored) {
+        } catch (SecurityException ignored) {
         }
     }
 

@@ -200,6 +200,24 @@ public class IdMask16ByteEngineTest {
         assertArrayEquals(id, engine3.unmask(maskedId3));
     }
 
+    @Test
+    public void testForgeryAttemptWithIncorrectMac() {
+        byte[] id = Bytes.random(16).array();
+        IdMaskEngine idMaskEngine = new IdMaskEngine.SixteenByteEngine(KeyManager.Factory.with(83785623198457L));
+        CharSequence maskedId = idMaskEngine.mask(id);
+
+        byte[] raw = new ByteToTextEncoding.Base64Url().decode(maskedId);
+
+        raw[20] = (byte) (raw[20] ^ 0xe2);
+
+        CharSequence forged = new ByteToTextEncoding.Base64Url().encode(raw);
+        try {
+            idMaskEngine.unmask(forged);
+            fail();
+        } catch (SecurityException ignored) {
+        }
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void testTooLongId() {
         idMaskEngine.mask(Bytes.allocate(17).array());

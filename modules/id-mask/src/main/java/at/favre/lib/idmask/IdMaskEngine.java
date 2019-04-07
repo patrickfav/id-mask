@@ -273,20 +273,21 @@ public interface IdMaskEngine {
 
             byte[] currentSecretKey = checkAndGetCurrentKey(version, cipherText);
 
+            byte[] message;
             try {
                 SecretKey secretKey = new SecretKeySpec(Bytes.from(currentSecretKey, 0, 16).array(), "AES");
                 Cipher c = getCipher();
                 c.init(Cipher.DECRYPT_MODE, secretKey);
-                byte[] message = c.doFinal(cipherText);
-
-                if (!Bytes.from(message, 0, getSupportedIdByteLength()).equalsConstantTime(entropyData)) {
-                    throw new SecurityException("internal reference entropy does not match, probably forgery attempt");
-                }
-
-                return Bytes.from(message, 8, getSupportedIdByteLength()).array();
+                message = c.doFinal(cipherText);
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             }
+
+            if (!Bytes.from(message, 0, getSupportedIdByteLength()).equalsConstantTime(entropyData)) {
+                throw new SecurityException("internal reference entropy does not match, probably forgery attempt");
+            }
+
+            return Bytes.from(message, 8, getSupportedIdByteLength()).array();
         }
 
         @Override
