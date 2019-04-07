@@ -198,4 +198,49 @@ public class IdMask8ByteEngineTest {
     public void testUnmaskEncodedTooLong() {
         idMaskEngine.unmask(Bytes.allocate(IdMaskEngine.BaseEngine.MAX_MASKED_ID_ENCODED_LENGTH / 2).encodeHex());
     }
+
+    @Test
+    public void testForgeryAttempt1() {
+        byte[] id = Bytes.from(103876123987523049L).array();
+        IdMaskEngine idMaskEngine = new IdMaskEngine.EightByteEncryptionEngine(KeyManager.Factory.with(9436783098457L));
+        CharSequence maskedId = idMaskEngine.mask(id);
+
+        byte[] raw = new ByteToTextEncoding.Base64Url().decode(maskedId);
+
+        raw[2] = (byte) (raw[2] ^ 0xe2);
+
+        CharSequence forged = new ByteToTextEncoding.Base64Url().encode(raw);
+        try {
+            idMaskEngine.unmask(forged);
+            fail();
+        } catch (IllegalStateException ignored) {
+        }
+    }
+
+    @Test
+    public void testForgeryAttempt2() {
+        byte[] id = Bytes.from(70366123987523049L).array();
+        IdMaskEngine idMaskEngine = new IdMaskEngine.EightByteEncryptionEngine(KeyManager.Factory.with(83785623198457L));
+        CharSequence maskedId = idMaskEngine.mask(id);
+
+        byte[] raw = new ByteToTextEncoding.Base64Url().decode(maskedId);
+
+        raw[14] = (byte) (raw[14] ^ 0xe2);
+
+        CharSequence forged = new ByteToTextEncoding.Base64Url().encode(raw);
+        try {
+            idMaskEngine.unmask(forged);
+            fail();
+        } catch (IllegalStateException ignored) {
+        }
+    }
+
+    @Test
+    public void testKeyIdTooBig() {
+        try {
+            new IdMaskEngine.EightByteEncryptionEngine(KeyManager.Factory.with(16, Bytes.random(16).array()));
+            fail();
+        } catch (IllegalArgumentException ignored) {
+        }
+    }
 }

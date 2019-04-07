@@ -281,7 +281,7 @@ public interface KeyManager {
             }
 
             if (keyId < 0 || keyId > MAX_KEY_ID) {
-                throw new IllegalArgumentException("key id must be between 0 and 16");
+                throw new IllegalArgumentException("key id must be between 0 and " + MAX_KEY_ID);
             }
 
             this.keyId = keyId;
