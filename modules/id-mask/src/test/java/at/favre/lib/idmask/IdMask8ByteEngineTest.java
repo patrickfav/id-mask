@@ -27,8 +27,8 @@ public class IdMask8ByteEngineTest {
         KeyManager key = KeyManager.Factory.with(87587659785921233L);
         byte[] id = Bytes.from(Bytes.from(9182746139874612986L)).array();
 
-        IdMaskEngine idMaskRandomized = new IdMaskEngine.EightByteEncryptionEngine(key, null, new SecureRandom(), new ByteToTextEncoding.Base64(), true);
-        IdMaskEngine idMaskDeterministic = new IdMaskEngine.EightByteEncryptionEngine(key, null, new SecureRandom(), new ByteToTextEncoding.Base64(), false);
+        IdMaskEngine idMaskRandomized = new IdMaskEngine.EightByteEncryptionEngine(key, null, new SecureRandom(), new ByteToTextEncoding.Base64Url(), true);
+        IdMaskEngine idMaskDeterministic = new IdMaskEngine.EightByteEncryptionEngine(key, null, new SecureRandom(), new ByteToTextEncoding.Base64Url(), false);
 
         CharSequence maskedId1 = idMaskRandomized.mask(id);
         CharSequence maskedId2 = idMaskDeterministic.mask(id);
@@ -43,7 +43,7 @@ public class IdMask8ByteEngineTest {
     @Test
     public void testRandomizedIdsShouldNotReturnSameMaskedId() {
         IdMaskEngine idMaskEngine = new IdMaskEngine.EightByteEncryptionEngine(KeyManager.Factory.with(130984671309784536L),
-                null, new SecureRandom(), new ByteToTextEncoding.Base64(), true);
+                null, new SecureRandom(), new ByteToTextEncoding.Base64Url(), true);
         byte[] id = Bytes.from(7239562391234L).array();
 
         CharSequence maskedId1 = idMaskEngine.mask(id);
@@ -71,7 +71,7 @@ public class IdMask8ByteEngineTest {
     @Test
     public void testDeterministicIdsShouldReturnSameMaskedId() {
         IdMaskEngine idMaskEngine = new IdMaskEngine.EightByteEncryptionEngine(KeyManager.Factory.with(130984671309784536L),
-                null, new SecureRandom(), new ByteToTextEncoding.Base64(), false);
+                null, new SecureRandom(), new ByteToTextEncoding.Base64Url(), false);
         byte[] id = Bytes.from(7239562391234L).array();
 
         CharSequence maskedId1 = idMaskEngine.mask(id);

@@ -55,11 +55,11 @@ public class IdMaskAndHashIdsBenchmark {
 
             idMaskEngine = IdMaskFactory.createForLongIds(
                     Config.builder().keyManager(KeyManager.Factory.with(Bytes.random(16).array()))
-                            .cacheEncode(false).cacheDecode(false)
+                            .enableCache(false)
                             .build());
             idMaskEngine16Byte = IdMaskFactory.createFor128bitNumbers(
                     Config.builder().keyManager(KeyManager.Factory.with(Bytes.random(16).array()))
-                            .cacheEncode(false).cacheDecode(false)
+                            .enableCache(false)
                             .build());
             hashids = new Hashids(Bytes.random(16).encodeBase64());
         }

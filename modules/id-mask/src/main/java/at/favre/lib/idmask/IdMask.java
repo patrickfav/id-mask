@@ -21,7 +21,7 @@ public interface IdMask<T> {
 
         String _encode(byte[] id) {
             String encoded;
-            if (config.cacheEncode()) {
+            if (config.enableCache() && !config.randomizedIds()) {
                 if ((encoded = config.cacheImpl().getEncoded(id)) != null) {
                     return encoded;
                 }
@@ -29,7 +29,7 @@ public interface IdMask<T> {
 
             encoded = engine.mask(id).toString();
 
-            if (config.cacheEncode()) {
+            if (config.enableCache()) {
                 config.cacheImpl().cache(id, encoded);
             }
 
@@ -38,7 +38,7 @@ public interface IdMask<T> {
 
         byte[] _decode(String encoded) {
             byte[] raw;
-            if (config.cacheDecode()) {
+            if (config.enableCache() && !config.randomizedIds()) {
                 if ((raw = config.cacheImpl().getBytes(encoded)) != null) {
                     return Bytes.wrap(raw).copy().array();
                 }
@@ -46,7 +46,7 @@ public interface IdMask<T> {
 
             raw = engine.unmask(encoded);
 
-            if (config.cacheEncode()) {
+            if (config.enableCache()) {
                 config.cacheImpl().cache(raw, encoded);
             }
 

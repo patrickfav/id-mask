@@ -193,7 +193,7 @@ public interface IdMaskEngine {
         private static final int ENGINE_ID = 0;
 
         EightByteEncryptionEngine(KeyManager keyManager) {
-            this(keyManager, null, new SecureRandom(), new ByteToTextEncoding.Base64(), false);
+            this(keyManager, null, new SecureRandom(), new ByteToTextEncoding.Base64Url(), false);
         }
 
         public EightByteEncryptionEngine(KeyManager keyManager, Provider provider, SecureRandom secureRandom, ByteToTextEncoding encoding, boolean randomizeIds) {
@@ -295,7 +295,7 @@ public interface IdMaskEngine {
         private ThreadLocal<Mac> macThreadLocal = new ThreadLocal<>();
 
         SixteenByteEngine(KeyManager keyManager) {
-            this(keyManager, false, new ByteToTextEncoding.Base64(), new SecureRandom(), null, false);
+            this(keyManager, false, new ByteToTextEncoding.Base64Url(), new SecureRandom(), null, false);
         }
 
         public SixteenByteEngine(KeyManager keyManager, boolean highSecurityMode, ByteToTextEncoding encoding, SecureRandom secureRandom, Provider provider, boolean randomizeIds) {

@@ -9,8 +9,7 @@ public class IdMask128bitByteArrayTest {
     private IdMask<byte[]> idMask = new IdMask.ByteArray128bitMask(
             Config.builder()
                     .keyManager(KeyManager.Factory.with(Bytes.random(16).array()))
-                    .cacheDecode(false)
-                    .cacheEncode(false)
+                    .enableCache(false)
                     .build());
 
     @Test

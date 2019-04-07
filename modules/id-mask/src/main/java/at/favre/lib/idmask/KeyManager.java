@@ -2,6 +2,7 @@ package at.favre.lib.idmask;
 
 import at.favre.lib.bytes.Bytes;
 
+import javax.crypto.SecretKey;
 import java.util.*;
 
 import static at.favre.lib.bytes.BytesValidators.*;
@@ -36,6 +37,10 @@ public interface KeyManager {
 
         public static KeyManager with(byte[] secretKey) {
             return new KeyManager.Default(new IdKey(DEFAULT_KEY_ID, secretKey));
+        }
+
+        public static KeyManager with(SecretKey secretAesKey) {
+            return new KeyManager.Default(new IdKey(DEFAULT_KEY_ID, secretAesKey.getEncoded()));
         }
 
         static KeyManager with(long key) {

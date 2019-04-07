@@ -3,6 +3,8 @@ package at.favre.lib.idmask;
 import at.favre.lib.bytes.Bytes;
 import org.junit.Test;
 
+import javax.crypto.spec.SecretKeySpec;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -46,6 +48,17 @@ public class KeyManagerTest {
         KeyManager keyManager = KeyManager.Factory.with(idKey.getKeyBytes());
         assertEquals(idKey, keyManager.getActiveKey());
         assertEquals(idKey, keyManager.getById(idKey.getKeyId()));
+        assertNull(keyManager.getById(2));
+    }
+
+    @Test
+    public void testWithSecretKey() {
+        byte[] key = Bytes.random(16).array();
+        KeyManager.IdKey idKey = new KeyManager.IdKey(0, key);
+
+        KeyManager keyManager = KeyManager.Factory.with(new SecretKeySpec(key, "AES"));
+        assertEquals(idKey, keyManager.getActiveKey());
+        assertEquals(idKey, keyManager.getById(keyManager.getActiveKeyId()));
         assertNull(keyManager.getById(2));
     }
 }

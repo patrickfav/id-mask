@@ -2,10 +2,21 @@ package at.favre.lib.idmask;
 
 import java.util.Objects;
 
-public class LongTuple {
+/**
+ * Simple tuple encapsulating 2 longs (64 bit integers).
+ * Can be used to easily encode 2 ids to one masked id.
+ */
+@SuppressWarnings("WeakerAccess")
+public final class LongTuple {
     private final long num1;
     private final long num2;
 
+    /**
+     * Create new instance with given long numbers
+     *
+     * @param num1
+     * @param num2
+     */
     public LongTuple(long num1, long num2) {
         this.num1 = num1;
         this.num2 = num2;

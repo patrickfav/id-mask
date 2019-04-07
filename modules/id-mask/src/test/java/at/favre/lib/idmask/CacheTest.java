@@ -6,7 +6,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class CacheTest {
-    private Cache cache = new Cache.SimpleLruCache(16);
+    private Cache cache = new Cache.SimpleLruMemCache(16);
 
     @Test
     public void testCacheEncode() {

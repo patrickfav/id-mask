@@ -11,8 +11,7 @@ public class IdMaskUuidTest {
     private IdMask<UUID> idMask = new IdMask.UuidMask(
             Config.builder()
                     .keyManager(KeyManager.Factory.with(Bytes.random(16).array()))
-                    .cacheDecode(false)
-                    .cacheEncode(false)
+                    .enableCache(false)
                     .build());
 
     @Test
