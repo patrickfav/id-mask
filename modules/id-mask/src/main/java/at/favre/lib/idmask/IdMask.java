@@ -4,12 +4,38 @@ import at.favre.lib.bytes.Bytes;
 
 import java.util.UUID;
 
+/**
+ * Id mask is responsible for masking/encoding ids in a reversible way.
+ * <p>
+ * This is mainly used for database or other ids which are published to the public
+ * and should be obfuscated as to make it harder to guess and understand related ids
+ * (e.g in a sequence).
+ * <p>
+ * IdMask should be thread
+ *
+ * @param <T> type of the id
+ */
 public interface IdMask<T> {
 
-    String encode(T id);
+    /**
+     * Mask a given id.
+     *
+     * @param id to mask
+     * @return encoded masked id
+     */
+    String mask(T id);
 
-    T decode(String encoded);
+    /**
+     * Unmask id that was previously masked with {@link #mask(Object)}
+     *
+     * @param encoded to unmask
+     * @return original id
+     */
+    T unmask(String encoded);
 
+    /**
+     * Base implementation
+     */
     abstract class BaseIdMask {
         private final IdMaskEngine engine;
         private final Config config;
@@ -54,6 +80,9 @@ public interface IdMask<T> {
         }
     }
 
+    /**
+     * Implementation which handles long type ids (64 bit integers)
+     */
     final class LongIdMask extends BaseIdMask implements IdMask<Long> {
 
         LongIdMask(Config config) {
@@ -62,17 +91,20 @@ public interface IdMask<T> {
         }
 
         @Override
-        public String encode(Long id) {
+        public String mask(Long id) {
             return _encode(Bytes.from(id).array());
         }
 
         @Override
-        public Long decode(String encoded) {
+        public Long unmask(String encoded) {
             byte[] out = _decode(encoded);
             return Bytes.wrap(out).toLong();
         }
     }
 
+    /**
+     * Implementation which handles two long ids (2x 64 bit ids)
+     */
     final class LongIdTupleMask extends BaseIdMask implements IdMask<LongTuple> {
 
         LongIdTupleMask(Config config) {
@@ -81,17 +113,23 @@ public interface IdMask<T> {
         }
 
         @Override
-        public String encode(LongTuple id) {
+        public String mask(LongTuple id) {
             return _encode(Bytes.from(id.getNum1(), id.getNum2()).array());
         }
 
         @Override
-        public LongTuple decode(String encoded) {
+        public LongTuple unmask(String encoded) {
             Bytes out = Bytes.wrap(_decode(encoded));
             return new LongTuple(out.longAt(0), out.longAt(8));
         }
     }
 
+    /**
+     * Implementation which handles uuids (Universally unique identifier).
+     * <p>
+     * You can use {@link UUID#fromString(String)} to parse a string representation
+     * to the typed version.
+     */
     final class UuidMask extends BaseIdMask implements IdMask<UUID> {
 
         UuidMask(Config config) {
@@ -100,17 +138,21 @@ public interface IdMask<T> {
         }
 
         @Override
-        public String encode(UUID id) {
+        public String mask(UUID id) {
             return _encode(Bytes.from(id).array());
         }
 
         @Override
-        public UUID decode(String encoded) {
+        public UUID unmask(String encoded) {
             byte[] out = _decode(encoded);
             return Bytes.wrap(out).toUUID();
         }
     }
 
+    /**
+     * Implementation which handles a generic 128 bit integer
+     * (or other 16 byte long array)
+     */
     final class ByteArray128bitMask extends BaseIdMask implements IdMask<byte[]> {
 
         ByteArray128bitMask(Config config) {
@@ -119,12 +161,12 @@ public interface IdMask<T> {
         }
 
         @Override
-        public String encode(byte[] id) {
+        public String mask(byte[] id) {
             return _encode(Bytes.from(id).array());
         }
 
         @Override
-        public byte[] decode(String encoded) {
+        public byte[] unmask(String encoded) {
             return _decode(encoded);
         }
     }

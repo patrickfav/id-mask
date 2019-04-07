@@ -11,14 +11,14 @@ public interface ByteToTextEncoding {
     /**
      * Encode given byte array to printable text
      *
-     * @param bytes to encode
+     * @param bytes to mask
      * @return printable text
      */
     String encode(byte[] bytes);
 
     /**
      * Decode given encoded string (see {@link #encode(byte[])} to a byte array
-     * @param encoded text to decode
+     * @param encoded text to unmask
      * @return raw bytes as array
      */
     byte[] decode(CharSequence encoded);

@@ -124,9 +124,9 @@ public class IdMask8ByteEngineTest {
     public void testMultiKeySupport() {
         byte[] id = Bytes.from(1L).array();
 
-        KeyManager.IdKey k1 = new KeyManager.IdKey(0, Bytes.random(16).array());
-        KeyManager.IdKey k2 = new KeyManager.IdKey(1, Bytes.random(16).array());
-        KeyManager.IdKey k3 = new KeyManager.IdKey(2, Bytes.random(16).array());
+        KeyManager.IdSecretKey k1 = new KeyManager.IdSecretKey(0, Bytes.random(16).array());
+        KeyManager.IdSecretKey k2 = new KeyManager.IdSecretKey(1, Bytes.random(16).array());
+        KeyManager.IdSecretKey k3 = new KeyManager.IdSecretKey(2, Bytes.random(16).array());
 
         IdMaskEngine engine1 = new IdMaskEngine.EightByteEncryptionEngine(KeyManager.Factory.with(k1));
         IdMaskEngine engine2 = new IdMaskEngine.EightByteEncryptionEngine(KeyManager.Factory.withKeyAndLegacyKeys(k2, k1));

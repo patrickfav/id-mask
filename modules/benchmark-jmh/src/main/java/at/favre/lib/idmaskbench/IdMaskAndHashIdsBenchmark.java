@@ -13,23 +13,22 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 /*
-        # Run complete. Total time: 00:04:05
+    # Run complete. Total time: 00:04:02
 
-        REMEMBER: The numbers below are just data. To gain reusable insights, you need to follow up on
-        why the numbers are the way they are. Use profilers (see -prof, -lprof), design factorial
-        experiments, perform baseline and negative tests that provide experimental control, make sure
-        the benchmarking environment is safe on JVM/OS/HW level, ask for reviews from the domain experts.
-        Do not assume the numbers tell you what you want them to tell.
+    REMEMBER: The numbers below are just data. To gain reusable insights, you need to follow up on
+    why the numbers are the way they are. Use profilers (see -prof, -lprof), design factorial
+    experiments, perform baseline and negative tests that provide experimental control, make sure
+    the benchmarking environment is safe on JVM/OS/HW level, ask for reviews from the domain experts.
+    Do not assume the numbers tell you what you want them to tell.
 
-        Benchmark                                               Mode  Cnt      Score       Error  Units
-        IdMaskAndHashIdsBenchmark.benchmarkHashIdEncode         avgt    3      4,438 ±     5,518  ns/op
-        IdMaskAndHashIdsBenchmark.benchmarkHashIdEncodeDecode   avgt    3      5,643 ±     2,432  ns/op
-        IdMaskAndHashIdsBenchmark.benchmarkIdMask16Byte         avgt    3  10235,168 ± 14503,867  ns/op
-        IdMaskAndHashIdsBenchmark.benchmarkIdMask8Byte          avgt    3   1292,331 ±   371,898  ns/op
-        IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask16Byte  avgt    3  16754,766 ±  1115,565  ns/op
-        IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask8Byte   avgt    3   1891,529 ±   311,644  ns/op
+    Benchmark                                               Mode  Cnt      Score     Error  Units
+    IdMaskAndHashIdsBenchmark.benchmarkHashIdEncode         avgt    3      2,306 ±   0,030  ns/op
+    IdMaskAndHashIdsBenchmark.benchmarkHashIdEncodeDecode   avgt    3      3,174 ±   0,023  ns/op
+    IdMaskAndHashIdsBenchmark.benchmarkIdMask16Byte         avgt    3   7411,538 ±  67,600  ns/op
+    IdMaskAndHashIdsBenchmark.benchmarkIdMask8Byte          avgt    3   2012,647 ±   9,976  ns/op
+    IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask16Byte  avgt    3  15035,381 ± 280,808  ns/op
+    IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask8Byte   avgt    3   4161,346 ±  28,803  ns/op
 
-        Process finished with exit code 0
 */
 
 @SuppressWarnings("CheckStyle")
@@ -50,8 +49,10 @@ public class IdMaskAndHashIdsBenchmark {
 
         @Setup
         public void setup() {
-            //noinspection StatementWithEmptyBody
-            while ((id = new Random().nextLong()) > 9005199254740992L) ;
+            // check that ids are beneath HashIds max supported number
+            do {
+                id = new Random().nextLong();
+            } while (id > Hashids.MAX_NUMBER - (long) Integer.MAX_VALUE);
 
             idMaskEngine = IdMaskFactory.createForLongIds(
                     Config.builder().keyManager(KeyManager.Factory.with(Bytes.random(16).array()))
@@ -67,13 +68,13 @@ public class IdMaskAndHashIdsBenchmark {
 
     @Benchmark
     public void benchmarkIdMask8Byte(BenchmarkState state, Blackhole blackhole) {
-        blackhole.consume(state.idMaskEngine.encode(state.id));
+        blackhole.consume(state.idMaskEngine.mask(state.id));
         state.id++;
     }
 
     @Benchmark
     public void benchmarkIdMask16Byte(BenchmarkState state, Blackhole blackhole) {
-        blackhole.consume(state.idMaskEngine16Byte.encode(Bytes.from(0L, state.id).array()));
+        blackhole.consume(state.idMaskEngine16Byte.mask(Bytes.from(0L, state.id).array()));
         state.id++;
     }
 
@@ -85,15 +86,15 @@ public class IdMaskAndHashIdsBenchmark {
 
     @Benchmark
     public void benchmarkMaskAndUnmask8Byte(BenchmarkState state, Blackhole blackhole) {
-        String encoded = state.idMaskEngine.encode(state.id);
-        blackhole.consume(state.idMaskEngine.decode(encoded));
+        String encoded = state.idMaskEngine.mask(state.id);
+        blackhole.consume(state.idMaskEngine.unmask(encoded));
         state.id++;
     }
 
     @Benchmark
     public void benchmarkMaskAndUnmask16Byte(BenchmarkState state, Blackhole blackhole) {
-        String encoded = state.idMaskEngine16Byte.encode(Bytes.from(0L, state.id).array());
-        blackhole.consume(state.idMaskEngine16Byte.decode(encoded));
+        String encoded = state.idMaskEngine16Byte.mask(Bytes.from(0L, state.id).array());
+        blackhole.consume(state.idMaskEngine16Byte.unmask(encoded));
         state.id++;
     }
 

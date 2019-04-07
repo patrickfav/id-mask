@@ -12,53 +12,53 @@ public class KeyManagerTest {
 
     @Test
     public void testSingleKeyManager() {
-        KeyManager.IdKey idKey = new KeyManager.IdKey(0, Bytes.random(16).array());
-        KeyManager keyManager = KeyManager.Factory.with(idKey);
-        assertEquals(idKey, keyManager.getActiveKey());
-        assertEquals(idKey, keyManager.getById(idKey.getKeyId()));
+        KeyManager.IdSecretKey idSecretKey = new KeyManager.IdSecretKey(0, Bytes.random(16).array());
+        KeyManager keyManager = KeyManager.Factory.with(idSecretKey);
+        assertEquals(idSecretKey, keyManager.getActiveKey());
+        assertEquals(idSecretKey, keyManager.getById(idSecretKey.getKeyId()));
         assertNull(keyManager.getById(2));
     }
 
     @Test
     public void testMultiKeyKeyManager() {
-        KeyManager.IdKey idKey1 = new KeyManager.IdKey(0, Bytes.random(16).array());
-        KeyManager.IdKey idKey2 = new KeyManager.IdKey(1, Bytes.random(16).array());
-        KeyManager.IdKey idKey3 = new KeyManager.IdKey(2, Bytes.random(16).array());
-        KeyManager keyManager = KeyManager.Factory.withKeyAndLegacyKeys(idKey1, idKey2, idKey3);
-        assertEquals(idKey1, keyManager.getActiveKey());
-        assertEquals(idKey1, keyManager.getById(idKey1.getKeyId()));
-        assertEquals(idKey2, keyManager.getById(idKey2.getKeyId()));
-        assertEquals(idKey3, keyManager.getById(idKey3.getKeyId()));
+        KeyManager.IdSecretKey idSecretKey1 = new KeyManager.IdSecretKey(0, Bytes.random(16).array());
+        KeyManager.IdSecretKey idSecretKey2 = new KeyManager.IdSecretKey(1, Bytes.random(16).array());
+        KeyManager.IdSecretKey idSecretKey3 = new KeyManager.IdSecretKey(2, Bytes.random(16).array());
+        KeyManager keyManager = KeyManager.Factory.withKeyAndLegacyKeys(idSecretKey1, idSecretKey2, idSecretKey3);
+        assertEquals(idSecretKey1, keyManager.getActiveKey());
+        assertEquals(idSecretKey1, keyManager.getById(idSecretKey1.getKeyId()));
+        assertEquals(idSecretKey2, keyManager.getById(idSecretKey2.getKeyId()));
+        assertEquals(idSecretKey3, keyManager.getById(idSecretKey3.getKeyId()));
         assertNull(keyManager.getById(3));
     }
 
     @Test
     public void testSimpleConstructor1() {
-        KeyManager.IdKey idKey = new KeyManager.IdKey(0, Bytes.random(16).array());
-        KeyManager keyManager = KeyManager.Factory.with(idKey.getKeyId(), idKey.getKeyBytes());
-        assertEquals(idKey, keyManager.getActiveKey());
-        assertEquals(idKey, keyManager.getById(idKey.getKeyId()));
+        KeyManager.IdSecretKey idSecretKey = new KeyManager.IdSecretKey(0, Bytes.random(16).array());
+        KeyManager keyManager = KeyManager.Factory.with(idSecretKey.getKeyId(), idSecretKey.getKeyBytes());
+        assertEquals(idSecretKey, keyManager.getActiveKey());
+        assertEquals(idSecretKey, keyManager.getById(idSecretKey.getKeyId()));
         assertNull(keyManager.getById(2));
     }
 
     @Test
     public void testSimpleConstructor2() {
-        KeyManager.IdKey idKey = new KeyManager.IdKey(0, Bytes.random(16).array());
+        KeyManager.IdSecretKey idSecretKey = new KeyManager.IdSecretKey(0, Bytes.random(16).array());
 
-        KeyManager keyManager = KeyManager.Factory.with(idKey.getKeyBytes());
-        assertEquals(idKey, keyManager.getActiveKey());
-        assertEquals(idKey, keyManager.getById(idKey.getKeyId()));
+        KeyManager keyManager = KeyManager.Factory.with(idSecretKey.getKeyBytes());
+        assertEquals(idSecretKey, keyManager.getActiveKey());
+        assertEquals(idSecretKey, keyManager.getById(idSecretKey.getKeyId()));
         assertNull(keyManager.getById(2));
     }
 
     @Test
     public void testWithSecretKey() {
         byte[] key = Bytes.random(16).array();
-        KeyManager.IdKey idKey = new KeyManager.IdKey(0, key);
+        KeyManager.IdSecretKey idSecretKey = new KeyManager.IdSecretKey(0, key);
 
         KeyManager keyManager = KeyManager.Factory.with(new SecretKeySpec(key, "AES"));
-        assertEquals(idKey, keyManager.getActiveKey());
-        assertEquals(idKey, keyManager.getById(keyManager.getActiveKeyId()));
+        assertEquals(idSecretKey, keyManager.getActiveKey());
+        assertEquals(idSecretKey, keyManager.getById(keyManager.getActiveKeyId()));
         assertNull(keyManager.getById(2));
     }
 }

@@ -5,13 +5,13 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-public class IdKeyTest {
+public class IdSecretKeyTest {
 
     @Test
     public void testCreateValidKeys() {
         for (int i = 8; i < 65; i++) {
             for (int keyId = 0; keyId < 15; keyId++) {
-                new KeyManager.IdKey(keyId, Bytes.random(i).array());
+                new KeyManager.IdSecretKey(keyId, Bytes.random(i).array());
             }
         }
     }
@@ -21,60 +21,60 @@ public class IdKeyTest {
         byte[] random = Bytes.random(16).array();
         byte[] randomRef = Bytes.wrap(random).copy().array();
         final int id = 2;
-        KeyManager.IdKey idKey = new KeyManager.IdKey(id, random);
-        assertArrayEquals(randomRef, idKey.getKeyBytes());
-        assertEquals(id, idKey.getKeyId());
+        KeyManager.IdSecretKey idSecretKey = new KeyManager.IdSecretKey(id, random);
+        assertArrayEquals(randomRef, idSecretKey.getKeyBytes());
+        assertEquals(id, idSecretKey.getKeyId());
 
-        assertEquals(idKey.hashCode(), new KeyManager.IdKey(id, random).hashCode());
-        assertEquals(idKey, new KeyManager.IdKey(id, random));
+        assertEquals(idSecretKey.hashCode(), new KeyManager.IdSecretKey(id, random).hashCode());
+        assertEquals(idSecretKey, new KeyManager.IdSecretKey(id, random));
 
-        idKey.clear();
+        idSecretKey.clear();
 
-        assertFalse(Bytes.wrap(randomRef).equals(idKey.getKeyBytes()));
+        assertFalse(Bytes.wrap(randomRef).equals(idSecretKey.getKeyBytes()));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testKeyBytesTooSmall() {
-        new KeyManager.IdKey(1, Bytes.random(7).array());
+        new KeyManager.IdSecretKey(1, Bytes.random(7).array());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testKeyIdTooSmall() {
-        new KeyManager.IdKey(-1, Bytes.random(16).array());
+        new KeyManager.IdSecretKey(-1, Bytes.random(16).array());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testKeyBytesTooBig() {
-        new KeyManager.IdKey(1, Bytes.random(65).array());
+        new KeyManager.IdSecretKey(1, Bytes.random(65).array());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testKeyIdTooBig() {
-        new KeyManager.IdKey(16, Bytes.random(16).array());
+        new KeyManager.IdSecretKey(16, Bytes.random(16).array());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testOnlyZeros() {
-        new KeyManager.IdKey(1, Bytes.allocate(8).array());
+        new KeyManager.IdSecretKey(1, Bytes.allocate(8).array());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testLowEntropy() {
-        new KeyManager.IdKey(1, Bytes.from(4L).array());
+        new KeyManager.IdSecretKey(1, Bytes.from(4L).array());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testLowEntropy2() {
-        new KeyManager.IdKey(1, Bytes.from(4564L).array());
+        new KeyManager.IdSecretKey(1, Bytes.from(4564L).array());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testLowEntropy3() {
-        new KeyManager.IdKey(1, Bytes.from(984654163L).array());
+        new KeyManager.IdSecretKey(1, Bytes.from(984654163L).array());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testLowEntropy4() {
-        new KeyManager.IdKey(1, Bytes.from(15678654163L).array());
+        new KeyManager.IdSecretKey(1, Bytes.from(15678654163L).array());
     }
 }

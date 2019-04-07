@@ -15,8 +15,8 @@ public class IdMaskLongTupleTest {
         for (int i = 0; i < 10; i++) {
             Random r = new Random();
             LongTuple tuple = new LongTuple(r.nextLong(), r.nextLong());
-            String encoded = idMask.encode(tuple);
-            LongTuple refId = idMask.decode(encoded);
+            String encoded = idMask.mask(tuple);
+            LongTuple refId = idMask.unmask(encoded);
             assertEquals(tuple, refId);
 
             System.out.println(encoded);

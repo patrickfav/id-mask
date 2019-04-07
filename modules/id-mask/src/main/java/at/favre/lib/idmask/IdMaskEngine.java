@@ -15,7 +15,9 @@ import java.security.SecureRandom;
 import java.util.Objects;
 
 /**
- * The underlying engine responsible for encrypting the provided id
+ * The underlying engine responsible for encrypting the provided id.
+ *
+ * IdMaskEngines are thread safe.
  */
 public interface IdMaskEngine {
 
@@ -65,9 +67,9 @@ public interface IdMaskEngine {
             this.provider = provider;
             this.secureRandom = Objects.requireNonNull(secureRandom, "secureRandom");
             this.encoding = Objects.requireNonNull(encoding, "encoding");
-            this.keyManager = KeyManager.CachedValueConverter.wrap(keyManager, new KeyManager.CachedValueConverter.ValueConverter() {
+            this.keyManager = KeyManager.CachedKdfConverter.wrap(keyManager, new KeyManager.CachedKdfConverter.KdfConverter() {
                 @Override
-                public byte[] convert(KeyManager.IdKey original) {
+                public byte[] convert(KeyManager.IdSecretKey original) {
                     return hkdf.extract(Bytes.from(original.getKeyId()).array(), original.getKeyBytes());
                 }
             });
@@ -101,6 +103,7 @@ public interface IdMaskEngine {
 
         /**
          * Create entropy bytes for further cryptographic functions
+         *
          * @param size of the entropy
          * @return entropy bytes
          */
@@ -145,6 +148,13 @@ public interface IdMaskEngine {
             }
         }
 
+        /**
+         * Creates a version byte encoding keyId and cipherText
+         *
+         * @param keyId      to encode in version (encoded to first 4 bit)
+         * @param cipherText to encode in version (encoded to last 4 bit)
+         * @return version byte
+         */
         byte createVersionByte(byte keyId, byte[] cipherText) {
             byte engineId = engineId();
             if (keyId < 0 || keyId > MAX_KEY_ID || engineId < 0 || engineId > MAX_ENGINE_ID) {
@@ -167,13 +177,20 @@ public interface IdMaskEngine {
         }
 
         byte[] getKeyForId(byte keyId) {
-            KeyManager.IdKey key;
+            KeyManager.IdSecretKey key;
             if ((key = keyManager.getById(keyId)) == null) {
                 return null;
             }
             return key.getKeyBytes();
         }
 
+        /**
+         * Checks given version byte if it matches current implementation
+         *
+         * @param version    to decode
+         * @param cipherText used to de obfuscate version byte
+         * @return secret key to decode
+         */
         byte[] checkAndGetCurrentKey(byte version, byte[] cipherText) {
             if (getEngineIdFromVersion(version, cipherText) != engineId()) {
                 throw new SecurityException("wrong id-engine used according to version byte");

@@ -18,8 +18,8 @@ public class IdMaskUuidTest {
     public void testEncodeDecode() {
         for (int i = 0; i < 10; i++) {
             UUID uuid = UUID.randomUUID();
-            String encoded = idMask.encode(uuid);
-            UUID refId = idMask.decode(encoded);
+            String encoded = idMask.mask(uuid);
+            UUID refId = idMask.unmask(encoded);
             assertEquals(uuid, refId);
 
             System.out.println(encoded);

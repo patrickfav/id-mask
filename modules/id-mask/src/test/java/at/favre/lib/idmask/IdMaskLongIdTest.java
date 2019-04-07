@@ -14,8 +14,8 @@ public class IdMaskLongIdTest {
     public void testEncodeDecode() {
         for (int i = 0; i < 10; i++) {
             long id = new Random().nextLong();
-            String encoded = idMask.encode(id);
-            long refId = idMask.decode(encoded);
+            String encoded = idMask.mask(id);
+            long refId = idMask.unmask(encoded);
             assertEquals(id, refId);
 
             System.out.println(encoded);
@@ -23,14 +23,25 @@ public class IdMaskLongIdTest {
     }
 
     @Test
-    public void testEncodeDecodeInt() {
+    public void testEncodeDecodePrimitiveInt() {
         for (int i = 0; i < 10; i++) {
             int id = new Random().nextInt();
-            String encoded = idMask.encode((long) id);
-            long refId = idMask.decode(encoded);
+            String encoded = idMask.mask((long) id);
+            long refId = idMask.unmask(encoded);
             assertEquals(id, refId);
 
             System.out.println(encoded);
+        }
+    }
+
+    @Test
+    public void testEncodeDecodeBoxedInt() {
+        for (int i = 0; i < 10; i++) {
+            //noinspection WrapperTypeMayBePrimitive
+            Integer id = new Random().nextInt();
+            String encoded = idMask.mask(id.longValue());
+            long refId = idMask.unmask(encoded);
+            assertEquals(id.longValue(), refId);
         }
     }
 
@@ -38,10 +49,10 @@ public class IdMaskLongIdTest {
     public void testDecodeCache() {
         IdMask<Long> idMask = new IdMask.LongIdMask(Config.builder().keyManager(KeyManager.Factory.with(Bytes.random(16).array())).enableCache(true).build());
         long id = new Random().nextLong();
-        String encoded = idMask.encode(id);
+        String encoded = idMask.mask(id);
 
         for (int i = 0; i < 10000; i++) {
-            long refId = idMask.decode(encoded);
+            long refId = idMask.unmask(encoded);
             assertEquals(id, refId);
         }
     }
@@ -50,10 +61,10 @@ public class IdMaskLongIdTest {
     public void testEncodeCache() {
         IdMask<Long> idMask = new IdMask.LongIdMask(Config.builder().keyManager(KeyManager.Factory.with(Bytes.random(16).array())).enableCache(false).build());
         long id = new Random().nextLong();
-        String encoded = idMask.encode(id);
+        String encoded = idMask.mask(id);
 
         for (int i = 0; i < 10000; i++) {
-            CharSequence encodedRef = idMask.encode(id);
+            CharSequence encodedRef = idMask.mask(id);
             assertEquals(encoded, encodedRef);
         }
     }

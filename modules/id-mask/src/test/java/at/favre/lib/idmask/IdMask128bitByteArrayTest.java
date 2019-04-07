@@ -16,8 +16,8 @@ public class IdMask128bitByteArrayTest {
     public void testEncodeDecode() {
         for (int i = 0; i < 10; i++) {
             byte[] id = Bytes.random(16).array();
-            String encoded = idMask.encode(id);
-            byte[] refId = idMask.decode(encoded);
+            String encoded = idMask.mask(id);
+            byte[] refId = idMask.unmask(encoded);
             assertArrayEquals(id, refId);
 
             System.out.println(encoded);

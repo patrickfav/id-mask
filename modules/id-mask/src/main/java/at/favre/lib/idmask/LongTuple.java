@@ -4,7 +4,7 @@ import java.util.Objects;
 
 /**
  * Simple tuple encapsulating 2 longs (64 bit integers).
- * Can be used to easily encode 2 ids to one masked id.
+ * Can be used to easily mask 2 ids to one masked id.
  */
 @SuppressWarnings("WeakerAccess")
 public final class LongTuple {
