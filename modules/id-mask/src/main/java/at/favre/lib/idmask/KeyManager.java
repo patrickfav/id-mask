@@ -211,7 +211,7 @@ public interface KeyManager {
         private final KeyManager keyManager;
         private final KdfConverter converter;
 
-        private CachedKdfConverter(KeyManager keyManager, KdfConverter converter) {
+        CachedKdfConverter(KeyManager keyManager, KdfConverter converter) {
             this.keyManager = Objects.requireNonNull(keyManager, "keyManager");
             this.converter = Objects.requireNonNull(converter, "converter");
             this.cache = new HashMap<>(keyManager.size());
