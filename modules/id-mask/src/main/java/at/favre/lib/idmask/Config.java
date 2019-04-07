@@ -175,8 +175,15 @@ public abstract class Config {
         public abstract Builder cacheImpl(Cache cache);
 
         /**
-         * If masking/unmasking should be cached to speed up performance. Mind that this will
-         * use slightly more memory (when using the default in-memory lru cache).
+         * If masking/unmasking should be cached to speed up performance.
+         *
+         * <strong>Note:</strong>
+         * <ul>
+         *     <li>Caching for masking will only work if randomizedIds are disabled</li>
+         *     <li>only makes sense if same ids will be masked from time to time</li>
+         *     <li>use slightly more memory (when using the default in-memory lru cache)</li>
+         *     <li>exposes the raw/masked ids mappings in memory which might be bad for Android</li>
+         * </ul>
          *
          * @param shouldCache true if enabled
          * @return builder
