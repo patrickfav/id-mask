@@ -47,10 +47,51 @@ UUID originalId = idMask.unmask(maskedId);
 
 ### Full Example
 
-```java
-byte[] key = Bytes.random(16).array();
-byte[] id128bit = Bytes.random(16).array();
+#### Step 1: Create a Secret Key
 
+The base of the security of IdMask relies on the strength of the used key. A key is basically just a 
+random byte array. A key should be at least 16 bytes long (more usually doesn't translate to better security).
+IdMask requires the key to be 8 and 64 bytes long. There are multiple ways to manage secret keys, if your project already has a managed KeyStore, use it. In it's simplest form, you can just hardcode the key. This is of course only makes sense, where the client doesn't has access to the code or binary (i.e. backend).
+
+##### Option A: Use Random Number Generator CLI
+
+One of the easiest way to create a high quality key is to use my random java cli: [Dice](https://github.com/patrickfav/dice/releases). Just download the `.jar` (or `.exe`)
+
+
+    java -jar dice.jar 16 -e "java"
+
+This will generate multiple 16 byte long syntactic java byte arrays. Looking like this:
+
+    new byte[]{(byte) 0xE4, (byte) 0x8A, ...};
+
+You could just hard code this value:
+
+    private static final byte[] ID_MASK_KEY = new byte[]{(byte) 0xE4, (byte) 0x8A, ...};
+    
+##### Option B: Generate Random Key with Java Code
+
+Either in the debugger, simple application or any other REPL execute the following code (IdMask must be in classpath):
+
+    Bytes.random(16).encodeHex();
+
+Which will create a random byte array using SecureRandom and encodes it as Hex string. In you code just 
+use:
+
+    private static final byte[] ID_MASK_KEY = Bytes.parseHex("e48a....").array();
+
+Either way, don't worry too much as the library supports changing the secret key while still be able to 
+unmask older ids.
+
+#### Step 2: Initialize IdMask
+
+Usually the default settings are fine for most use cases, however often the following may make sense to
+increase security:
+
+ * **Randomize Ids**: By default off; if this option is set, the same id weill create different masked ids every time. This makes sense for tokens, share links, etc. but does not make sense if the client needs to know equality of ids.
+ * **Caching**: By default a simple in-memory cache is enabled. You may want to provide your own cache if you still use one.
+ * Advanced Security Features
+
+```java
 IdMask<byte[]> idMask = IdMaskFactory.createFor128bitNumbers(
         Config.builder()
                 .keyManager(KeyManager.Factory.with(key))
