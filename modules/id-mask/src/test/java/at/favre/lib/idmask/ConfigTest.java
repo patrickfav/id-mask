@@ -1,5 +1,6 @@
 package at.favre.lib.idmask;
 
+import at.favre.lib.bytes.Bytes;
 import org.junit.Test;
 
 import java.security.Provider;
@@ -49,5 +50,12 @@ public class ConfigTest {
         assertFalse(config.enableCache());
         assertTrue(config.randomizedIds());
         assertTrue(config.highSecurityMode());
+    }
+
+    @Test
+    public void testUsingKeyShorthand() {
+        byte[] key = Bytes.random(16).array();
+        Config config = Config.builder().key(key).build();
+        assertArrayEquals(key, config.keyManager().getActiveKey().getKeyBytes());
     }
 }

@@ -21,24 +21,28 @@ public abstract class Config {
 
     /**
      * If the masking creates non-deterministic ids (different output for every call)
+     *
      * @return if non-deterministic
      */
     abstract boolean randomizedIds();
 
     /**
      * If better security settings should be used sacrificing output size and / or performance
+     *
      * @return if high security mode is on
      */
     abstract boolean highSecurityMode();
 
     /**
      * The key manager responsible for providing the secret keys for the cryptographic primitives
+     *
      * @return key manager
      */
     abstract KeyManager keyManager();
 
     /**
      * Optional custom JCA security provider
+     *
      * @return provider instance
      */
     @Nullable
@@ -46,12 +50,14 @@ public abstract class Config {
 
     /**
      * The cryptographically secure pseudorandom number generator used for generating randoms during masking process
+     *
      * @return random generator
      */
     abstract SecureRandom secureRandom();
 
     /**
      * Cache implementation used to cache if enabled.
+     *
      * @return cache impl
      */
     abstract Cache cacheImpl();
@@ -67,11 +73,11 @@ public abstract class Config {
      * Creates a new build with the following defaults:
      *
      * <ul>
-     *     <li>Base64 encoding</li>
-     *     <li>Default security provider</li>
-     *     <li>Using in-memory-lru cache and enables it</li>
-     *     <li>Default secure random</li>
-     *     <li>Deterministic ids &amp; high security mode disabled</li>
+     * <li>Base64 encoding</li>
+     * <li>Default security provider</li>
+     * <li>Using in-memory-lru cache and enables it</li>
+     * <li>Default secure random</li>
+     * <li>Deterministic ids &amp; high security mode disabled</li>
      * </ul>
      *
      * @return builder
@@ -92,22 +98,34 @@ public abstract class Config {
 
         /**
          * The key manager responsible for providing the secret keys for the cryptographic primitives.
-         *
+         * <p>
          * If only a single key is used:
          * <pre>
          *    KeyManager.Factory.with(secretKey);
          * </pre>
+         *
          * @param keyManager to use (non-optional)
          * @return builder
          */
         public abstract Builder keyManager(KeyManager keyManager);
 
         /**
-         * Used byte to text encoding.
+         * Set the cryptographic key for this id mask. This is a shorthand call and alternative
+         * to calling {@link #keyManager(KeyManager)}.
          *
+         * @param key to use (non-optional)
+         * @return builder
+         */
+        public Builder key(byte[] key) {
+            return keyManager(KeyManager.Factory.with(key));
+        }
+
+        /**
+         * Used byte to text encoding.
+         * <p>
          * Implementations for Base64, Base32 and Hex are available. You may provide your own
          * however.
-         *
+         * <p>
          * E.g.
          * <pre>
          *    new ByteToTextEncoding.Base32()
@@ -131,15 +149,15 @@ public abstract class Config {
          * If the masking should create non-deterministic ids (different output for every call).
          * If tolerable, this setting should always be activated because it drastically improves the
          * effectiveness of masking.
-         *
+         * <p>
          * Use this randomized ids
          *
          * <ul>
-         *     <li>Shareable links</li>
-         *     <li>Single Use Tokens</li>
-         *     <li>Ids where the client must not compare equality (e.g. are those 2 models the same?)</li>
+         * <li>Shareable links</li>
+         * <li>Single Use Tokens</li>
+         * <li>Ids where the client must not compare equality (e.g. are those 2 models the same?)</li>
          * </ul>
-         *
+         * <p>
          * If this is enabled, cache for encoding wil be disabled.
          *
          * @param isRandomized true if enabled
@@ -179,10 +197,10 @@ public abstract class Config {
          *
          * <strong>Note:</strong>
          * <ul>
-         *     <li>Caching for masking will only work if randomizedIds are disabled</li>
-         *     <li>only makes sense if same ids will be masked from time to time</li>
-         *     <li>use slightly more memory (when using the default in-memory lru cache)</li>
-         *     <li>exposes the raw/masked ids mappings in memory which might be bad for Android</li>
+         * <li>Caching for masking will only work if randomizedIds are disabled</li>
+         * <li>only makes sense if same ids will be masked from time to time</li>
+         * <li>use slightly more memory (when using the default in-memory lru cache)</li>
+         * <li>exposes the raw/masked ids mappings in memory which might be bad for Android</li>
          * </ul>
          *
          * @param shouldCache true if enabled
@@ -192,6 +210,7 @@ public abstract class Config {
 
         /**
          * Create config
+         *
          * @return new config instance
          */
         public abstract Config build();
