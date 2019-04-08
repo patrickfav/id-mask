@@ -27,6 +27,7 @@ IdMask<Long> idMask = IdMaskFactory.createForLongIds(
         Config.builder().keyManager(KeyManager.Factory.with(key)).build());
 
 String maskedId = idMask.mask(id);
+//example: rK0wpnG1lwvG0xiZn5swxOYmAvxhA4A7yg
 long originalId = idMask.unmask(maskedId);
 ```
 
