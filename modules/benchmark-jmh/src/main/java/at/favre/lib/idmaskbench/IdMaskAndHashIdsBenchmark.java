@@ -3,7 +3,7 @@ package at.favre.lib.idmaskbench;
 import at.favre.lib.bytes.Bytes;
 import at.favre.lib.idmask.Config;
 import at.favre.lib.idmask.IdMask;
-import at.favre.lib.idmask.IdMaskFactory;
+import at.favre.lib.idmask.IdMasks;
 import at.favre.lib.idmask.KeyManager;
 import org.hashids.Hashids;
 import org.openjdk.jmh.annotations.*;
@@ -54,11 +54,11 @@ public class IdMaskAndHashIdsBenchmark {
                 id = new Random().nextLong();
             } while (id > Hashids.MAX_NUMBER - (long) Integer.MAX_VALUE);
 
-            idMaskEngine = IdMaskFactory.createForLongIds(
+            idMaskEngine = IdMasks.forLongIds(
                     Config.builder().keyManager(KeyManager.Factory.with(Bytes.random(16).array()))
                             .enableCache(false)
                             .build());
-            idMaskEngine16Byte = IdMaskFactory.createFor128bitNumbers(
+            idMaskEngine16Byte = IdMasks.for128bitNumbers(
                     Config.builder().keyManager(KeyManager.Factory.with(Bytes.random(16).array()))
                             .enableCache(false)
                             .build());

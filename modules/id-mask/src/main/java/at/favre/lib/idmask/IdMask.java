@@ -2,6 +2,8 @@ package at.favre.lib.idmask;
 
 import at.favre.lib.bytes.Bytes;
 
+import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.util.UUID;
 
 /**
@@ -168,6 +170,41 @@ public interface IdMask<T> {
         @Override
         public byte[] unmask(String encoded) {
             return _decode(encoded);
+        }
+    }
+
+    /**
+     * Implementation which handles a big integer up to 15 byte two complements representation
+     */
+    final class BigIntegerIdMask extends BaseIdMask implements IdMask<BigInteger> {
+        private static final int SUPPORTED_LENGTH = 15;
+
+        BigIntegerIdMask(Config config) {
+            super(new IdMaskEngine.SixteenByteEngine(config.keyManager(), config.highSecurityMode(), config.encoding(),
+                    config.secureRandom(), config.securityProvider(), config.randomizedIds()), config);
+        }
+
+        @Override
+        public String mask(BigInteger id) {
+            Bytes bytes = Bytes.from(id);
+            if (bytes.length() > SUPPORTED_LENGTH) {
+                throw new IllegalArgumentException("biginteger only support up to " + SUPPORTED_LENGTH + " byte two-complements representation");
+            }
+
+            ByteBuffer bb = ByteBuffer.allocate(SUPPORTED_LENGTH + 1);
+            bb.put((byte) bytes.length());
+            bb.put(bytes.resize(SUPPORTED_LENGTH).array());
+
+            return _encode(bb.array());
+        }
+
+        @Override
+        public BigInteger unmask(String encoded) {
+            ByteBuffer bb = ByteBuffer.wrap(_decode(encoded));
+            int length = bb.get();
+            byte[] number = new byte[bb.remaining()];
+            bb.get(number);
+            return Bytes.wrap(number).resize(length).toBigInteger();
         }
     }
 

@@ -18,7 +18,7 @@ public class QuickstartTests {
         byte[] key = Bytes.random(16).array();
         long id = new Random().nextLong();
 
-        IdMask<Long> idMask = IdMaskFactory.createForLongIds(
+        IdMask<Long> idMask = IdMasks.forLongIds(
                 Config.builder().keyManager(KeyManager.Factory.with(key)).build());
 
         String maskedId = idMask.mask(id);
@@ -34,7 +34,7 @@ public class QuickstartTests {
         byte[] key = Bytes.random(16).array();
         UUID id = UUID.fromString("eb1c6999-5fc1-4d5f-b98a-792949c38c45");
 
-        IdMask<UUID> idMask = IdMaskFactory.createForUuids(
+        IdMask<UUID> idMask = IdMasks.forUuids(
                 Config.builder().keyManager(KeyManager.Factory.with(key)).build());
 
         String maskedId = idMask.mask(id);
@@ -50,7 +50,7 @@ public class QuickstartTests {
         byte[] key = Bytes.random(16).array();
         byte[] id128bit = Bytes.random(16).array();
 
-        IdMask<byte[]> idMask = IdMaskFactory.createFor128bitNumbers(
+        IdMask<byte[]> idMask = IdMasks.for128bitNumbers(
                 Config.builder()
                         .keyManager(KeyManager.Factory.with(key))
                         .randomizedIds(true) //non-deterministic output

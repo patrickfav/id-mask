@@ -5,9 +5,7 @@ import org.junit.Test;
 
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-
-public class IdMaskUuidTest {
+public class IdMaskUuidTest extends ABaseIdMaskTest {
     private IdMask<UUID> idMask = new IdMask.UuidMask(
             Config.builder()
                     .keyManager(KeyManager.Factory.with(Bytes.random(16).array()))
@@ -17,12 +15,7 @@ public class IdMaskUuidTest {
     @Test
     public void testEncodeDecode() {
         for (int i = 0; i < 10; i++) {
-            UUID uuid = UUID.randomUUID();
-            String encoded = idMask.mask(uuid);
-            UUID refId = idMask.unmask(encoded);
-            assertEquals(uuid, refId);
-
-            System.out.println(encoded);
+            maskAndUnmask(idMask, UUID.randomUUID());
         }
     }
 

@@ -7,46 +7,32 @@ import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 
-public class IdMaskLongIdTest {
+public class IdMaskLongIdTest extends ABaseIdMaskTest {
     private IdMask<Long> idMask = new IdMask.LongIdMask(Config.builder().keyManager(KeyManager.Factory.with(Bytes.random(16).array())).enableCache(false).build());
 
     @Test
     public void testEncodeDecode() {
         for (int i = 0; i < 10; i++) {
-            long id = new Random().nextLong();
-            String encoded = idMask.mask(id);
-            long refId = idMask.unmask(encoded);
-            assertEquals(id, refId);
-
-            System.out.println(encoded);
+            maskAndUnmask(idMask, new Random().nextLong());
         }
     }
 
     @Test
     public void testEncodeDecodePrimitiveInt() {
         for (int i = 0; i < 10; i++) {
-            int id = new Random().nextInt();
-            String encoded = idMask.mask((long) id);
-            long refId = idMask.unmask(encoded);
-            assertEquals(id, refId);
-
-            System.out.println(encoded);
+            maskAndUnmask(idMask, (long) new Random().nextInt());
         }
     }
 
     @Test
     public void testEncodeDecodeBoxedInt() {
         for (int i = 0; i < 10; i++) {
-            //noinspection WrapperTypeMayBePrimitive
-            Integer id = new Random().nextInt();
-            String encoded = idMask.mask(id.longValue());
-            long refId = idMask.unmask(encoded);
-            assertEquals(id.longValue(), refId);
+            maskAndUnmask(idMask, Integer.valueOf(new Random().nextInt()).longValue());
         }
     }
 
     @Test
-    public void testDecodeCache() {
+    public void testWithCache() {
         IdMask<Long> idMask = new IdMask.LongIdMask(Config.builder().keyManager(KeyManager.Factory.with(Bytes.random(16).array())).enableCache(true).build());
         long id = new Random().nextLong();
         String encoded = idMask.mask(id);
@@ -58,7 +44,7 @@ public class IdMaskLongIdTest {
     }
 
     @Test
-    public void testEncodeCache() {
+    public void testWithoutCache() {
         IdMask<Long> idMask = new IdMask.LongIdMask(Config.builder().keyManager(KeyManager.Factory.with(Bytes.random(16).array())).enableCache(false).build());
         long id = new Random().nextLong();
         String encoded = idMask.mask(id);
@@ -69,4 +55,14 @@ public class IdMaskLongIdTest {
         }
     }
 
+    @Test
+    public void testEncodeDecodeNegativeLong() {
+        maskAndUnmask(idMask, -87586759877098L);
+    }
+
+    @Test
+    public void testEncodeDecodeMinAndMaxLongValue() {
+        maskAndUnmask(idMask, Long.MAX_VALUE);
+        maskAndUnmask(idMask, Long.MIN_VALUE);
+    }
 }

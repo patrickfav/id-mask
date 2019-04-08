@@ -23,7 +23,7 @@ A very simple example using 64 bit integers (long):
 byte[] key = Bytes.random(16).array();
 long id = ...
 
-IdMask<Long> idMask = IdMaskFactory.createForLongIds(
+IdMask<Long> idMask = IdMasks.forLongIds(
         Config.builder().keyManager(KeyManager.Factory.with(key)).build());
 
 String maskedId = idMask.mask(id);
@@ -37,7 +37,7 @@ and using UUIDs
 byte[] key = Bytes.random(16).array();
 UUID id = UUID.fromString("eb1c6999-5fc1-4d5f-b98a-792949c38c45");
 
-IdMask<UUID> idMask = IdMaskFactory.createForUuids(
+IdMask<UUID> idMask = IdMasks.forUuids(
     Config.builder().keyManager(KeyManager.Factory.with(key)).build());
 
 String maskedId = idMask.mask(id);
