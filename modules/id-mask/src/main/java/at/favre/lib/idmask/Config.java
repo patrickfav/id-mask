@@ -96,7 +96,7 @@ public abstract class Config {
     }
 
     /**
-     * Create new builder. Shorthand for calling {@link #builder(byte[])} with single key key-manager.
+     * Create new builder. Shorthand for calling {@link #builder(KeyManager)} with single key key-manager.
      *
      * @param key to use as secret key.
      * @return builder

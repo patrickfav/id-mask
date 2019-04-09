@@ -7,6 +7,8 @@ Id mask is a library for masking public (database) ids to hide the actual value 
 [![Javadocs](https://www.javadoc.io/badge/at.favre.lib/id-mask.svg)](https://www.javadoc.io/doc/at.favre.lib/id-mask)
 [![Coverage Status](https://coveralls.io/repos/github/patrickfav/id-mask/badge.svg?branch=master)](https://coveralls.io/github/patrickfav/id-mask?branch=master) [![Maintainability](https://api.codeclimate.com/v1/badges/fc50d911e4146a570d4e/maintainability)](https://codeclimate.com/github/patrickfav/id-mask/maintainability)
 
+The code is compiled with target [Java 7](https://en.wikipedia.org/wiki/Java_version_history#Java_SE_7) to keep backwards compatibility with *Android* and older *Java* applications.
+
 ## Quickstart
 
 Add dependency to your `pom.xml` ([check latest release](https://github.com/patrickfav/id-mask/releases)):
@@ -78,7 +80,7 @@ use this code and proved the hex string created before:
 Either way, don't worry too much as the library supports changing the secret key while still be able to 
 unmask older ids.
 
-### Step 2: Initialize IdMask
+### Step 2: IdMask Configuration
 
 Usually the default settings are fine for most use cases, however often the following may make sense to change some settings based on current requirements
 
@@ -88,21 +90,18 @@ By default off, the masking algorithm supports randomization of generated ids. T
 
 Enable with:
 
+```java
     Config.builder()
         .randomizedIds(true)
         ...
+```        
 
 #### Q2: What encoding should I choose?
 
 The library internally converts everything to bytes, encrypts it and then requires an encoding schema to make the output printable. Per default the url-safe version of Base64 ([RFC4648](https://tools.ietf.org/html/rfc4648)) is used. This is a well supported, fast and reasonable space efficient (needs ~25% more storage than the raw bytes) encoding.
 
-Depending on your use case, you may want Ids that:
-
-* are easy to type
-* do not contain words, or at the very least curse words
-* need to be as short as possible
-
-Currently the following encodings are supported:
+However depending on your use case, you may want Ids that are easy to type, do not contain possible problematic words
+or require some maximum length. The library includes some build-in encodings which satisfy different requirements:
 
 
 | Encoding               | may contain words | easy to type                        | Length for 64 bit id (deterministic/randomized) | Length for 128 bit id (deterministic/randomized) | Example                              |
@@ -112,9 +111,88 @@ Currently the following encodings are supported:
 | Base32 (Safe Alphabet) | no curse words    | contains upper and lowercase        | 28/40                                           | 40/66                                            | `pVY2YYbV8GyzaEZ3aB5b87EeP4Da`       |
 | Base64                 | yes               | no                                  | 23/34                                           | 34/55                                            | `SkqktDj1MVEkiPMrwg1blfA`            |
 
+If ids should be as short as possible, you may look into using [Ascii85/Base85](https://en.wikipedia.org/wiki/Ascii85) with
+a Java implementation [here](https://github.com/fzakaria/ascii85); expect around 8% better space efficiency compared to Base64. 
 
- * **Caching**: By default a simple in-memory cache is enabled. You may want to provide your own cache if you still use one.
- * Advanced Security Features
+Choose a different encoding by setting the following in the config builder:
+
+```java
+    Config.builder()
+        .encoding(new ByteToTextEncoding.Base32Rfc4648())
+        ...
+```      
+Implement your own encoding by using the `ByteToTextEncoding` interface.
+
+#### Q3: Do you need Caching?
+
+ By default a simple in-memory cache is enabled. This cache improves performance if recurring ids are encoded/decoded - 
+ if this is not the case the cache can be disabled to safe heap.
+
+This setting is responsible for disabling the cache:
+
+```java
+    Config.builder()
+        .enableCache(true)
+        ...
+```
+
+if you want to wire your own cache framework to the id mask library you may do so by implementing the `Cache` interface
+and setting:
+
+```java
+    Config.builder()
+        .cacheImpl(new MyHazelcastCache())
+        ...
+```
+
+#### Q3: Any other Advanced Security Features required?
+
+You may provide your own [JCA provider](https://docs.oracle.com/javase/7/docs/technotes/guides/security/crypto/CryptoSpec.html) (like [BouncyCastle](https://www.bouncycastle.org/)) or your own cryptographically secure pseudorandom number generator
+(i.e. a [SecureRandom](https://docs.oracle.com/javase/8/docs/api/java/security/SecureRandom.html) implementation).
+
+Example:
+```java
+    Config.builder()
+        .secureRandom(new SecureRandom())
+        .securityProvider(Security.getProvider("BC"))
+        ...
+```
+
+### Step 3: Choosing the correct Type
+
+IdMask basically supports 2 data types:
+
+* 64 bit long words (8 byte)
+* 128 bit long words  (16 byte)
+
+Different Java types often used as identifiers can fit in these categories:
+
+#### Option A: 64-bit integers (long)
+
+The most common case is an id with the type [`long`](https://docs.oracle.com/javase/7/docs/api/java/lang/Long.html). 
+In Java a `long` is signed an can represent `-2^63` to `2^63 -1`. This IdMask supports this full range.
+
+Create a new instance by calling:
+
+```java
+IdMask<Long> idMask = IdMasks.forLongIds(Config.builder(key).build());
+String masked = idMask.mask(1897461182736122L);
+```
+
+#### Option B: Universally unique identifier (UUIDs)
+
+A [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier) is a 128 bit long identifier (122 bit entropy) and
+often used in databases because one does not have to worry about squences or duplicates, but can just randomly generate
+unique ids. Java has first level support of [UUIDs](https://docs.oracle.com/javase/7/docs/api/java/util/UUID.html)
+
+Create a new instance by calling:
+
+```java
+IdMask<UUID> idMask = IdMasks.forUuids(Config.builder(key).build());
+String masked = idMask.mask(UUID.fromString("eb1c6999-5fc1-4d5f-b98a-792949c38c45"));
+```
+
+#### Option C: Immutable Arbitrary-Precision Integers (BigInteger)
 
 ```java
 IdMask<byte[]> idMask = IdMaskFactory.createFor128bitNumbers(
