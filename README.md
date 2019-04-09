@@ -86,14 +86,14 @@ Usually the default settings are fine for most use cases, however often the foll
 
 #### Q1: Should Ids be deterministic or random?
 
-By default off, the masking algorithm supports randomization of generated ids. This is achieved by creating a random number, use it as part to encrypt the id and append it the output. Therefore randomized Ids are longer than their deterministic counter part. Randomization increases the obfuscation effectiveness but makes it impossible for a client to check equality. This usually makes sense with shareable links, random access tokens, or other one-time identifiers. Randomized ids withing models are probably a bad idea. 
+By default off, the masking algorithm supports randomization of generated ids. This is achieved by creating a random number and using it as part of the encrypt scheme as well as appending it to the output of the masked id. Therefore randomized Ids are longer than their deterministic counter part. Randomization increases the obfuscation effectiveness but makes it impossible for a client to check equality. This usually makes sense with shareable links, random access tokens, or other one-time identifiers. Randomized ids within models are probably a bad idea. 
 
 Enable with:
 
 ```java
-    Config.builder()
-        .randomizedIds(true)
-        ...
+Config.builder()
+    .randomizedIds(true)
+    ...
 ```        
 
 #### Q2: What encoding should I choose?
@@ -101,7 +101,7 @@ Enable with:
 The library internally converts everything to bytes, encrypts it and then requires an encoding schema to make the output printable. Per default the url-safe version of Base64 ([RFC4648](https://tools.ietf.org/html/rfc4648)) is used. This is a well supported, fast and reasonable space efficient (needs ~25% more storage than the raw bytes) encoding.
 
 However depending on your use case, you may want Ids that are easy to type, do not contain possible problematic words
-or require some maximum length. The library includes some build-in encodings which satisfy different requirements:
+or require some maximum length. The library includes some built-in encodings which satisfy different requirements:
 
 
 | Encoding               | may contain words | easy to type                        | Length for 64 bit id (deterministic/randomized) | Length for 128 bit id (deterministic/randomized) | Example                              |
@@ -117,9 +117,9 @@ a Java implementation [here](https://github.com/fzakaria/ascii85); expect around
 Choose a different encoding by setting the following in the config builder:
 
 ```java
-    Config.builder()
-        .encoding(new ByteToTextEncoding.Base32Rfc4648())
-        ...
+Config.builder()
+    .encoding(new ByteToTextEncoding.Base32Rfc4648())
+    ...
 ```      
 Implement your own encoding by using the `ByteToTextEncoding` interface.
 
@@ -131,18 +131,18 @@ Implement your own encoding by using the `ByteToTextEncoding` interface.
 This setting is responsible for disabling the cache:
 
 ```java
-    Config.builder()
-        .enableCache(true)
-        ...
+Config.builder()
+    .enableCache(true)
+    ...
 ```
 
 if you want to wire your own cache framework to the id mask library you may do so by implementing the `Cache` interface
 and setting:
 
 ```java
-    Config.builder()
-        .cacheImpl(new MyHazelcastCache())
-        ...
+Config.builder()
+    .cacheImpl(new MyHazelcastCache())
+    ...
 ```
 
 #### Q3: Any other Advanced Security Features required?
@@ -152,10 +152,10 @@ You may provide your own [JCA provider](https://docs.oracle.com/javase/7/docs/te
 
 Example:
 ```java
-    Config.builder()
-        .secureRandom(new SecureRandom())
-        .securityProvider(Security.getProvider("BC"))
-        ...
+Config.builder()
+    .secureRandom(new SecureRandom())
+    .securityProvider(Security.getProvider("BC"))
+    ...
 ```
 
 ### Step 3: Choosing the correct Type
@@ -165,11 +165,11 @@ IdMask basically supports 2 data types:
 * 64 bit long words (8 byte)
 * 128 bit long words  (16 byte)
 
-Different Java types often used as identifiers can fit in these categories:
+This library supports various Java types often used as identifiers can fit in these categories:
 
 #### Option A: 64-bit integers (long)
 
-The most common case is an id with the type [`long`](https://docs.oracle.com/javase/7/docs/api/java/lang/Long.html). 
+The most common case and the only one fitting in the '8 byte' category is an id with the type [`long`](https://docs.oracle.com/javase/7/docs/api/java/lang/Long.html). 
 In Java a `long` is signed an can represent `-2^63` to `2^63 -1`. This IdMask supports this full range.
 
 Create a new instance by calling:
@@ -193,6 +193,38 @@ String masked = idMask.mask(UUID.fromString("eb1c6999-5fc1-4d5f-b98a-792949c38c4
 ```
 
 #### Option C: Immutable Arbitrary-Precision Integers (BigInteger)
+
+If your ids are typed as [BigInteger](https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html) you can either convert them to long (if they are bound to 64 bit) or use the specific IdMask implementation. Note that the big integer will be converted to a [two's complement](https://en.wikipedia.org/wiki/Two%27s_complement) byte representation supported up to 15 byte length (i.e. up to `2^120`).
+
+```java
+IdMask<BigInteger> idMask = IdMasks.forBigInteger(Config.builder(key).build());
+String masked = idMask.mask(BigInteger.ONE);
+```
+
+#### Option D: Tuple of 64-bit integers
+
+Sometimes it makes sense to encode multiple ids to a single serialized version. Use this if you want to combine two long ids, making it even harder to understand individual ones within.
+
+```java
+IdMask<LongTuple> idMask = IdMasks.forLongTuples(Config.builder(key).build());
+String masked = idMask.mask(new LongTuple(182736128L, 33516718189976L));
+```
+#### Option E: 16 byte (128 bit) byte array
+
+**Only for advanced use cases.** The most generic way to represent a 128 bit id is as a byte array. Basically you provide any data as long as it is exactly 16 byte long. Mind thought, that this is not a general purpose encryption schema and your data might not be secure! 
+
+```java
+IdMask<byte[]> idMask = IdMasks.for128bitNumbers(Config.builder(key).build());
+String masked = idMask.mask(new byte[] {0xE3, ....});
+```
+
+#### Option F: Strings?
+
+Per design this library lacks the feature to mask string based ids. This is to discourage using it as general purpose encryption library. In most cases strings is encoded data: e.g. UUIDs string representation, hex, base64, etc. Best practice would be to decode these to a byte array (or UUID if possible) and use any of the other options provided above. (Note: *technically* it would be possible to convert the string to e.g. ASCII bytes and just feed it `IdMask<byte[]>` if it's length is under 16 but this is highly discouraged).
+
+### A Full Example
+
+Here is a fully wired example using the generic byte array IdMask:
 
 ```java
 IdMask<byte[]> idMask = IdMaskFactory.createFor128bitNumbers(
@@ -234,10 +266,13 @@ Add to your `build.gradle` module dependencies:
 
 [Grab jar from latest release.](https://github.com/patrickfav/id-mask/releases/latest)
 
-
 ## Description
 
-tba.
+### Encryption Schema
+
+### 8 Byte Encryption Schema
+
+### 16 Byte Encryption Schema
 
 ## Security Relevant Information
 
