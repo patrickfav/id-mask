@@ -1,7 +1,7 @@
 # IDMask - Encryption and Obfuscation of IDs
 
 IDMask is a library for masking **internal ids** (e.g. from your DB) when they need to be **publicly published to hide their actual value**.
-This should make it impossible* for an attacker to understand provided ids (e.g. by witnessing a sequence, deducting how many order you had, etc.). **Forgery protection** prevents guessing possible valid IDs. Masking is **fully reversible** and also supports optional **randomization of masked ids** for e.g. **shareable links** or **one-time tokens**. This library uses strong cryptographic primitives ([AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard), [HMAC](https://en.wikipedia.org/wiki/HMAC), [HKDF](https://en.wikipedia.org/wiki/HKDF)) to create secure encryption schema. This library was inspired by [HashIds](https://hashids.org/) but tries to depend on a sound and strong encryption schema.
+This should make it impossible* for an attacker to understand provided ids (e.g. by witnessing a sequence, deducting how many order you had, etc.). **Forgery protection** prevents guessing possible valid IDs. Masking is **fully reversible** and also supports optional **randomization of masked ids** for e.g. **shareable links** or **one-time tokens**. This library uses strong cryptographic primitives ([AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard), [HMAC](https://en.wikipedia.org/wiki/HMAC), [HKDF](https://en.wikipedia.org/wiki/HKDF)) to create a secure encryption schema. This library was inspired by [HashIds](https://hashids.org/) but tries to depend on a sound and strong encryption schema.
 
 <small>*_if the cryptographic key remains secret_</small>
 
