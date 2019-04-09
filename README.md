@@ -48,7 +48,7 @@ UUID originalId = idMask.unmask(maskedId);
 
 The base of the security of IdMask relies on the strength of the used key. A key is basically just a 
 random byte array. A key should be at least 16 bytes long (longer usually doesn't translate to better security).
-IdMask requires the key to be 8 and 64 bytes long. There are multiple ways to manage secret keys, if your project already has a managed [`KeyStore`](https://docs.oracle.com/javase/7/docs/api/java/security/KeyStore.html), use it. In it's simplest form, you can just hardcode the key. This is of course only makes sense, where the client doesn't have access to the code or binary (i.e. in a backend scenario).
+IdMask requires the key to be 12 and 64 bytes long. There are multiple ways to manage secret keys, if your project already has a managed [`KeyStore`](https://docs.oracle.com/javase/7/docs/api/java/security/KeyStore.html), use it. In it's simplest form, you can just hardcode the key. This is of course only makes sense, where the client doesn't have access to the code or binary (i.e. in a backend scenario).
 
 #### Option A: Use Random Number Generator CLI
 

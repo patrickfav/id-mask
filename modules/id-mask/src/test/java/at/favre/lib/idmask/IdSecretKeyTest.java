@@ -9,8 +9,8 @@ public class IdSecretKeyTest {
 
     @Test
     public void testCreateValidKeys() {
-        for (int i = 8; i < 65; i++) {
-            for (int keyId = 0; keyId < 15; keyId++) {
+        for (int i = KeyManager.MIN_KEY_LENGTH_BYTE; i < KeyManager.MAX_KEY_LENGTH_BYTE + 1; i++) {
+            for (int keyId = 0; keyId < IdMaskEngine.MAX_KEY_ID + 1; keyId++) {
                 new KeyManager.IdSecretKey(keyId, Bytes.random(i).array());
             }
         }

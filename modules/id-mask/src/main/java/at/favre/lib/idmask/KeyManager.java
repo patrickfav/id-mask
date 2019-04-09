@@ -17,6 +17,16 @@ import static at.favre.lib.idmask.IdMaskEngine.MAX_KEY_ID;
 public interface KeyManager {
 
     /**
+     * Minimum byte length of allowed keys
+     */
+    int MIN_KEY_LENGTH_BYTE = 12;
+
+    /**
+     * Maximum byte length of allowed keys
+     */
+    int MAX_KEY_LENGTH_BYTE = 64;
+
+    /**
      * Gets an id-key for given key id.
      *
      * @param id to find the key by
@@ -111,7 +121,7 @@ public interface KeyManager {
          * @return manager
          */
         public static KeyManager with(SecretKey secretAesKey) {
-            return new KeyManager.Default(new IdSecretKey(DEFAULT_KEY_ID, secretAesKey.getEncoded()));
+            return with(secretAesKey.getEncoded());
         }
 
         /**
@@ -127,22 +137,12 @@ public interface KeyManager {
         }
 
         /**
-         * This is only for internal use. Uses a 64 bit integer as 8 byte long key.
-         *
-         * @param key used to encrypt.
-         * @return manager
-         */
-        static KeyManager with(long key) {
-            return new KeyManager.Default(new IdSecretKey(DEFAULT_KEY_ID, Bytes.from(key).array()));
-        }
-
-        /**
          * This is only for internal use. Creates a random 16 byte long key
          *
          * @return manager
          */
         static KeyManager withRandom() {
-            return new KeyManager.Default(new IdSecretKey(DEFAULT_KEY_ID, Bytes.random(16).array()));
+            return with(Bytes.random(16).array());
         }
     }
 
@@ -268,14 +268,15 @@ public interface KeyManager {
          * Create new instance.
          *
          * @param keyId    for given key which must be between 0 and 15 (within 4 bit)
-         * @param keyBytes used to encrypt which must be between 8 and 64 bytes, must not
+         * @param keyBytes used to encrypt which must be between {@link #MIN_KEY_LENGTH_BYTE}
+         *                 and {@link #MAX_KEY_LENGTH_BYTE} bytes, must not
          *                 only contains zeros and must have reasonable entropy
          *                 (check with 'Bytes.wrap(key).entropy()').
          */
         public IdSecretKey(int keyId, byte[] keyBytes) {
             Bytes bytes = Bytes.wrap(keyBytes);
             if (!bytes.validate(
-                    and(atLeast(8), atMost(64), notOnlyOf((byte) 0))
+                    and(atLeast(MIN_KEY_LENGTH_BYTE), atMost(MAX_KEY_LENGTH_BYTE), notOnlyOf((byte) 0))
             ) || bytes.entropy() < 2.5) {
                 throw new IllegalArgumentException("key must be at least 8 byte, at most 64 byte and must not only contain zeros, also must have high entropy");
             }

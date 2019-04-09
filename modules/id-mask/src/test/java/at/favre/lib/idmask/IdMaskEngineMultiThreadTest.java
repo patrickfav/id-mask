@@ -11,7 +11,7 @@ public class IdMaskEngineMultiThreadTest extends AMultiThreadTest {
     @Test
     public void test16Byte() throws InterruptedException {
         final IdMaskEngine idMaskEngine = new IdMaskEngine.SixteenByteEngine(
-                KeyManager.Factory.with(Bytes.from(192731092837120938L).array()));
+                KeyManager.Factory.withRandom());
         for (int i = 0; i < ROUNDS; i++) {
             executor.submit(new Runnable() {
                 @Override
@@ -30,7 +30,7 @@ public class IdMaskEngineMultiThreadTest extends AMultiThreadTest {
     @Test
     public void test8Byte() throws InterruptedException {
         final IdMaskEngine idMaskEngine = new IdMaskEngine.EightByteEncryptionEngine(
-                KeyManager.Factory.with(Bytes.from(192731092837120938L).array()));
+                KeyManager.Factory.withRandom());
         for (int i = 0; i < ROUNDS; i++) {
             executor.submit(new Runnable() {
                 @Override

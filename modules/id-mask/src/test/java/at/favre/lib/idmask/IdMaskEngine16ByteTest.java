@@ -14,8 +14,7 @@ public class IdMaskEngine16ByteTest {
     @Test
     public void testMediumSecurityMode() {
         byte[] id = Bytes.from(Bytes.from(UUID.randomUUID())).array();
-        IdMaskEngine idMaskEngine = new IdMaskEngine.SixteenByteEngine(KeyManager.Factory.with(192731092837120938L),
-                false, new ByteToTextEncoding.Base64Url(), new SecureRandom(), null, true);
+        IdMaskEngine idMaskEngine = new IdMaskEngine.SixteenByteEngine(KeyManager.Factory.withRandom(), false, new ByteToTextEncoding.Base64Url(), new SecureRandom(), null, true);
 
         for (int i = 0; i < 10; i++) {
             CharSequence maskedId = idMaskEngine.mask(id);
@@ -28,7 +27,7 @@ public class IdMaskEngine16ByteTest {
     @Test
     public void testHighSecurityMode() {
         byte[] id = Bytes.from(Bytes.from(UUID.randomUUID())).array();
-        IdMaskEngine idMaskEngine = new IdMaskEngine.SixteenByteEngine(KeyManager.Factory.with(192731092837120938L),
+        IdMaskEngine idMaskEngine = new IdMaskEngine.SixteenByteEngine(KeyManager.Factory.withRandom(),
                 true, new ByteToTextEncoding.Base64Url(), new SecureRandom(), null, true);
 
         for (int i = 0; i < 10; i++) {
@@ -41,7 +40,7 @@ public class IdMaskEngine16ByteTest {
 
     @Test
     public void testHighSecurityModeShouldBeLongerThanMediumSecurity() {
-        KeyManager keyManager = KeyManager.Factory.with(Bytes.from(192731092837120938L).array());
+        KeyManager keyManager = KeyManager.Factory.withRandom();
         byte[] id = Bytes.from(Bytes.from(UUID.randomUUID())).array();
 
         IdMaskEngine idMaskEngineHighSecurity = new IdMaskEngine.SixteenByteEngine(keyManager, true,
@@ -62,7 +61,7 @@ public class IdMaskEngine16ByteTest {
 
     @Test
     public void testRandomizedShouldBeLongerThanDeterministic() {
-        KeyManager keyManager = KeyManager.Factory.with(Bytes.from(245789624908756240L).array());
+        KeyManager keyManager = KeyManager.Factory.withRandom();
         byte[] id = Bytes.from(Bytes.from(UUID.randomUUID())).array();
 
         IdMaskEngine idMaskRandomized = new IdMaskEngine.SixteenByteEngine(keyManager, false,
@@ -83,7 +82,7 @@ public class IdMaskEngine16ByteTest {
 
     @Test
     public void testRandomizedShouldNotReturnSameMaskedId() {
-        IdMaskEngine idMaskEngine = new IdMaskEngine.SixteenByteEngine(KeyManager.Factory.with(130984671309784536L),
+        IdMaskEngine idMaskEngine = new IdMaskEngine.SixteenByteEngine(KeyManager.Factory.withRandom(),
                 true, new ByteToTextEncoding.Base64Url(), new SecureRandom(), null, true);
         byte[] id = Bytes.from(UUID.randomUUID()).array();
 
@@ -106,7 +105,7 @@ public class IdMaskEngine16ByteTest {
 
     @Test
     public void testDeterministicShouldReturnSameMaskedId() {
-        IdMaskEngine idMaskEngine = new IdMaskEngine.SixteenByteEngine(KeyManager.Factory.with(130984671309784536L),
+        IdMaskEngine idMaskEngine = new IdMaskEngine.SixteenByteEngine(KeyManager.Factory.withRandom(),
                 true, new ByteToTextEncoding.Base64Url(), new SecureRandom(), null, false);
         byte[] id = Bytes.from(UUID.randomUUID()).array();
 
@@ -203,7 +202,7 @@ public class IdMaskEngine16ByteTest {
     @Test
     public void testForgeryAttemptWithIncorrectMac() {
         byte[] id = Bytes.random(16).array();
-        IdMaskEngine idMaskEngine = new IdMaskEngine.SixteenByteEngine(KeyManager.Factory.with(83785623198457L));
+        IdMaskEngine idMaskEngine = new IdMaskEngine.SixteenByteEngine(KeyManager.Factory.withRandom());
         CharSequence maskedId = idMaskEngine.mask(id);
 
         byte[] raw = new ByteToTextEncoding.Base64Url().decode(maskedId);
