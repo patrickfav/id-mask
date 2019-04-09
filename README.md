@@ -11,7 +11,7 @@ The code is compiled with target [Java 7](https://en.wikipedia.org/wiki/Java_ver
 
 ## Quickstart
 
-Add dependency to your `pom.xml` ([check latest release](https://github.com/patrickfav/id-mask/releases)):
+Add the dependency to your `pom.xml` ([check latest release](https://github.com/patrickfav/id-mask/releases)):
 
     <dependency>
         <groupId>at.favre.lib</groupId>
@@ -48,13 +48,11 @@ UUID originalId = idMask.unmask(maskedId);
 
 ### Step 1: Create a Secret Key
 
-The base of the security of IdMask relies on the strength of the used key. A key is basically just a 
-random byte array. A key should be at least 16 bytes long (longer usually doesn't translate to better security).
-IdMask requires the key to be 12 and 64 bytes long. There are multiple ways to manage secret keys, if your project already has a managed [`KeyStore`](https://docs.oracle.com/javase/7/docs/api/java/security/KeyStore.html), use it. In it's simplest form, you can just hardcode the key. This is of course only makes sense, where the client doesn't have access to the code or binary (i.e. in a backend scenario).
+IdMask's security relies on the strength of the used key. In it's rawest from, a secret key is basically just a random byte array. A provided key should be at least 16 bytes long (longer usually doesn't translate to better security). IdMask requires it to be between 12 and 64 bytes long. There are multiple ways to manage secret keys, if your project already has a managed [`KeyStore`](https://docs.oracle.com/javase/7/docs/api/java/security/KeyStore.html) or similar, use it. In it's simplest form, you can just hardcode the key. This is of course only makes sense where the client doesn't have access to the code or binary (i.e. in a backend scenario). Here are some suggestion on how to create your secret key:
 
 #### Option A: Use Random Number Generator CLI
 
-One of the easiest ways to create a high quality key is to use this random java cli: [Dice](https://github.com/patrickfav/dice/releases). Just download the `.jar` (or `.exe`)
+One of the easiest ways to create a high quality key is to use this java cli: [Dice](https://github.com/patrickfav/dice/releases). Just download the `.jar` (or `.exe`) and run:
 
     java -jar dice.jar 16 -e "java"
 
@@ -72,21 +70,27 @@ Either in the [debugger](https://www.jetbrains.com/help/idea/debugging-your-firs
 
     Bytes.random(16).encodeHex();
 
-Which will create a random byte array using SecureRandom and encodes it as hex string. In your code just 
-use this code and proved the hex string created before:
+which will create a random byte array using `SecureRandom` and encodes it as [hex string](https://en.wikipedia.org/wiki/Hexadecimal). In your code use this hex parser and the previously generated string:
 
     private static final byte[] ID_MASK_KEY = Bytes.parseHex("e48a....").array();
 
-Either way, don't worry too much as the library supports changing the secret key while still be able to 
-unmask older ids.
+Either way, don't worry too much as the library supports changing the secret key while still supporting unmasking of older ids.
 
 ### Step 2: IdMask Configuration
 
-Usually the default settings are fine for most use cases, however often the following may make sense to change some settings based on current requirements
+Usually the default settings are fine for most use cases, however it may make sense to adapt to different usage scenarios with the following settings.
 
 #### Q1: Should Ids be deterministic or random?
 
 By default off, the masking algorithm supports randomization of generated ids. This is achieved by creating a random number and using it as part of the encrypt scheme as well as appending it to the output of the masked id. Therefore randomized Ids are longer than their deterministic counter part. Randomization increases the obfuscation effectiveness but makes it impossible for a client to check equality. This usually makes sense with shareable links, random access tokens, or other one-time identifiers. Randomized ids within models are probably a bad idea. 
+
+For instance these masked ids all represent the same original id `70366123987523049`:
+
+```
+SUkHScdj3j9sE3B3K8KGzgc
+Hx8KpcbNQb7MAAnKPW-H3D4
+wsKW652TCEDBjim8JfOmLbg
+```
 
 Enable with:
 
@@ -104,15 +108,14 @@ However depending on your use case, you may want Ids that are easy to type, do n
 or require some maximum length. The library includes some built-in encodings which satisfy different requirements:
 
 
-| Encoding               | may contain words | easy to type                        | Length for 64 bit id (deterministic/randomized) | Length for 128 bit id (deterministic/randomized) | Example                              |
-|------------------------|-------------------|-------------------------------------|-------------------------------------------------|--------------------------------------------------|--------------------------------------|
-| Hex                    | no                | yes                                 | 34/50                                           | 50/82                                            | `e5e53e09bbd37f8d8b9afdfbed776de6fe` |
-| Base32                 | yes               | yes | 28/40                                           | 40/66                                            | `XS6GLNDNQ2NSBWJRMWM3U72FTLLA`       |
-| Base32 (Safe Alphabet) | no curse words    | contains upper and lowercase        | 28/40                                           | 40/66                                            | `pVY2YYbV8GyzaEZ3aB5b87EeP4Da`       |
-| Base64                 | yes               | no                                  | 23/34                                           | 34/55                                            | `SkqktDj1MVEkiPMrwg1blfA`            |
+| Encoding               | may contain words | easy to type                       | url safe | Length for 64 bit id (deterministic/randomized) | Length for 128 bit id (deterministic/randomized) | Example                              |
+|------------------------|-------------------|------------------------------------|----------|-------------------------------------------------|--------------------------------------------------|--------------------------------------|
+| Hex                    | no                | yes                                | yes      | 34/50                                           | 50/82                                            | `e5e53e09bbd37f8d8b9afdfbed776de6fe` |
+| Base32                 | yes               | contains ambiguous chars (`O`,`0`) | yes      | 28/40                                           | 40/66                                            | `XS6GLNDNQ2NSBWJRMWM3U72FTLLA`       |
+| Base32 (Safe Alphabet) | no curse words    | contains upper and lowercase       | yes      | 28/40                                           | 40/66                                            | `pVY2YYbV8GyzaEZ3aB5b87EeP4Da`       |
+| Base64                 | yes               | no                                 | yes      | 23/34                                           | 34/55                                            | `SkqktDj1MVEkiPMrwg1blfA`            |
 
-If ids should be as short as possible, you may look into using [Ascii85/Base85](https://en.wikipedia.org/wiki/Ascii85) with
-a Java implementation [here](https://github.com/fzakaria/ascii85); expect around 8% better space efficiency compared to Base64. 
+If ids should be as short as possible, you may look into using [Ascii85/Base85](https://en.wikipedia.org/wiki/Ascii85) with a Java implementation [here](https://github.com/fzakaria/ascii85); expect around 8% better space efficiency compared to Base64. 
 
 Choose a different encoding by setting the following in the config builder:
 
@@ -120,13 +123,13 @@ Choose a different encoding by setting the following in the config builder:
 Config.builder()
     .encoding(new ByteToTextEncoding.Base32Rfc4648())
     ...
-```      
+```
+
 Implement your own encoding by using the `ByteToTextEncoding` interface.
 
 #### Q3: Do you need Caching?
 
- By default a simple in-memory cache is enabled. This cache improves performance if recurring ids are encoded/decoded - 
- if this is not the case the cache can be disabled to safe heap.
+ By default a simple in-memory [lru cache](https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)) is enabled. This cache improves performance if recurring ids are encoded/decoded - if this is not the case the cache should be disabled to safe memory.
 
 This setting is responsible for disabling the cache:
 
@@ -136,8 +139,7 @@ Config.builder()
     ...
 ```
 
-if you want to wire your own cache framework to the id mask library you may do so by implementing the `Cache` interface
-and setting:
+if you want to wire your own cache framework to the id mask library you may do so by implementing the `Cache` interface and setting:
 
 ```java
 Config.builder()
@@ -145,10 +147,10 @@ Config.builder()
     ...
 ```
 
-#### Q3: Any other Advanced Security Features required?
+#### Q4: Any other Advanced Security Features required?
 
 You may provide your own [JCA provider](https://docs.oracle.com/javase/7/docs/technotes/guides/security/crypto/CryptoSpec.html) (like [BouncyCastle](https://www.bouncycastle.org/)) or your own cryptographically secure pseudorandom number generator
-(i.e. a [SecureRandom](https://docs.oracle.com/javase/8/docs/api/java/security/SecureRandom.html) implementation).
+(i.e. a [SecureRandom](https://docs.oracle.com/javase/8/docs/api/java/security/SecureRandom.html) implementation). The provider is used to encrypt/decrypt with [AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard) and to calculate [HMACs](https://en.wikipedia.org/wiki/HMAC)
 
 Example:
 ```java
@@ -165,7 +167,7 @@ IdMask basically supports 2 data types:
 * 64 bit long words (8 byte)
 * 128 bit long words  (16 byte)
 
-This library supports various Java types often used as identifiers can fit in these categories:
+Data types with these byte lengths can be represented as various Java types often used as identifiers:
 
 #### Option A: 64-bit integers (long)
 
@@ -179,11 +181,17 @@ IdMask<Long> idMask = IdMasks.forLongIds(Config.builder(key).build());
 String masked = idMask.mask(1897461182736122L);
 ```
 
+It is of course possible to also pass `int` types by casting them:
+
+```java
+String masked = idMask.mask((long) 1780);
+```
+
 #### Option B: Universally unique identifier (UUIDs)
 
 A [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier) is a 128 bit long identifier (122 bit entropy) and
 often used in databases because one does not have to worry about squences or duplicates, but can just randomly generate
-unique ids. Java has first level support of [UUIDs](https://docs.oracle.com/javase/7/docs/api/java/util/UUID.html)
+unique ids. Java has first level support of [UUIDs](https://docs.oracle.com/javase/7/docs/api/java/util/UUID.html).
 
 Create a new instance by calling:
 
@@ -192,7 +200,7 @@ IdMask<UUID> idMask = IdMasks.forUuids(Config.builder(key).build());
 String masked = idMask.mask(UUID.fromString("eb1c6999-5fc1-4d5f-b98a-792949c38c45"));
 ```
 
-#### Option C: Immutable Arbitrary-Precision Integers (BigInteger)
+#### Option C: Arbitrary-Precision Integers (BigInteger)
 
 If your ids are typed as [BigInteger](https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html) you can either convert them to long (if they are bound to 64 bit) or use the specific IdMask implementation. Note that the big integer will be converted to a [two's complement](https://en.wikipedia.org/wiki/Two%27s_complement) byte representation supported up to 15 byte length (i.e. up to `2^120`).
 
@@ -203,7 +211,7 @@ String masked = idMask.mask(BigInteger.ONE);
 
 #### Option D: Tuple of 64-bit integers
 
-Sometimes it makes sense to encode multiple ids to a single serialized version. Use this if you want to combine two long ids, making it even harder to understand individual ones within.
+Sometimes it makes sense to encode multiple ids to a single serialized version. Use this if you want to combine two `long` ids, making it even harder to understand individual ones within.
 
 ```java
 IdMask<LongTuple> idMask = IdMasks.forLongTuples(Config.builder(key).build());
@@ -211,7 +219,7 @@ String masked = idMask.mask(new LongTuple(182736128L, 33516718189976L));
 ```
 #### Option E: 16 byte (128 bit) byte array
 
-**Only for advanced use cases.** The most generic way to represent a 128 bit id is as a byte array. Basically you provide any data as long as it is exactly 16 byte long. Mind thought, that this is not a general purpose encryption schema and your data might not be secure! 
+**Only for advanced use cases.** The most generic way to represent a 128 bit id is as a byte array. Basically you may provide any data as long as it fits in 16 bytes. Mind thou, that this is not a general purpose encryption schema and your data might not be secure! 
 
 ```java
 IdMask<byte[]> idMask = IdMasks.for128bitNumbers(Config.builder(key).build());
@@ -220,7 +228,7 @@ String masked = idMask.mask(new byte[] {0xE3, ....});
 
 #### Option F: Strings?
 
-Per design this library lacks the feature to mask string based ids. This is to discourage using it as general purpose encryption library. In most cases strings is encoded data: e.g. UUIDs string representation, hex, base64, etc. Best practice would be to decode these to a byte array (or UUID if possible) and use any of the other options provided above. (Note: *technically* it would be possible to convert the string to e.g. ASCII bytes and just feed it `IdMask<byte[]>` if it's length is under 16 but this is highly discouraged).
+Per design this library lacks the feature to mask string based ids. This is to discourage using it as general purpose encryption library. In most cases strings are encoded data: e.g. `UUIDs` string representation, `hex`, `base64`, etc. Best practice would be to decode these to a byte array (or `UUID` if possible) and use any of the other options provided above. (Note: *technically* it would be possible to convert the string to e.g. [ASCII](https://en.wikipedia.org/wiki/ASCII) bytes and just feed it `IdMask<byte[]>` if it's length is equal or under 16; **but this is highly discouraged**).
 
 ### A Full Example
 
