@@ -172,13 +172,13 @@ Data types with these byte lengths can be represented as various Java types ofte
 #### Option A: 64-bit integers (long)
 
 The most common case and the only one fitting in the '8 byte' category is an id with the type [`long`](https://docs.oracle.com/javase/7/docs/api/java/lang/Long.html). 
-In Java a `long` is signed an can represent `-2^63` to `2^63 -1`. This IdMask supports this full range.
+In Java a `long` is signed an can represent `-2^63` to `2^63 -1`. IdMask supports the full range.
 
 Create a new instance by calling:
 
 ```java
 IdMask<Long> idMask = IdMasks.forLongIds(Config.builder(key).build());
-String masked = idMask.mask(1897461182736122L);
+String masked = idMask.mask(-588461182736122L);
 ```
 
 It is of course possible to also pass `int` types by casting them:
@@ -190,7 +190,7 @@ String masked = idMask.mask((long) 1780);
 #### Option B: Universally unique identifier (UUIDs)
 
 A [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier) is a 128 bit long identifier (122 bit entropy) and
-often used in databases because one does not have to worry about squences or duplicates, but can just randomly generate
+often used in databases because one does not have to worry about sequences or duplicates, but can just randomly generate
 unique ids. Java has first level support of [UUIDs](https://docs.oracle.com/javase/7/docs/api/java/util/UUID.html).
 
 Create a new instance by calling:
@@ -219,7 +219,7 @@ String masked = idMask.mask(new LongTuple(182736128L, 33516718189976L));
 ```
 #### Option E: 16 byte (128 bit) byte array
 
-**Only for advanced use cases.** The most generic way to represent a 128 bit id is as a byte array. Basically you may provide any data as long as it fits in 16 bytes. Mind thou, that this is not a general purpose encryption schema and your data might not be secure! 
+**Only for advanced use cases.** The most generic way to represent a 128 bit id is as a byte array. Basically you may provide any data as long as it fits in 16 bytes. *Note, that this is not a general purpose encryption schema and your data might not be secure!* 
 
 ```java
 IdMask<byte[]> idMask = IdMasks.for128bitNumbers(Config.builder(key).build());
