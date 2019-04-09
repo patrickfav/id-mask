@@ -19,7 +19,7 @@ Add the dependency to your `pom.xml` ([check latest release](https://github.com/
         <version>{latest-version}</version>
     </dependency>
 
-A very simple example using 64 bit integers (`long`):
+A very simple example using 64 bit integers ([`long`](https://docs.oracle.com/javase/7/docs/api/java/lang/Long.html)):
 
 ```java
 byte[] key = Bytes.random(16).array();
@@ -32,7 +32,7 @@ String maskedId = idMask.mask(id);
 long originalId = idMask.unmask(maskedId);
 ```
 
-alternatively using UUIDs
+alternatively using [`UUIDs`](https://docs.oracle.com/javase/7/docs/api/java/util/UUID.html):
 
 ```java
 UUID id = UUID.fromString("eb1c6999-5fc1-4d5f-b98a-792949c38c45");
@@ -44,7 +44,15 @@ String maskedId = idMask.mask(id);
 UUID originalId = idMask.unmask(maskedId);
 ```
 
+Examples for other java types (e.g. [`BigInteger`](https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html), [`byte[]`](https://docs.oracle.com/javase/7/docs/api/java/lang/Byte.html) and `LongTuple`), see below.
+
 ## How-To
+
+In the following section explains in detail how to use and configure IdMask:
+
+* **Step 1:** How to create your secret key
+* **Step 2:** Select the Java type to use
+* **Step 3:** Adjust the configuration to your needs
 
 ### Step 1: Create a Secret Key
 
@@ -76,91 +84,7 @@ which will create a random byte array using `SecureRandom` and encodes it as [he
 
 Either way, don't worry too much as the library supports changing the secret key while still supporting unmasking of older ids.
 
-### Step 2: IdMask Configuration
-
-Usually the default settings are fine for most use cases, however it may make sense to adapt to different usage scenarios with the following settings.
-
-#### Q1: Should Ids be deterministic or random?
-
-By default off, the masking algorithm supports randomization of generated ids. This is achieved by creating a random number and using it as part of the encrypt scheme as well as appending it to the output of the masked id. Therefore randomized Ids are longer than their deterministic counter part. Randomization increases the obfuscation effectiveness but makes it impossible for a client to check equality. This usually makes sense with shareable links, random access tokens, or other one-time identifiers. Randomized ids within models are probably a bad idea. 
-
-For instance these masked ids all represent the same original id `70366123987523049`:
-
-```
-SUkHScdj3j9sE3B3K8KGzgc
-Hx8KpcbNQb7MAAnKPW-H3D4
-wsKW652TCEDBjim8JfOmLbg
-```
-
-Enable with:
-
-```java
-Config.builder()
-    .randomizedIds(true)
-    ...
-```        
-
-#### Q2: What encoding should I choose?
-
-The library internally converts everything to bytes, encrypts it and then requires an encoding schema to make the output printable. Per default the url-safe version of Base64 ([RFC4648](https://tools.ietf.org/html/rfc4648)) is used. This is a well supported, fast and reasonable space efficient (needs ~25% more storage than the raw bytes) encoding.
-
-However depending on your use case, you may want Ids that are easy to type, do not contain possible problematic words
-or require some maximum length. The library includes some built-in encodings which satisfy different requirements:
-
-
-| Encoding               | may contain words | easy to type                       | url safe | Length for 64 bit id (deterministic/randomized) | Length for 128 bit id (deterministic/randomized) | Example                              |
-|------------------------|-------------------|------------------------------------|----------|-------------------------------------------------|--------------------------------------------------|--------------------------------------|
-| Hex                    | no                | yes                                | yes      | 34/50                                           | 50/82                                            | `e5e53e09bbd37f8d8b9afdfbed776de6fe` |
-| Base32                 | yes               | contains ambiguous chars (`O`,`0`) | yes      | 28/40                                           | 40/66                                            | `XS6GLNDNQ2NSBWJRMWM3U72FTLLA`       |
-| Base32 (Safe Alphabet) | no curse words    | contains upper and lowercase       | yes      | 28/40                                           | 40/66                                            | `pVY2YYbV8GyzaEZ3aB5b87EeP4Da`       |
-| Base64                 | yes               | no                                 | yes      | 23/34                                           | 34/55                                            | `SkqktDj1MVEkiPMrwg1blfA`            |
-
-If ids should be as short as possible, you may look into using [Ascii85/Base85](https://en.wikipedia.org/wiki/Ascii85) with a Java implementation [here](https://github.com/fzakaria/ascii85); expect around 8% better space efficiency compared to Base64. 
-
-Choose a different encoding by setting the following in the config builder:
-
-```java
-Config.builder()
-    .encoding(new ByteToTextEncoding.Base32Rfc4648())
-    ...
-```
-
-Implement your own encoding by using the `ByteToTextEncoding` interface.
-
-#### Q3: Do you need Caching?
-
- By default a simple in-memory [lru cache](https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)) is enabled. This cache improves performance if recurring ids are encoded/decoded - if this is not the case the cache should be disabled to safe memory.
-
-This setting is responsible for disabling the cache:
-
-```java
-Config.builder()
-    .enableCache(true)
-    ...
-```
-
-if you want to wire your own cache framework to the id mask library you may do so by implementing the `Cache` interface and setting:
-
-```java
-Config.builder()
-    .cacheImpl(new MyHazelcastCache())
-    ...
-```
-
-#### Q4: Any other Advanced Security Features required?
-
-You may provide your own [JCA provider](https://docs.oracle.com/javase/7/docs/technotes/guides/security/crypto/CryptoSpec.html) (like [BouncyCastle](https://www.bouncycastle.org/)) or your own cryptographically secure pseudorandom number generator
-(i.e. a [SecureRandom](https://docs.oracle.com/javase/8/docs/api/java/security/SecureRandom.html) implementation). The provider is used to encrypt/decrypt with [AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard) and to calculate [HMACs](https://en.wikipedia.org/wiki/HMAC)
-
-Example:
-```java
-Config.builder()
-    .secureRandom(new SecureRandom())
-    .securityProvider(Security.getProvider("BC"))
-    ...
-```
-
-### Step 3: Choosing the correct Type
+### Step 2: Choosing the correct Type
 
 IdMask basically supports 2 data types:
 
@@ -189,9 +113,9 @@ String masked = idMask.mask((long) 1780);
 
 #### Option B: Universally unique identifier (UUIDs)
 
-A [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier) is a 128 bit long identifier (122 bit entropy) and
-often used in databases because one does not have to worry about sequences or duplicates, but can just randomly generate
-unique ids. Java has first level support of [UUIDs](https://docs.oracle.com/javase/7/docs/api/java/util/UUID.html).
+A [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier) is a 128 bit long identifier (with 122 bit entropy) and
+often used in databases because one does not have to worry about sequences or duplicates, but can just generate
+unique ids but choosing one randomly. Java has first level support for [UUIDs](https://docs.oracle.com/javase/7/docs/api/java/util/UUID.html) for generation, parsing and serialization.
 
 Create a new instance by calling:
 
@@ -230,6 +154,90 @@ String masked = idMask.mask(new byte[] {0xE3, ....});
 
 Per design this library lacks the feature to mask string based ids. This is to discourage using it as general purpose encryption library. In most cases strings are encoded data: e.g. `UUIDs` string representation, `hex`, `base64`, etc. Best practice would be to decode these to a byte array (or `UUID` if possible) and use any of the other options provided above. (Note: *technically* it would be possible to convert the string to e.g. [ASCII](https://en.wikipedia.org/wiki/ASCII) bytes and just feed it `IdMask<byte[]>` if it's length is equal or under 16; **but this is highly discouraged**).
 
+### Step 3: IdMask Configuration
+
+Usually the default settings are fine for most use cases, however it may make sense to adapt to different usage scenarios with the following settings.
+
+#### Q1: Should Ids be deterministic or random?
+
+By default off, the masking algorithm supports randomization of generated ids. This is achieved by creating a random number and using it as part of the encrypt scheme as well as appending it to the output of the masked id. Therefore randomized Ids are longer than their deterministic counter part. Randomization increases the obfuscation effectiveness but makes it impossible for a client to check equality. This usually makes sense with shareable links, random access tokens, or other one-time identifiers. Randomized ids within models are probably a bad idea. 
+
+For instance these masked ids all represent the same original id `70366123987523049`:
+
+```
+SUkHScdj3j9sE3B3K8KGzgc
+Hx8KpcbNQb7MAAnKPW-H3D4
+wsKW652TCEDBjim8JfOmLbg
+```
+
+Enable with:
+
+```java
+Config.builder(key)
+    .randomizedIds(true)
+    ...
+```        
+
+#### Q2: What encoding should I choose?
+
+The library internally converts everything to bytes, encrypts it and then requires an encoding schema to make the output printable. Per default the url-safe version of Base64 ([RFC4648](https://tools.ietf.org/html/rfc4648)) is used. This is a well supported, fast and reasonable space efficient (needs ~25% more storage than the raw bytes) encoding.
+
+However depending on your use case, you may want Ids that are easy to type, do not contain possible problematic words
+or require some maximum length. The library includes some built-in encodings which satisfy different requirements:
+
+
+| Encoding               | may contain words | easy to type                       | url safe | Length for 64 bit id (deterministic/randomized) | Length for 128 bit id (deterministic/randomized) | Example                              |
+|------------------------|-------------------|------------------------------------|----------|-------------------------------------------------|--------------------------------------------------|--------------------------------------|
+| Hex                    | no                | yes                                | yes      | 34/50                                           | 50/82                                            | `e5e53e09bbd37f8d8b9afdfbed776de6fe` |
+| Base32                 | yes               | contains ambiguous chars (`O`,`0`) | yes      | 28/40                                           | 40/66                                            | `XS6GLNDNQ2NSBWJRMWM3U72FTLLA`       |
+| Base32 (Safe Alphabet) | no curse words    | contains upper and lowercase       | yes      | 28/40                                           | 40/66                                            | `pVY2YYbV8GyzaEZ3aB5b87EeP4Da`       |
+| Base64                 | yes               | no                                 | yes      | 23/34                                           | 34/55                                            | `SkqktDj1MVEkiPMrwg1blfA`            |
+
+If ids should be as short as possible, you may look into using [Ascii85/Base85](https://en.wikipedia.org/wiki/Ascii85) with a Java implementation [here](https://github.com/fzakaria/ascii85); expect around 8% better space efficiency compared to Base64. 
+
+Choose a different encoding by setting the following in the config builder:
+
+```java
+Config.builder(key)
+    .encoding(new ByteToTextEncoding.Base32Rfc4648())
+    ...
+```
+
+Implement your own encoding by using the `ByteToTextEncoding` interface.
+
+#### Q3: Do you need Caching?
+
+ By default a simple in-memory [lru cache](https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)) is enabled. This cache improves performance if recurring ids are encoded/decoded - if this is not the case the cache should be disabled to safe memory.
+
+This setting is responsible for disabling the cache:
+
+```java
+Config.builder(key)
+    .enableCache(true)
+    ...
+```
+
+if you want to wire your own cache framework to the id mask library you may do so by implementing the `Cache` interface and setting:
+
+```java
+Config.builder(key)
+    .cacheImpl(new MyHazelcastCache())
+    ...
+```
+
+#### Q4: Any other Advanced Security Features required?
+
+You may provide your own [JCA provider](https://docs.oracle.com/javase/7/docs/technotes/guides/security/crypto/CryptoSpec.html) (like [BouncyCastle](https://www.bouncycastle.org/)) or your own cryptographically secure pseudorandom number generator
+(i.e. a [SecureRandom](https://docs.oracle.com/javase/8/docs/api/java/security/SecureRandom.html) implementation). The provider is used to encrypt/decrypt with [AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard) and to calculate [HMACs](https://en.wikipedia.org/wiki/HMAC)
+
+Example:
+```java
+Config.builder(key)
+    .secureRandom(new SecureRandom())
+    .securityProvider(Security.getProvider("BC"))
+    ...
+```
+
 ### A Full Example
 
 Here is a fully wired example using the generic byte array IdMask:
@@ -249,6 +257,59 @@ String maskedId = idMask.mask(id128bit);
 //example: RAKESQ32V37ORV5JX7FAWCFVV2PITRN5KMOKYBJBLNS42WCEA3FI2FIBXLKJGMTSZY
 byte[] originalId = idMask.unmask(maskedId);
 ```
+
+## Additional Features
+
+### Upgrade of used Secret Key
+
+If you want to change the used secret key, because it became compromised, but still want to be able to unmask ids created
+with the previous key, you use this simple key upgrade scheme. Since every created id encodes the id of the used key, it
+is possible to choose the legacy key for decryption.
+
+Here is a full example. First a new instance with `key1` will be created. If no `key-id` is passed, the library uses
+`KeyManager.Factory.DEFAULT_KEY_ID`.
+
+```java
+long id = 123456789L;
+byte[] key1 = Bytes.random(16).array();
+
+// create new instance with your key
+IdMask<Long> idMask1 = IdMasks.forLongIds(Config.builder(key1).build());
+String maskKey1 = idMask1.mask(id);
+// e.g.: kpKOdqrNdmyx34-VxjTg6B4
+```
+
+If you want to switch the active key, just generate a new one and also set the old one as legacy key. Mind to choose
+a different `key-id`:
+
+```java
+// if key1 is compromised create a new key
+byte[] key2 = Bytes.random(16).array();
+
+// set the new key as active key and add the old key as legacy key - us the DEFAULT_KEY_ID, is it is used if no key id is set
+IdMask<Long> idMask2 = IdMasks.forLongIds(
+        Config.builder(KeyManager.Factory.withKeyAndLegacyKeys(
+                new KeyManager.IdSecretKey(KeyManager.Factory.DEFAULT_KEY_ID+1, key2), //new key with a new key id
+                new KeyManager.IdSecretKey(KeyManager.Factory.DEFAULT_KEY_ID, key1))) //old key with the DEFAULT_KEY_ID
+                .build());
+```
+
+Masking the same id, with the new key will generate different output:
+
+```java
+// same id will create different output
+String maskKey2 = idMask2.mask(id);
+// e.g.: 3c1UMVvVK5SvNiOaT4btpiQ
+```
+
+Unmasking however will reveal the same underlying id, no matter if it was masked with `key1` or `key2`.
+
+```java
+// the new instance can unmask the old an new key
+assert idMask2.unmask(maskKey1).equals(idMask2.unmask(maskKey2));
+```
+
+_Be aware that changing the secret key, will destroy equality of masked ids cached with clients or elsewhere._
 
 ## Download
 

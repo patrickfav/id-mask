@@ -69,7 +69,7 @@ public interface KeyManager {
         /**
          * If no explicit id is used, this is the used default key id
          */
-        private static final int DEFAULT_KEY_ID = 0;
+        public static final int DEFAULT_KEY_ID = 0;
 
         private Factory() {
         }
