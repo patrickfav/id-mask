@@ -71,7 +71,7 @@ The following section explains in detail how to use and configure IDMask:
 
 ### Step 1: Create a Secret Key
 
-IDMask's security relies on the strength of the used key. In it's rawest from, a secret key is basically just a random byte array. A provided key should be at least 16 bytes long (longer usually doesn't translate to better security). IDMask requires it to be between 12 and 64 bytes long. There are multiple ways to manage secret keys, if your project already has a managed [`KeyStore`](https://docs.oracle.com/javase/7/docs/api/java/security/KeyStore.html) or similar, use it. In it's simplest form, you can just hardcode the key. This, of course, only makes sense where the client doesn't have access to the code or binary (i.e. in a backend scenario). Here are some suggestion on how to create your secret key:
+IDMask's security relies on the strength of the used cryptographic key. In it's rawest from, a secret key is basically just a random byte array. A provided key should be at least 16 bytes long (longer usually doesn't translate to better security). IDMask requires it to be between 12 and 64. There are multiple ways to manage secret keys, if your project already has a managed [`KeyStore`](https://docs.oracle.com/javase/7/docs/api/java/security/KeyStore.html) or similar, use it. Otherwise you could just hardcode the key in your code. This, of course, only makes sense where the client doesn't have access to the source or binary (i.e. in a backend scenario). Here are some suggestion on how to create your secret key:
 
 #### Option A: Use Random Number Generator CLI
 
@@ -87,7 +87,7 @@ You could just hard code this value:
 
     private static final byte[] ID_MASK_KEY = new byte[]{(byte) 0xE4, (byte) 0x8A, ...};
     
-#### Option B: Generate Random Key within Java Code
+#### Option B: Generate a Random Key within a Java Runtime
 
 Either in the [debugger](https://www.jetbrains.com/help/idea/debugging-your-first-java-application.html), simple application or any other [REPL](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop) execute the following code (IDMask must be in classpath):
 
