@@ -19,4 +19,11 @@ public class IdMaskUuidTest extends ABaseIdMaskTest {
         }
     }
 
+    @Test
+    public void testAllByteToTextEncodings() {
+        for (ByteToTextEncoding encoding : encodings) {
+            maskAndUnmask(new IdMask.UuidMask(Config.builder().key(Bytes.random(16).array()).enableCache(false).encoding(encoding).build()), UUID.randomUUID());
+            maskAndUnmask(new IdMask.UuidMask(Config.builder().key(Bytes.random(16).array()).randomizedIds(true).enableCache(false).encoding(encoding).build()), UUID.randomUUID());
+        }
+    }
 }

@@ -8,7 +8,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.*;
 
-public class IdMask16ByteEngineTest {
+public class IdMaskEngine16ByteTest {
     private IdMaskEngine idMaskEngine = new IdMaskEngine.SixteenByteEngine(KeyManager.Factory.withRandom());
 
     @Test

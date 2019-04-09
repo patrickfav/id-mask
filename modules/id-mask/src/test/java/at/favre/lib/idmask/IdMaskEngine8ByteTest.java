@@ -7,7 +7,7 @@ import java.security.SecureRandom;
 
 import static org.junit.Assert.*;
 
-public class IdMask8ByteEngineTest {
+public class IdMaskEngine8ByteTest {
     private IdMaskEngine idMaskEngine = new IdMaskEngine.EightByteEncryptionEngine(KeyManager.Factory.withRandom());
 
     @Test

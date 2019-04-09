@@ -43,7 +43,7 @@ String maskedId = idMask.mask(id);
 UUID originalId = idMask.unmask(maskedId);
 ```
 
-## Full Example
+## How-To
 
 ### Step 1: Create a Secret Key
 
@@ -65,7 +65,7 @@ You could just hard code this value:
 
     private static final byte[] ID_MASK_KEY = new byte[]{(byte) 0xE4, (byte) 0x8A, ...};
     
-#### Option B: Generate Random Key with Java Code
+#### Option B: Generate Random Key within Java Code
 
 Either in the [debugger](https://www.jetbrains.com/help/idea/debugging-your-first-java-application.html), simple application or any other [REPL](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop) execute the following code (IdMask must be in classpath):
 
@@ -85,7 +85,7 @@ Usually the default settings are fine for most use cases, however often the foll
 
 #### Q1: Should Ids be deterministic or random?
 
-By default off, the masking algorithm supports randomization of generated ids. This is achieved by creating a random number, use it as part to encrypt the id and append it the output. Therefore randomized Ids are longer than their deterministic counter part. Randomization increases the obfuscation effectivness but makes it impossible for a client to check equality. This usually makes sense with shareable links, random access tokens, or other one-time identifiers. Randomized ids withing models are probably a bad idea. 
+By default off, the masking algorithm supports randomization of generated ids. This is achieved by creating a random number, use it as part to encrypt the id and append it the output. Therefore randomized Ids are longer than their deterministic counter part. Randomization increases the obfuscation effectiveness but makes it impossible for a client to check equality. This usually makes sense with shareable links, random access tokens, or other one-time identifiers. Randomized ids withing models are probably a bad idea. 
 
 Enable with:
 
@@ -95,7 +95,7 @@ Enable with:
 
 #### Q2: What encoding should I choose?
 
-The library internally converts everything to bytes, encrypts it and then needs an encoding to make it printable. Per default the url-safe version of Base64 ([RFC4648](https://tools.ietf.org/html/rfc4648)). This is a well supported, fast and reasonable space efficient (needs ~25% more storage than the raw bytes).
+The library internally converts everything to bytes, encrypts it and then requires an encoding schema to make the output printable. Per default the url-safe version of Base64 ([RFC4648](https://tools.ietf.org/html/rfc4648)) is used. This is a well supported, fast and reasonable space efficient (needs ~25% more storage than the raw bytes) encoding.
 
 Depending on your use case, you may want Ids that:
 
@@ -105,10 +105,13 @@ Depending on your use case, you may want Ids that:
 
 Currently the following encodings are supported:
 
-* Hex
-* Base32
-* Base32 (safe)
-* Base64 (url)
+
+| Encoding               | may contain words | easy to type                        | Length for 64 bit id (deterministic/randomized) | Length for 128 bit id (deterministic/randomized) | Example                              |
+|------------------------|-------------------|-------------------------------------|-------------------------------------------------|--------------------------------------------------|--------------------------------------|
+| Hex                    | no                | yes                                 | 34/50                                           | 50/82                                            | `e5e53e09bbd37f8d8b9afdfbed776de6fe` |
+| Base32                 | yes               | yes | 28/40                                           | 40/66                                            | `XS6GLNDNQ2NSBWJRMWM3U72FTLLA`       |
+| Base32 (Safe Alphabet) | no curse words    | contains upper and lowercase        | 28/40                                           | 40/66                                            | `pVY2YYbV8GyzaEZ3aB5b87EeP4Da`       |
+| Base64                 | yes               | no                                  | 23/34                                           | 34/55                                            | `SkqktDj1MVEkiPMrwg1blfA`            |
 
 
  * **Caching**: By default a simple in-memory cache is enabled. You may want to provide your own cache if you still use one.
