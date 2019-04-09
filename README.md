@@ -437,6 +437,7 @@ Use the Maven wrapper to create a jar including all dependencies
 
 * [Exposing database IDs - security risk?](https://stackoverflow.com/questions/396164/exposing-database-ids-security-risk)
 * [Prevent Business Intelligence Leaks by Using UUIDs Instead of Database IDs on URLs and in APIs](https://medium.com/lightrail/prevent-business-intelligence-leaks-by-using-uuids-instead-of-database-ids-on-urls-and-in-apis-17f15669fd2e)
+* [Why not expose a primary key](https://softwareengineering.stackexchange.com/questions/218306/why-not-expose-a-primary-key)
 
 ### Similar Libraries
 
