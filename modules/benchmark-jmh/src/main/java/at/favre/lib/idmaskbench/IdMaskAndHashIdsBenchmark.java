@@ -4,7 +4,6 @@ import at.favre.lib.bytes.Bytes;
 import at.favre.lib.idmask.Config;
 import at.favre.lib.idmask.IdMask;
 import at.favre.lib.idmask.IdMasks;
-import at.favre.lib.idmask.KeyManager;
 import org.hashids.Hashids;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
@@ -55,11 +54,11 @@ public class IdMaskAndHashIdsBenchmark {
             } while (id > Hashids.MAX_NUMBER - (long) Integer.MAX_VALUE);
 
             idMaskEngine = IdMasks.forLongIds(
-                    Config.builder().keyManager(KeyManager.Factory.with(Bytes.random(16).array()))
+                    Config.builder(Bytes.random(16).array())
                             .enableCache(false)
                             .build());
             idMaskEngine16Byte = IdMasks.for128bitNumbers(
-                    Config.builder().keyManager(KeyManager.Factory.with(Bytes.random(16).array()))
+                    Config.builder(Bytes.random(16).array())
                             .enableCache(false)
                             .build());
             hashids = new Hashids(Bytes.random(16).encodeBase64());

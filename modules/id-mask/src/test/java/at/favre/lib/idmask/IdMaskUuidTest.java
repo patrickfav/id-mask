@@ -7,8 +7,7 @@ import java.util.UUID;
 
 public class IdMaskUuidTest extends ABaseIdMaskTest {
     private IdMask<UUID> idMask = new IdMask.UuidMask(
-            Config.builder()
-                    .keyManager(KeyManager.Factory.with(Bytes.random(16).array()))
+            Config.builder(Bytes.random(16).array())
                     .enableCache(false)
                     .build());
 
@@ -22,8 +21,8 @@ public class IdMaskUuidTest extends ABaseIdMaskTest {
     @Test
     public void testAllByteToTextEncodings() {
         for (ByteToTextEncoding encoding : encodings) {
-            maskAndUnmask(new IdMask.UuidMask(Config.builder().key(Bytes.random(16).array()).enableCache(false).encoding(encoding).build()), UUID.randomUUID());
-            maskAndUnmask(new IdMask.UuidMask(Config.builder().key(Bytes.random(16).array()).randomizedIds(true).enableCache(false).encoding(encoding).build()), UUID.randomUUID());
+            maskAndUnmask(new IdMask.UuidMask(Config.builder(Bytes.random(16).array()).enableCache(false).encoding(encoding).build()), UUID.randomUUID());
+            maskAndUnmask(new IdMask.UuidMask(Config.builder(Bytes.random(16).array()).randomizedIds(true).enableCache(false).encoding(encoding).build()), UUID.randomUUID());
         }
     }
 }

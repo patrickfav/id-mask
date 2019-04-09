@@ -80,10 +80,12 @@ public abstract class Config {
      * <li>Deterministic ids &amp; high security mode disabled</li>
      * </ul>
      *
+     * @param keyManager non-null key manager responsible for providing the secret keys for the cryptographic primitives. If only a single key is used:'KeyManager.Factory.with(secretKey);'
      * @return builder
      */
-    public static Builder builder() {
+    public static Builder builder(KeyManager keyManager) {
         return new AutoValue_Config.Builder()
+                .keyManager(keyManager)
                 .encoding(new ByteToTextEncoding.Base64Url())
                 .highSecurityMode(false)
                 .randomizedIds(false)
@@ -91,6 +93,16 @@ public abstract class Config {
                 .cacheImpl(new Cache.SimpleLruMemCache())
                 .enableCache(true)
                 .secureRandom(new SecureRandom());
+    }
+
+    /**
+     * Create new builder. Shorthand for calling {@link #builder(byte[])} with single key key-manager.
+     *
+     * @param key to use as secret key.
+     * @return builder
+     */
+    public static Builder builder(byte[] key) {
+        return builder(KeyManager.Factory.with(key));
     }
 
     @AutoValue.Builder
@@ -107,18 +119,7 @@ public abstract class Config {
          * @param keyManager to use (non-optional)
          * @return builder
          */
-        public abstract Builder keyManager(KeyManager keyManager);
-
-        /**
-         * Set the cryptographic key for this id mask. This is a shorthand call and alternative
-         * to calling {@link #keyManager(KeyManager)}.
-         *
-         * @param key to use (non-optional)
-         * @return builder
-         */
-        public Builder key(byte[] key) {
-            return keyManager(KeyManager.Factory.with(key));
-        }
+        abstract Builder keyManager(KeyManager keyManager);
 
         /**
          * Used byte to text encoding.

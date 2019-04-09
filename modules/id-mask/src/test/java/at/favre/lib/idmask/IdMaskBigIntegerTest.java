@@ -9,7 +9,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 public class IdMaskBigIntegerTest extends ABaseIdMaskTest {
-    private IdMask<BigInteger> idMask = new IdMask.BigIntegerIdMask(Config.builder().keyManager(KeyManager.Factory.with(Bytes.random(16).array())).enableCache(false).build());
+    private IdMask<BigInteger> idMask = new IdMask.BigIntegerIdMask(Config.builder(Bytes.random(16).array()).enableCache(false).build());
 
     @Test
     public void testEncodeDecode() {
@@ -30,7 +30,7 @@ public class IdMaskBigIntegerTest extends ABaseIdMaskTest {
 
     @Test
     public void testWithCache() {
-        IdMask<BigInteger> idMask = new IdMask.BigIntegerIdMask(Config.builder().keyManager(KeyManager.Factory.with(Bytes.random(16).array())).enableCache(true).build());
+        IdMask<BigInteger> idMask = new IdMask.BigIntegerIdMask(Config.builder(Bytes.random(16).array()).enableCache(true).build());
         BigInteger id = BigInteger.valueOf(Bytes.random(8).toLong());
         String encoded = idMask.mask(id);
 
@@ -42,7 +42,7 @@ public class IdMaskBigIntegerTest extends ABaseIdMaskTest {
 
     @Test
     public void testWithoutCache() {
-        IdMask<BigInteger> idMask = new IdMask.BigIntegerIdMask(Config.builder().keyManager(KeyManager.Factory.with(Bytes.random(16).array())).enableCache(false).build());
+        IdMask<BigInteger> idMask = new IdMask.BigIntegerIdMask(Config.builder(Bytes.random(16).array()).enableCache(false).build());
         BigInteger id = BigInteger.valueOf(Bytes.random(8).toLong());
         String encoded = idMask.mask(id);
 

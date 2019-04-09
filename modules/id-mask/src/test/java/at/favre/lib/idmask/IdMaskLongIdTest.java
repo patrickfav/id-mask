@@ -8,7 +8,7 @@ import java.util.Random;
 import static org.junit.Assert.assertEquals;
 
 public class IdMaskLongIdTest extends ABaseIdMaskTest {
-    private IdMask<Long> idMask = new IdMask.LongIdMask(Config.builder().keyManager(KeyManager.Factory.with(Bytes.random(16).array())).enableCache(false).build());
+    private IdMask<Long> idMask = new IdMask.LongIdMask(Config.builder(Bytes.random(16).array()).enableCache(false).build());
 
     @Test
     public void testEncodeDecode() {
@@ -33,7 +33,7 @@ public class IdMaskLongIdTest extends ABaseIdMaskTest {
 
     @Test
     public void testWithCache() {
-        IdMask<Long> idMask = new IdMask.LongIdMask(Config.builder().keyManager(KeyManager.Factory.with(Bytes.random(16).array())).enableCache(true).build());
+        IdMask<Long> idMask = new IdMask.LongIdMask(Config.builder(Bytes.random(16).array()).enableCache(true).build());
         long id = new Random().nextLong();
         String encoded = idMask.mask(id);
 
@@ -45,7 +45,7 @@ public class IdMaskLongIdTest extends ABaseIdMaskTest {
 
     @Test
     public void testWithoutCache() {
-        IdMask<Long> idMask = new IdMask.LongIdMask(Config.builder().keyManager(KeyManager.Factory.with(Bytes.random(16).array())).enableCache(false).build());
+        IdMask<Long> idMask = new IdMask.LongIdMask(Config.builder(Bytes.random(16).array()).enableCache(false).build());
         long id = new Random().nextLong();
         String encoded = idMask.mask(id);
 
@@ -69,8 +69,8 @@ public class IdMaskLongIdTest extends ABaseIdMaskTest {
     @Test
     public void testAllByteToTextEncodings() {
         for (ByteToTextEncoding encoding : encodings) {
-            maskAndUnmask(new IdMask.LongIdMask(Config.builder().key(Bytes.random(16).array()).enableCache(false).encoding(encoding).build()), new Random().nextLong());
-            maskAndUnmask(new IdMask.LongIdMask(Config.builder().key(Bytes.random(16).array()).randomizedIds(true).enableCache(false).encoding(encoding).build()), new Random().nextLong());
+            maskAndUnmask(new IdMask.LongIdMask(Config.builder(Bytes.random(16).array()).enableCache(false).encoding(encoding).build()), new Random().nextLong());
+            maskAndUnmask(new IdMask.LongIdMask(Config.builder(Bytes.random(16).array()).randomizedIds(true).enableCache(false).encoding(encoding).build()), new Random().nextLong());
         }
     }
 }

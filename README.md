@@ -23,20 +23,19 @@ A very simple example using 64 bit integers (`long`):
 byte[] key = Bytes.random(16).array();
 long id = ...
 
-IdMask<Long> idMask = IdMasks.forLongIds(Config.builder().key(key).build());
+IdMask<Long> idMask = IdMasks.forLongIds(Config.builder(key).build());
 
 String maskedId = idMask.mask(id);
 //example: rK0wpnG1lwvG0xiZn5swxOYmAvxhA4A7yg
 long originalId = idMask.unmask(maskedId);
 ```
 
-and using UUIDs
+alternatively using UUIDs
 
 ```java
-byte[] key = Bytes.random(16).array();
 UUID id = UUID.fromString("eb1c6999-5fc1-4d5f-b98a-792949c38c45");
 
-IdMask<UUID> idMask = IdMasks.forUuids(Config.builder().key(key).build());
+IdMask<UUID> idMask = IdMasks.forUuids(Config.builder(key).build());
 
 String maskedId = idMask.mask(id);
 //example: rK0wpnG1lwvG0xiZn5swxOYmAvxhA4A7yg
@@ -119,8 +118,7 @@ Currently the following encodings are supported:
 
 ```java
 IdMask<byte[]> idMask = IdMaskFactory.createFor128bitNumbers(
-        Config.builder()
-                .keyManager(KeyManager.Factory.with(key))
+        Config.builder(KeyManager.Factory.with(key))
                 .randomizedIds(true) //non-deterministic output
                 .enableCache(true)
                 .cacheImpl(new Cache.SimpleLruMemCache(64))

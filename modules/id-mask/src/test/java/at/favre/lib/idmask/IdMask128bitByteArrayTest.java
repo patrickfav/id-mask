@@ -7,8 +7,7 @@ import static org.junit.Assert.assertArrayEquals;
 
 public class IdMask128bitByteArrayTest {
     private IdMask<byte[]> idMask = new IdMask.ByteArray128bitMask(
-            Config.builder()
-                    .keyManager(KeyManager.Factory.with(Bytes.random(16).array()))
+            Config.builder(Bytes.random(16).array())
                     .enableCache(false)
                     .build());
 

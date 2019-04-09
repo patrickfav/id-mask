@@ -12,7 +12,7 @@ public class IdMaskMultiThreadTest extends AMultiThreadTest {
 
     @Test
     public void testLongIdsNoCache() throws InterruptedException {
-        final IdMask<Long> idMask = new IdMask.LongIdMask(Config.builder().keyManager(KeyManager.Factory.with(Bytes.random(16).array())).enableCache(false).build());
+        final IdMask<Long> idMask = new IdMask.LongIdMask(Config.builder(Bytes.random(16).array()).enableCache(false).build());
         testWithLongIds(idMask);
     }
 
@@ -34,13 +34,13 @@ public class IdMaskMultiThreadTest extends AMultiThreadTest {
 
     @Test
     public void testLongIdsWithCache() throws InterruptedException {
-        final IdMask<Long> idMask = new IdMask.LongIdMask(Config.builder().keyManager(KeyManager.Factory.with(Bytes.random(16).array())).enableCache(true).build());
+        final IdMask<Long> idMask = new IdMask.LongIdMask(Config.builder(Bytes.random(16).array()).enableCache(true).build());
         testWithLongIds(idMask);
     }
 
     @Test
     public void testUuidIds() throws InterruptedException {
-        final IdMask<UUID> idMask = new IdMask.UuidMask(Config.builder().keyManager(KeyManager.Factory.with(Bytes.random(16).array())).enableCache(false).build());
+        final IdMask<UUID> idMask = new IdMask.UuidMask(Config.builder(Bytes.random(16).array()).enableCache(false).build());
 
         for (int i = 0; i < ROUNDS; i++) {
             executor.submit(new Runnable() {

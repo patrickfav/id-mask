@@ -6,7 +6,7 @@ import org.junit.Test;
 import java.util.Random;
 
 public class IdMaskLongTupleTest extends ABaseIdMaskTest {
-    private IdMask<LongTuple> idMask = new IdMask.LongIdTupleMask(Config.builder().keyManager(KeyManager.Factory.with(Bytes.random(16).array())).enableCache(false).build());
+    private IdMask<LongTuple> idMask = new IdMask.LongIdTupleMask(Config.builder(Bytes.random(16).array()).enableCache(false).build());
 
     @Test
     public void testEncodeDecode() {

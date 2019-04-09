@@ -13,7 +13,7 @@ public class ConfigTest {
 
     @Test
     public void testDefaults() {
-        Config config = Config.builder().keyManager(KeyManager.Factory.withRandom()).build();
+        Config config = Config.builder(KeyManager.Factory.withRandom()).build();
         assertTrue(config.enableCache());
         assertFalse(config.randomizedIds());
         assertFalse(config.highSecurityMode());
@@ -29,8 +29,7 @@ public class ConfigTest {
         Cache cache = new Cache.SimpleLruMemCache();
         SecureRandom secureRandom = new SecureRandom();
 
-        Config config = Config.builder()
-                .keyManager(keyManager)
+        Config config = Config.builder(keyManager)
                 .encoding(encoding)
                 .enableCache(false)
                 .randomizedIds(true)
@@ -55,7 +54,7 @@ public class ConfigTest {
     @Test
     public void testUsingKeyShorthand() {
         byte[] key = Bytes.random(16).array();
-        Config config = Config.builder().key(key).build();
+        Config config = Config.builder(key).build();
         assertArrayEquals(key, config.keyManager().getActiveKey().getKeyBytes());
     }
 }
