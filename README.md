@@ -1,8 +1,10 @@
-# ID Mask
+# IDMask - Encryption and Obfuscation of IDs
 
---> no collisions
+IDMask is a library for masking **internal ids** (e.g. from your DB) when they need to be **publicly published to hide their actual value**.
+This should make it impossible* for an attacker to understand provided ids (e.g. by witnessing a sequence, deducting how many order you had, etc.). **Forgery protection** prevents guessing possible valid IDs. Masking is **fully reversible** and also supports optional **randomization of masked ids** for e.g. **shareable links** or **one-time tokens**. This library uses strong cryptographic primitives ([AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard), [HMAC](https://en.wikipedia.org/wiki/HMAC), [HKDF](https://en.wikipedia.org/wiki/HKDF)) to create secure encryption schema. This library was inspired by [HashIds](https://hashids.org/) but tries to depend on a sound and strong encryption schema.
 
-Id mask is a library for masking public (database) ids to hide the actual value of the id. This should make it harder for an attacker to guess or understand provided ids. Additionally it is possible to generate non-deterministic ids for e.g. shareable links or single use tokens. This library has a similar goal as [HashIds](https://hashids.org/) but depends in contrast on cryptographically strong algorithms.
+<small>*_if the cryptographic key remains secret_</small>
+
 
 [![Download](https://api.bintray.com/packages/patrickfav/maven/id-mask/images/download.svg)](https://bintray.com/patrickfav/maven/id-mask/_latestVersion)
 [![Build Status](https://travis-ci.org/patrickfav/id-mask.svg?branch=master)](https://travis-ci.org/patrickfav/id-mask)
@@ -15,10 +17,10 @@ Id mask is a library for masking public (database) ids to hide the actual value 
 * **Wide range of Java type support**: mask ids from `long`, `UUID`, `BigInteger`, `LongTuple` and `byte[]`
 * **Full support of types**: no arbitrary restrictions like "only positive longs", etc.
 * **No collisions possible**: because the IDs are not hashed or otherwise compressed, collisions are impossible
-* **Supports multiple encodings**: Depending on your requirement (short IDs vs. readability vs. should not contain words) multiple encodings are available including [Base64](https://en.wikipedia.org/wiki/Base64), [Base32](https://en.wikipedia.org/wiki/Base32) and [Hex](https://en.wikipedia.org/wiki/Hexadecimal) with the option of providing a custom one.
 * **Built-in caching support**: To increase performance a simple caching framework can be facilitated.
 * **Lightweight & Easy-to-use**: the library has only minimal dependencies and a straight forward API
 * **Fast**: 8 byte ids take about `2µs` and 16 byte ids `7µs` to mask on a fast desktop machine (see JMH benchmark)
+* **Supports multiple encodings**: Depending on your requirement (short IDs vs. readability vs. should not contain words) multiple encodings are available including [Base64](https://en.wikipedia.org/wiki/Base64), [Base32](https://en.wikipedia.org/wiki/Base32) and [Hex](https://en.wikipedia.org/wiki/Hexadecimal) with the option of providing a custom one.
 
 The code is compiled with target [Java 7](https://en.wikipedia.org/wiki/Java_version_history#Java_SE_7) to keep backwards compatibility with *Android* and older *Java* applications.
 
@@ -355,6 +357,18 @@ Add to your `build.gradle` module dependencies:
 
 #### JMH Benchmark
 
+Here is an benchmark done on a [i7-7700k](https://ark.intel.com/content/www/us/en/ark/products/97129/intel-core-i7-7700k-processor-8m-cache-up-to-4-50-ghz.html)
+
+```
+Benchmark                                               Mode  Cnt      Score     Error  Units
+IdMaskAndHashIdsBenchmark.benchmarkHashIdEncode         avgt    3      2,407 ±   0,038  ns/op
+IdMaskAndHashIdsBenchmark.benchmarkHashIdEncodeDecode   avgt    3      3,317 ±   0,042  ns/op
+IdMaskAndHashIdsBenchmark.benchmarkIdMask16Byte         avgt    3   7416,257 ±  43,564  ns/op
+IdMaskAndHashIdsBenchmark.benchmarkIdMask8Byte          avgt    3   2028,520 ±   5,286  ns/op
+IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask16Byte  avgt    3  15130,483 ± 696,314  ns/op
+IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask8Byte   avgt    3   4174,282 ±  76,482  ns/op
+```
+
 ### Encryption Schema
 
 ### 8 Byte Encryption Schema
@@ -412,6 +426,11 @@ Use the Maven wrapper to create a jar including all dependencies
 
 * Java 7 (+ [errorprone](https://github.com/google/error-prone) static analyzer)
 * Maven
+
+# Further Reading
+
+## Discussions
+* [Exposing database IDs - security risk?](https://stackoverflow.com/questions/396164/exposing-database-ids-security-risk)
 
 ## Similar Libraries
 

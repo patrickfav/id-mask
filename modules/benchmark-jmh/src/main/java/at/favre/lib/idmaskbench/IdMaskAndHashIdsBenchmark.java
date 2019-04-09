@@ -33,8 +33,8 @@ import java.util.concurrent.TimeUnit;
 @SuppressWarnings("CheckStyle")
 @State(Scope.Thread)
 @Fork(1)
-@Warmup(iterations = 2, time = 5)
-@Measurement(iterations = 3, time = 10)
+@Warmup(iterations = 2, time = 6)
+@Measurement(iterations = 3, time = 15)
 @BenchmarkMode(org.openjdk.jmh.annotations.Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 public class IdMaskAndHashIdsBenchmark {

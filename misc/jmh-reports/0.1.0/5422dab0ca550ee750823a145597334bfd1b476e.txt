@@ -1,0 +1,174 @@
+"C:\Program Files\AdoptOpenJDK\jdk-8.0.202.08\bin\java.exe" -Dfile.encoding=UTF-8 -classpath C:\Users\PatrickF\workspaces\id-mask\modules\benchmark-jmh\target\classes;C:\Users\PatrickF\.m2\repository\org\openjdk\jmh\jmh-core\1.21\jmh-core-1.21.jar;C:\Users\PatrickF\.m2\repository\net\sf\jopt-simple\jopt-simple\4.6\jopt-simple-4.6.jar;C:\Users\PatrickF\.m2\repository\org\apache\commons\commons-math3\3.2\commons-math3-3.2.jar;C:\Users\PatrickF\.m2\repository\at\favre\lib\bytes\1.0.0\bytes-1.0.0.jar;C:\Users\PatrickF\workspaces\id-mask\modules\id-mask\target\classes;C:\Users\PatrickF\.m2\repository\at\favre\lib\hkdf\1.0.1\hkdf-1.0.1.jar;C:\Users\PatrickF\.m2\repository\com\google\auto\value\auto-value-annotations\1.6.3\auto-value-annotations-1.6.3.jar;C:\Users\PatrickF\.m2\repository\org\jetbrains\annotations\15.0\annotations-15.0.jar;C:\Users\PatrickF\.m2\repository\net\markenwerk\utils-lrucache\1.0.1\utils-lrucache-1.0.1.jar;C:\Users\PatrickF\.m2\repository\org\hashids\hashids\1.0.3\hashids-1.0.3.jar org.openjdk.jmh.Main at.favre.lib.idmaskbench.IdMaskAndHashIdsBenchmark.*
+# JMH version: 1.21
+# VM version: JDK 1.8.0_202, OpenJDK 64-Bit Server VM, 25.202-b08
+# VM invoker: C:\Program Files\AdoptOpenJDK\jdk-8.0.202.08\jre\bin\java.exe
+# VM options: -Dfile.encoding=UTF-8
+# Warmup: 2 iterations, 6 s each
+# Measurement: 3 iterations, 15 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: at.favre.lib.idmaskbench.IdMaskAndHashIdsBenchmark.benchmarkHashIdEncode
+
+# Run progress: 0,00% complete, ETA 00:05:42
+# Fork: 1 of 1
+# Warmup Iteration   1: 2,707 ns/op
+# Warmup Iteration   2: 2,688 ns/op
+Iteration   1: 2,404 ns/op
+Iteration   2: 2,407 ns/op
+Iteration   3: 2,409 ns/op
+
+
+Result "at.favre.lib.idmaskbench.IdMaskAndHashIdsBenchmark.benchmarkHashIdEncode":
+  2,407 ±(99.9%) 0,038 ns/op [Average]
+  (min, avg, max) = (2,404, 2,407, 2,409), stdev = 0,002
+  CI (99.9%): [2,369, 2,444] (assumes normal distribution)
+
+
+# JMH version: 1.21
+# VM version: JDK 1.8.0_202, OpenJDK 64-Bit Server VM, 25.202-b08
+# VM invoker: C:\Program Files\AdoptOpenJDK\jdk-8.0.202.08\jre\bin\java.exe
+# VM options: -Dfile.encoding=UTF-8
+# Warmup: 2 iterations, 6 s each
+# Measurement: 3 iterations, 15 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: at.favre.lib.idmaskbench.IdMaskAndHashIdsBenchmark.benchmarkHashIdEncodeDecode
+
+# Run progress: 16,67% complete, ETA 00:04:47
+# Fork: 1 of 1
+# Warmup Iteration   1: 4,036 ns/op
+# Warmup Iteration   2: 3,967 ns/op
+Iteration   1: 3,314 ns/op
+Iteration   2: 3,319 ns/op
+Iteration   3: 3,317 ns/op
+
+
+Result "at.favre.lib.idmaskbench.IdMaskAndHashIdsBenchmark.benchmarkHashIdEncodeDecode":
+  3,317 ±(99.9%) 0,042 ns/op [Average]
+  (min, avg, max) = (3,314, 3,317, 3,319), stdev = 0,002
+  CI (99.9%): [3,274, 3,359] (assumes normal distribution)
+
+
+# JMH version: 1.21
+# VM version: JDK 1.8.0_202, OpenJDK 64-Bit Server VM, 25.202-b08
+# VM invoker: C:\Program Files\AdoptOpenJDK\jdk-8.0.202.08\jre\bin\java.exe
+# VM options: -Dfile.encoding=UTF-8
+# Warmup: 2 iterations, 6 s each
+# Measurement: 3 iterations, 15 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: at.favre.lib.idmaskbench.IdMaskAndHashIdsBenchmark.benchmarkIdMask16Byte
+
+# Run progress: 33,33% complete, ETA 00:03:50
+# Fork: 1 of 1
+# Warmup Iteration   1: 8111,104 ns/op
+# Warmup Iteration   2: 7425,783 ns/op
+Iteration   1: 7418,803 ns/op
+Iteration   2: 7415,900 ns/op
+Iteration   3: 7414,067 ns/op
+
+
+Result "at.favre.lib.idmaskbench.IdMaskAndHashIdsBenchmark.benchmarkIdMask16Byte":
+  7416,257 ±(99.9%) 43,564 ns/op [Average]
+  (min, avg, max) = (7414,067, 7416,257, 7418,803), stdev = 2,388
+  CI (99.9%): [7372,692, 7459,821] (assumes normal distribution)
+
+
+# JMH version: 1.21
+# VM version: JDK 1.8.0_202, OpenJDK 64-Bit Server VM, 25.202-b08
+# VM invoker: C:\Program Files\AdoptOpenJDK\jdk-8.0.202.08\jre\bin\java.exe
+# VM options: -Dfile.encoding=UTF-8
+# Warmup: 2 iterations, 6 s each
+# Measurement: 3 iterations, 15 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: at.favre.lib.idmaskbench.IdMaskAndHashIdsBenchmark.benchmarkIdMask8Byte
+
+# Run progress: 50,00% complete, ETA 00:02:52
+# Fork: 1 of 1
+# Warmup Iteration   1: 2128,762 ns/op
+# Warmup Iteration   2: 2030,309 ns/op
+Iteration   1: 2028,204 ns/op
+Iteration   2: 2028,581 ns/op
+Iteration   3: 2028,774 ns/op
+
+
+Result "at.favre.lib.idmaskbench.IdMaskAndHashIdsBenchmark.benchmarkIdMask8Byte":
+  2028,520 ±(99.9%) 5,286 ns/op [Average]
+  (min, avg, max) = (2028,204, 2028,520, 2028,774), stdev = 0,290
+  CI (99.9%): [2023,233, 2033,806] (assumes normal distribution)
+
+
+# JMH version: 1.21
+# VM version: JDK 1.8.0_202, OpenJDK 64-Bit Server VM, 25.202-b08
+# VM invoker: C:\Program Files\AdoptOpenJDK\jdk-8.0.202.08\jre\bin\java.exe
+# VM options: -Dfile.encoding=UTF-8
+# Warmup: 2 iterations, 6 s each
+# Measurement: 3 iterations, 15 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: at.favre.lib.idmaskbench.IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask16Byte
+
+# Run progress: 66,67% complete, ETA 00:01:54
+# Fork: 1 of 1
+# Warmup Iteration   1: 16709,137 ns/op
+# Warmup Iteration   2: 15228,259 ns/op
+Iteration   1: 15133,952 ns/op
+Iteration   2: 15166,798 ns/op
+Iteration   3: 15090,700 ns/op
+
+
+Result "at.favre.lib.idmaskbench.IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask16Byte":
+  15130,483 ±(99.9%) 696,314 ns/op [Average]
+  (min, avg, max) = (15090,700, 15130,483, 15166,798), stdev = 38,167
+  CI (99.9%): [14434,170, 15826,797] (assumes normal distribution)
+
+
+# JMH version: 1.21
+# VM version: JDK 1.8.0_202, OpenJDK 64-Bit Server VM, 25.202-b08
+# VM invoker: C:\Program Files\AdoptOpenJDK\jdk-8.0.202.08\jre\bin\java.exe
+# VM options: -Dfile.encoding=UTF-8
+# Warmup: 2 iterations, 6 s each
+# Measurement: 3 iterations, 15 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: at.favre.lib.idmaskbench.IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask8Byte
+
+# Run progress: 83,33% complete, ETA 00:00:57
+# Fork: 1 of 1
+# Warmup Iteration   1: 4322,873 ns/op
+# Warmup Iteration   2: 4188,490 ns/op
+Iteration   1: 4169,717 ns/op
+Iteration   2: 4177,959 ns/op
+Iteration   3: 4175,171 ns/op
+
+
+Result "at.favre.lib.idmaskbench.IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask8Byte":
+  4174,282 ±(99.9%) 76,482 ns/op [Average]
+  (min, avg, max) = (4169,717, 4174,282, 4177,959), stdev = 4,192
+  CI (99.9%): [4097,801, 4250,764] (assumes normal distribution)
+
+
+# Run complete. Total time: 00:05:44
+
+REMEMBER: The numbers below are just data. To gain reusable insights, you need to follow up on
+why the numbers are the way they are. Use profilers (see -prof, -lprof), design factorial
+experiments, perform baseline and negative tests that provide experimental control, make sure
+the benchmarking environment is safe on JVM/OS/HW level, ask for reviews from the domain experts.
+Do not assume the numbers tell you what you want them to tell.
+
+Benchmark                                               Mode  Cnt      Score     Error  Units
+IdMaskAndHashIdsBenchmark.benchmarkHashIdEncode         avgt    3      2,407 ±   0,038  ns/op
+IdMaskAndHashIdsBenchmark.benchmarkHashIdEncodeDecode   avgt    3      3,317 ±   0,042  ns/op
+IdMaskAndHashIdsBenchmark.benchmarkIdMask16Byte         avgt    3   7416,257 ±  43,564  ns/op
+IdMaskAndHashIdsBenchmark.benchmarkIdMask8Byte          avgt    3   2028,520 ±   5,286  ns/op
+IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask16Byte  avgt    3  15130,483 ± 696,314  ns/op
+IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask8Byte   avgt    3   4174,282 ±  76,482  ns/op
+
+Process finished with exit code 0
