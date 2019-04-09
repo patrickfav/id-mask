@@ -23,7 +23,7 @@ public class ConfigTest {
 
     @Test
     public void testConfigs() {
-        ByteToTextEncoding encoding = new ByteToTextEncoding.Base32();
+        ByteToTextEncoding encoding = new ByteToTextEncoding.Base32Rfc4648();
         KeyManager keyManager = KeyManager.Factory.withRandom();
         Provider provider = Security.getProvider("BC");
         Cache cache = new Cache.SimpleLruMemCache();

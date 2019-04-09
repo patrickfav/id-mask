@@ -54,7 +54,7 @@ public class QuickstartTests {
                         .randomizedIds(true) //non-deterministic output
                         .enableCache(true)
                         .cacheImpl(new Cache.SimpleLruMemCache(64))
-                        .encoding(new ByteToTextEncoding.Base32())
+                        .encoding(new ByteToTextEncoding.Base32Rfc4648())
                         .secureRandom(new SecureRandom())
                         .securityProvider(Security.getProvider("BC"))
                         .build());

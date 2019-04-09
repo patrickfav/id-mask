@@ -15,7 +15,8 @@ public class ByteToTextEncodingTest {
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                {new ByteToTextEncoding.Base64Url()}, {new ByteToTextEncoding.Base32()}, {new ByteToTextEncoding.Base16()}
+                {new ByteToTextEncoding.Base64Url()}, {new ByteToTextEncoding.Base32Rfc4648()},
+                {new ByteToTextEncoding.SafeBase32Encoding()}, {new ByteToTextEncoding.Base16()}
         });
     }
 

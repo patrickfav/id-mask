@@ -123,12 +123,12 @@ public abstract class Config {
         /**
          * Used byte to text encoding.
          * <p>
-         * Implementations for Base64, Base32 and Hex are available. You may provide your own
+         * Implementations for Base64, Base32Rfc4648 and Hex are available. You may provide your own
          * however.
          * <p>
          * E.g.
          * <pre>
-         *    new ByteToTextEncoding.Base32()
+         *    new ByteToTextEncoding.Base32Rfc4648()
          * </pre>
          *
          * @param encoding to use

@@ -2,6 +2,8 @@ package at.favre.lib.idmask;
 
 import at.favre.lib.bytes.Bytes;
 
+import java.nio.ByteOrder;
+
 /**
  * Responsible for encoding byte arrays to ASCII safe text and vice versa.
  * More precisely, it is an encoding of binary data in a sequence of printable characters.
@@ -41,11 +43,11 @@ public interface ByteToTextEncoding {
     }
 
     /**
-     * Base32 uses a 32-character set comprising the twenty-six upper-case letters A–Z, and the digits 2–7.
+     * Base32Rfc4648 uses a 32-character set comprising the twenty-six upper-case letters A–Z, and the digits 2–7.
      *
      * Example: <code>36YV2BTECHOTDTU4I23VND46HVXQ</code>
      */
-    final class Base32 implements ByteToTextEncoding {
+    final class Base32Rfc4648 implements ByteToTextEncoding {
         @Override
         public String encode(byte[] bytes) {
             return Bytes.wrap(bytes).encodeBase32().replaceAll("=", "");
@@ -54,6 +56,32 @@ public interface ByteToTextEncoding {
         @Override
         public byte[] decode(CharSequence encoded) {
             return Bytes.parseBase32(encoded).array();
+        }
+    }
+
+
+    /**
+     * Base32Rfc4648 uses a 32-character set comprising the twenty-six upper-case letters A–Z, and the digits 2–7.
+     * <p>
+     * Example: <code>36YV2BTECHOTDTU4I23VND46HVXQ</code>
+     */
+    final class SafeBase32Encoding implements ByteToTextEncoding {
+        private final BaseEncoding encoding;
+
+        //abdegkmnpqrvwxyzABDEGKMNPQRVWXYZ23456789
+        //abdegjklmnopqrvwxyzABDEGJKLMNOPQRVWXYZ23456789
+        public SafeBase32Encoding() {
+            this.encoding = new BaseEncoding(new BaseEncoding.Alphabet("abeknpqrwxyzBDEGKMPRVXYZ23456789".toCharArray()), '=');
+        }
+
+        @Override
+        public String encode(byte[] bytes) {
+            return encoding.encode(bytes, ByteOrder.BIG_ENDIAN);
+        }
+
+        @Override
+        public byte[] decode(CharSequence encoded) {
+            return encoding.decode(encoded);
         }
     }
 
