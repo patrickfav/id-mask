@@ -1,7 +1,7 @@
 # IDMask - Encryption and Obfuscation of IDs
 
 IDMask is a library for masking **internal ids** (e.g. from your DB) when they need to be **publicly published to hide their actual value**.
-This should make it impossible* for an attacker to understand provided ids (e.g. by witnessing a sequence, deducting how many order you had, etc.). **Forgery protection** prevents guessing possible valid IDs. Masking is **fully reversible** and also supports optional **randomization of masked ids** for e.g. **shareable links** or **one-time tokens**. This library uses strong cryptographic primitives ([AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard), [HMAC](https://en.wikipedia.org/wiki/HMAC), [HKDF](https://en.wikipedia.org/wiki/HKDF)) to create a secure encryption schema. This was inspired by [HashIds](https://hashids.org/) but tries to tackle most of it's shortcomings and to depend on a sound and strong encryption schema.
+This should make it impossible* for an attacker to understand provided ids (e.g. by witnessing a sequence, deducting how many order you had, etc.). **Forgery protection** prevents guessing possible valid IDs. Masking is **fully reversible** and also supports optional **randomization of masked ids** for e.g. **shareable links** or **one-time tokens**. This library uses strong cryptographic primitives ([AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard), [HMAC](https://en.wikipedia.org/wiki/HMAC), [HKDF](https://en.wikipedia.org/wiki/HKDF)) to create a secure encryption schema. This project was inspired by [HashIds](https://hashids.org/) but tries to tackle most of it's shortcomings and depends on a sound and strong encryption schema.
 
 <small>*_if the cryptographic key remains secret_</small>
 
@@ -353,9 +353,23 @@ Add to your `build.gradle` module dependencies:
 
 ## Description
 
-### Why use IDMask?
+### Why?
+
+#### When to use IDMask
+
+* If IDs are used which are easily guessable (ie. simple sequence) and knowledge of this ID might reveal confident information
+* If IDs expose row count in a database table, which in turn reveals business intelligence (e.g. how many orders per day, etc.)
+* For creating ad-hoc shareable links
+* For creating single-use tokens for various use cases
+
+#### When not to use IDMask
+
+* If it is feasible to create a new column with random UUIDs
+* If maximum performance is required
 
 ### Performance
+
+IDMask requires a non-trivial amount of work to encrypt ids. The 8-byte-schema only needs to encrypt a single AES block (which should be hardware accelerated with most CPUs). The 16-byte schema is more expensive, since it requires encryption of an AES block, one HKDF expand and a HMAC calculation. According to the JMH benchmark, you can expect multiple hundreds encryption/decryption per ms. Compared to the performance HashIds, which is faster by a factor of about 1000, IDMask seems extremely slow, but in the grant scheme of things it probably doesn't make a difference if masking of a single id costs 2µs or 0.002µs.
 
 #### JMH Benchmark
 
@@ -378,6 +392,33 @@ IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask8Byte   avgt    3   4174,282 ± 
 #### 16 Byte Encryption Schema
 
 ### IDMask vs HashIds
+
+One of the reasons this library was created, was that the author was not happy how HashIds solved the issue of
+obfuscating/encryption of IDs. The two main criticism are as follows:
+
+#### Weak, home-brew cryptography
+
+HashIds encryption schema is basically: Have an alphabet. Shuffle it with Yates Algorithm and a salt provided by the user. Use simple encoding schema to encode 53 bit integers. There is a well known [cryptanalysis](https://carnage.github.io/2015/08/cryptanalysis-of-hashids) and to be fair, the author does not directly claim any security - BUT a library called HashId which is used to obfuscate IDs for security purpose which does not claim any actual security does not make sense to me.
+
+#### Arbitrary limitation inherited rom the original javascript implementation
+
+The integer values in HashId must be positive and have an upper bound of 53-bit (instead of 64-bit). If IDs are created in a sequence in the DB, this limitation is probably irrelevant, but if you work with random 64-bit values, this might break your code. IDMask does not apply any restriction on Java's `long`; the value may be positive as well as negative in the full range of 2^64. Only `BigInteger` is restricted to 15 byte (or 2^120).
+
+
+In summary, here is simple comparison table of the main points:
+
+|                    | IDMask                                    | HashId                       |
+|--------------------|-------------------------------------------|------------------------------|
+| Supported Types    | long, UUID, BigInteger, byte[], LongTuple | long, long[]                 |
+| Type Limitations   | long: none, BigInteger: max 15 byte       | only positive and max 2^53   |
+| Randomized IDs     | optional                                  | no                           |
+| Output Length      | fixed length                              | variable length              |
+| Encryption         | AES + HMAC                                | encoding + shuffled alphabet |
+| Performance        | 2-7 µs/op                                 | 0.003 µs/op                  |
+| Collision possible | no                                        | no                           |
+| Caching            | Built-In                                  | no                           |
+| Encodings          | Hex, Base32, Base64, Custom...            | customizable alphabet        |
+| Forgery Protection | HMAC (8-16 bytes)                         | no                           |
 
 ## Security Relevant Information
 
