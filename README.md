@@ -17,7 +17,7 @@ Add dependency to your `pom.xml` ([check latest release](https://github.com/patr
         <version>{latest-version}</version>
     </dependency>
 
-A very simple example using 64 bit integers (long):
+A very simple example using 64 bit integers (`long`):
 
 ```java
 byte[] key = Bytes.random(16).array();
@@ -43,22 +43,21 @@ String maskedId = idMask.mask(id);
 UUID originalId = idMask.unmask(maskedId);
 ```
 
-### Full Example
+## Full Example
 
-#### Step 1: Create a Secret Key
+### Step 1: Create a Secret Key
 
 The base of the security of IdMask relies on the strength of the used key. A key is basically just a 
-random byte array. A key should be at least 16 bytes long (more usually doesn't translate to better security).
-IdMask requires the key to be 8 and 64 bytes long. There are multiple ways to manage secret keys, if your project already has a managed KeyStore, use it. In it's simplest form, you can just hardcode the key. This is of course only makes sense, where the client doesn't has access to the code or binary (i.e. backend).
+random byte array. A key should be at least 16 bytes long (longer usually doesn't translate to better security).
+IdMask requires the key to be 8 and 64 bytes long. There are multiple ways to manage secret keys, if your project already has a managed [`KeyStore`](https://docs.oracle.com/javase/7/docs/api/java/security/KeyStore.html), use it. In it's simplest form, you can just hardcode the key. This is of course only makes sense, where the client doesn't have access to the code or binary (i.e. in a backend scenario).
 
-##### Option A: Use Random Number Generator CLI
+#### Option A: Use Random Number Generator CLI
 
-One of the easiest way to create a high quality key is to use my random java cli: [Dice](https://github.com/patrickfav/dice/releases). Just download the `.jar` (or `.exe`)
-
+One of the easiest ways to create a high quality key is to use this random java cli: [Dice](https://github.com/patrickfav/dice/releases). Just download the `.jar` (or `.exe`)
 
     java -jar dice.jar 16 -e "java"
 
-This will generate multiple 16 byte long syntactic java byte arrays. Looking like this:
+This will generate multiple 16 byte long syntactically correct java byte arrays:
 
     new byte[]{(byte) 0xE4, (byte) 0x8A, ...};
 
@@ -66,26 +65,52 @@ You could just hard code this value:
 
     private static final byte[] ID_MASK_KEY = new byte[]{(byte) 0xE4, (byte) 0x8A, ...};
     
-##### Option B: Generate Random Key with Java Code
+#### Option B: Generate Random Key with Java Code
 
-Either in the debugger, simple application or any other REPL execute the following code (IdMask must be in classpath):
+Either in the [debugger](https://www.jetbrains.com/help/idea/debugging-your-first-java-application.html), simple application or any other [REPL](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop) execute the following code (IdMask must be in classpath):
 
     Bytes.random(16).encodeHex();
 
-Which will create a random byte array using SecureRandom and encodes it as Hex string. In you code just 
-use:
+Which will create a random byte array using SecureRandom and encodes it as hex string. In your code just 
+use this code and proved the hex string created before:
 
     private static final byte[] ID_MASK_KEY = Bytes.parseHex("e48a....").array();
 
 Either way, don't worry too much as the library supports changing the secret key while still be able to 
 unmask older ids.
 
-#### Step 2: Initialize IdMask
+### Step 2: Initialize IdMask
 
-Usually the default settings are fine for most use cases, however often the following may make sense to
-increase security:
+Usually the default settings are fine for most use cases, however often the following may make sense to change some settings based on current requirements
 
- * **Randomize Ids**: By default off; if this option is set, the same id weill create different masked ids every time. This makes sense for tokens, share links, etc. but does not make sense if the client needs to know equality of ids.
+#### Q1: Should Ids be deterministic or random?
+
+By default off, the masking algorithm supports randomization of generated ids. This is achieved by creating a random number, use it as part to encrypt the id and append it the output. Therefore randomized Ids are longer than their deterministic counter part. Randomization increases the obfuscation effectivness but makes it impossible for a client to check equality. This usually makes sense with shareable links, random access tokens, or other one-time identifiers. Randomized ids withing models are probably a bad idea. 
+
+Enable with:
+
+    Config.builder()
+        .randomizedIds(true)
+        ...
+
+#### Q2: What encoding should I choose?
+
+The library internally converts everything to bytes, encrypts it and then needs an encoding to make it printable. Per default the url-safe version of Base64 ([RFC4648](https://tools.ietf.org/html/rfc4648)). This is a well supported, fast and reasonable space efficient (needs ~25% more storage than the raw bytes).
+
+Depending on your use case, you may want Ids that:
+
+* are easy to type
+* do not contain words, or at the very least curse words
+* need to be as short as possible
+
+Currently the following encodings are supported:
+
+* Hex
+* Base32
+* Base32 (safe)
+* Base64 (url)
+
+
  * **Caching**: By default a simple in-memory cache is enabled. You may want to provide your own cache if you still use one.
  * Advanced Security Features
 
