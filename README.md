@@ -1,11 +1,24 @@
 # ID Mask
 
+--> no collisions
+
 Id mask is a library for masking public (database) ids to hide the actual value of the id. This should make it harder for an attacker to guess or understand provided ids. Additionally it is possible to generate non-deterministic ids for e.g. shareable links or single use tokens. This library has a similar goal as [HashIds](https://hashids.org/) but depends in contrast on cryptographically strong algorithms.
 
 [![Download](https://api.bintray.com/packages/patrickfav/maven/id-mask/images/download.svg)](https://bintray.com/patrickfav/maven/id-mask/_latestVersion)
 [![Build Status](https://travis-ci.org/patrickfav/id-mask.svg?branch=master)](https://travis-ci.org/patrickfav/id-mask)
 [![Javadocs](https://www.javadoc.io/badge/at.favre.lib/id-mask.svg)](https://www.javadoc.io/doc/at.favre.lib/id-mask)
 [![Coverage Status](https://coveralls.io/repos/github/patrickfav/id-mask/badge.svg?branch=master)](https://coveralls.io/github/patrickfav/id-mask?branch=master) [![Maintainability](https://api.codeclimate.com/v1/badges/fc50d911e4146a570d4e/maintainability)](https://codeclimate.com/github/patrickfav/id-mask/maintainability)
+
+## Feature Overview
+
+* **Secure**: Creates encrypted IDs with **no-nonsense cryptography** ([AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard), [HKDF](https://en.wikipedia.org/wiki/HKDF)) including **forgery protection** ([HMAC](https://en.wikipedia.org/wiki/HMAC))
+* **Wide range of Java type support**: mask ids from `long`, `UUID`, `BigInteger`, `LongTuple` and `byte[]`
+* **Full support of types**: no arbitrary restrictions like "only positive longs", etc.
+* **No collisions possible**: because the IDs are not hashed or otherwise compressed, collisions are impossible
+* **Supports multiple encodings**: Depending on your requirement (short IDs vs. readability vs. should not contain words) multiple encodings are available including [Base64](https://en.wikipedia.org/wiki/Base64), [Base32](https://en.wikipedia.org/wiki/Base32) and [Hex](https://en.wikipedia.org/wiki/Hexadecimal) with the option of providing a custom one.
+* **Built-in caching support**: To increase performance a simple caching framework can be facilitated.
+* **Lightweight & Easy-to-use**: the library has only minimal dependencies and a straight forward API
+* **Fast**: 8 byte ids take about `2µs` and 16 byte ids `7µs` to mask on a fast desktop machine (see JMH benchmark)
 
 The code is compiled with target [Java 7](https://en.wikipedia.org/wiki/Java_version_history#Java_SE_7) to keep backwards compatibility with *Android* and older *Java* applications.
 
@@ -48,7 +61,7 @@ Examples for other java types (e.g. [`BigInteger`](https://docs.oracle.com/javas
 
 ## How-To
 
-In the following section explains in detail how to use and configure IdMask:
+The following section explains in detail how to use and configure IDMask:
 
 * **Step 1:** How to create your secret key
 * **Step 2:** Select the Java type to use
@@ -56,7 +69,7 @@ In the following section explains in detail how to use and configure IdMask:
 
 ### Step 1: Create a Secret Key
 
-IdMask's security relies on the strength of the used key. In it's rawest from, a secret key is basically just a random byte array. A provided key should be at least 16 bytes long (longer usually doesn't translate to better security). IdMask requires it to be between 12 and 64 bytes long. There are multiple ways to manage secret keys, if your project already has a managed [`KeyStore`](https://docs.oracle.com/javase/7/docs/api/java/security/KeyStore.html) or similar, use it. In it's simplest form, you can just hardcode the key. This is of course only makes sense where the client doesn't have access to the code or binary (i.e. in a backend scenario). Here are some suggestion on how to create your secret key:
+IDMask's security relies on the strength of the used key. In it's rawest from, a secret key is basically just a random byte array. A provided key should be at least 16 bytes long (longer usually doesn't translate to better security). IDMask requires it to be between 12 and 64 bytes long. There are multiple ways to manage secret keys, if your project already has a managed [`KeyStore`](https://docs.oracle.com/javase/7/docs/api/java/security/KeyStore.html) or similar, use it. In it's simplest form, you can just hardcode the key. This is of course only makes sense where the client doesn't have access to the code or binary (i.e. in a backend scenario). Here are some suggestion on how to create your secret key:
 
 #### Option A: Use Random Number Generator CLI
 
@@ -74,7 +87,7 @@ You could just hard code this value:
     
 #### Option B: Generate Random Key within Java Code
 
-Either in the [debugger](https://www.jetbrains.com/help/idea/debugging-your-first-java-application.html), simple application or any other [REPL](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop) execute the following code (IdMask must be in classpath):
+Either in the [debugger](https://www.jetbrains.com/help/idea/debugging-your-first-java-application.html), simple application or any other [REPL](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop) execute the following code (IDMask must be in classpath):
 
     Bytes.random(16).encodeHex();
 
@@ -86,7 +99,7 @@ Either way, don't worry too much as the library supports changing the secret key
 
 ### Step 2: Choosing the correct Type
 
-IdMask basically supports 2 data types:
+IDMask basically supports 2 data types:
 
 * 64 bit long words (8 byte)
 * 128 bit long words  (16 byte)
@@ -96,7 +109,8 @@ Data types with these byte lengths can be represented as various Java types ofte
 #### Option A: 64-bit integers (long)
 
 The most common case and the only one fitting in the '8 byte' category is an id with the type [`long`](https://docs.oracle.com/javase/7/docs/api/java/lang/Long.html). 
-In Java a `long` is signed an can represent `-2^63` to `2^63 -1`. IdMask supports the full range.
+In Java a `long` is signed integer an can represent `-2^63` to `2^63 -1`. IDMask can mask any valid `long` value.
+Internally it will be represented as 8 byte, two's complement representation.
 
 Create a new instance by calling:
 
@@ -126,7 +140,7 @@ String masked = idMask.mask(UUID.fromString("eb1c6999-5fc1-4d5f-b98a-792949c38c4
 
 #### Option C: Arbitrary-Precision Integers (BigInteger)
 
-If your ids are typed as [BigInteger](https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html) you can either convert them to long (if they are bound to 64 bit) or use the specific IdMask implementation. Note that the big integer will be converted to a [two's complement](https://en.wikipedia.org/wiki/Two%27s_complement) byte representation supported up to 15 byte length (i.e. up to `2^120`).
+If your ids are typed as [BigInteger](https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html) you can either convert them to long (if they are bound to 64 bit) or use the specific IDMask implementation. Note that the big integer will be converted to a [two's complement](https://en.wikipedia.org/wiki/Two%27s_complement) byte representation supported up to 15 byte length (i.e. up to `2^120`).
 
 ```java
 IdMask<BigInteger> idMask = IdMasks.forBigInteger(Config.builder(key).build());
@@ -154,7 +168,7 @@ String masked = idMask.mask(new byte[] {0xE3, ....});
 
 Per design this library lacks the feature to mask string based ids. This is to discourage using it as general purpose encryption library. In most cases strings are encoded data: e.g. `UUIDs` string representation, `hex`, `base64`, etc. Best practice would be to decode these to a byte array (or `UUID` if possible) and use any of the other options provided above. (Note: *technically* it would be possible to convert the string to e.g. [ASCII](https://en.wikipedia.org/wiki/ASCII) bytes and just feed it `IdMask<byte[]>` if it's length is equal or under 16; **but this is highly discouraged**).
 
-### Step 3: IdMask Configuration
+### Step 3: IDMask Configuration
 
 Usually the default settings are fine for most use cases, however it may make sense to adapt to different usage scenarios with the following settings.
 
@@ -240,7 +254,7 @@ Config.builder(key)
 
 ### A Full Example
 
-Here is a fully wired example using the generic byte array IdMask:
+Here is a fully wired example using the generic byte array IDMask:
 
 ```java
 IdMask<byte[]> idMask = IdMaskFactory.createFor128bitNumbers(
@@ -336,6 +350,10 @@ Add to your `build.gradle` module dependencies:
 [Grab jar from latest release.](https://github.com/patrickfav/id-mask/releases/latest)
 
 ## Description
+
+### Performance
+
+#### JMH Benchmark
 
 ### Encryption Schema
 
