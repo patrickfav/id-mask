@@ -1,7 +1,7 @@
 # IDMask - Encryption and Obfuscation of IDs
 
 IDMask is a library for masking **internal ids** (e.g. from your DB) when they need to be **publicly published to hide their actual value**.
-This should make it impossible* for an attacker to understand provided ids (e.g. by witnessing a sequence, deducting how many order you had, etc.). **Forgery protection** prevents guessing possible valid IDs. Masking is **fully reversible** and also supports optional **randomization of masked ids** for e.g. **shareable links** or **one-time tokens**. This library uses strong cryptographic primitives ([AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard), [HMAC](https://en.wikipedia.org/wiki/HMAC), [HKDF](https://en.wikipedia.org/wiki/HKDF)) to create a secure encryption schema. This library was inspired by [HashIds](https://hashids.org/) but tries to depend on a sound and strong encryption schema.
+This should make it impossible* for an attacker to understand provided ids (e.g. by witnessing a sequence, deducting how many order you had, etc.). **Forgery protection** prevents guessing possible valid IDs. Masking is **fully reversible** and also supports optional **randomization of masked ids** for e.g. **shareable links** or **one-time tokens**. This library uses strong cryptographic primitives ([AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard), [HMAC](https://en.wikipedia.org/wiki/HMAC), [HKDF](https://en.wikipedia.org/wiki/HKDF)) to create a secure encryption schema. This was inspired by [HashIds](https://hashids.org/) but tries to tackle most of it's shortcomings and to depend on a sound and strong encryption schema.
 
 <small>*_if the cryptographic key remains secret_</small>
 
@@ -71,7 +71,7 @@ The following section explains in detail how to use and configure IDMask:
 
 ### Step 1: Create a Secret Key
 
-IDMask's security relies on the strength of the used key. In it's rawest from, a secret key is basically just a random byte array. A provided key should be at least 16 bytes long (longer usually doesn't translate to better security). IDMask requires it to be between 12 and 64 bytes long. There are multiple ways to manage secret keys, if your project already has a managed [`KeyStore`](https://docs.oracle.com/javase/7/docs/api/java/security/KeyStore.html) or similar, use it. In it's simplest form, you can just hardcode the key. This is of course only makes sense where the client doesn't have access to the code or binary (i.e. in a backend scenario). Here are some suggestion on how to create your secret key:
+IDMask's security relies on the strength of the used key. In it's rawest from, a secret key is basically just a random byte array. A provided key should be at least 16 bytes long (longer usually doesn't translate to better security). IDMask requires it to be between 12 and 64 bytes long. There are multiple ways to manage secret keys, if your project already has a managed [`KeyStore`](https://docs.oracle.com/javase/7/docs/api/java/security/KeyStore.html) or similar, use it. In it's simplest form, you can just hardcode the key. This, of course, only makes sense where the client doesn't have access to the code or binary (i.e. in a backend scenario). Here are some suggestion on how to create your secret key:
 
 #### Option A: Use Random Number Generator CLI
 
@@ -196,7 +196,7 @@ Config.builder(key)
 
 #### Q2: What encoding should I choose?
 
-The library internally converts everything to bytes, encrypts it and then requires an encoding schema to make the output printable. Per default the url-safe version of Base64 ([RFC4648](https://tools.ietf.org/html/rfc4648)) is used. This is a well supported, fast and reasonable space efficient (needs ~25% more storage than the raw bytes) encoding.
+The library internally converts everything to bytes, encrypts it and then requires an encoding schema to make the output printable. Per default the url-safe version of Base64 ([RFC4648](https://tools.ietf.org/html/rfc4648)) is used. This is a well supported, fast and reasonable space efficient (needs ~25% more storage than the raw bytes) encoding. Note that the output size is constant using the same settings a type and does _not_ grow or shrink depending on e.g. how big the number is.
 
 However depending on your use case, you may want Ids that are easy to type, do not contain possible problematic words
 or require some maximum length. The library includes some built-in encodings which satisfy different requirements:
@@ -205,7 +205,7 @@ or require some maximum length. The library includes some built-in encodings whi
 | Encoding               | may contain words | easy to type                       | url safe | Length for 64 bit id (deterministic/randomized) | Length for 128 bit id (deterministic/randomized) | Example                              |
 |------------------------|-------------------|------------------------------------|----------|-------------------------------------------------|--------------------------------------------------|--------------------------------------|
 | Hex                    | no                | yes                                | yes      | 34/50                                           | 50/82                                            | `e5e53e09bbd37f8d8b9afdfbed776de6fe` |
-| Base32                 | yes               | contains ambiguous chars (`O`,`0`) | yes      | 28/40                                           | 40/66                                            | `XS6GLNDNQ2NSBWJRMWM3U72FTLLA`       |
+| Base32                 | yes               | yes                  | yes      | 28/40                                           | 40/66                                            | `XS6GLNDNQ2NSBWJRMWM3U72FTLLA`       |
 | Base32 (Safe Alphabet) | no curse words    | contains upper and lowercase       | yes      | 28/40                                           | 40/66                                            | `pVY2YYbV8GyzaEZ3aB5b87EeP4Da`       |
 | Base64                 | yes               | no                                 | yes      | 23/34                                           | 34/55                                            | `SkqktDj1MVEkiPMrwg1blfA`            |
 
@@ -371,9 +371,11 @@ IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask8Byte   avgt    3   4174,282 ± 
 
 ### Encryption Schema
 
-### 8 Byte Encryption Schema
+#### 8 Byte Encryption Schema
 
-### 16 Byte Encryption Schema
+#### 16 Byte Encryption Schema
+
+### IDMask vs HashIds
 
 ## Security Relevant Information
 
