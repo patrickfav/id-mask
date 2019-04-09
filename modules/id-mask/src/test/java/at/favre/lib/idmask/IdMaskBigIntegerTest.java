@@ -46,7 +46,7 @@ public class IdMaskBigIntegerTest extends ABaseIdMaskTest {
         BigInteger id = BigInteger.valueOf(Bytes.random(8).toLong());
         String encoded = idMask.mask(id);
 
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 100; i++) {
             BigInteger refId = idMask.unmask(encoded);
             assertEquals(id, refId);
         }

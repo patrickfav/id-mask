@@ -22,7 +22,6 @@
 package at.favre.lib.idmask;
 
 import java.io.IOException;
-import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -35,9 +34,6 @@ import java.util.Objects;
  */
 final class BaseEncoding {
     private static final char ASCII_MAX = 127;
-
-    static final Alphabet BASE32_RFC4848 = new Alphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567".toCharArray());
-    static final char BASE32_RFC4848_PADDING = '=';
 
     private final Alphabet alphabet;
     private final Character paddingChar;
@@ -52,7 +48,7 @@ final class BaseEncoding {
         return alphabet.charsPerChunk * divide(bytes, alphabet.bytesPerChunk);
     }
 
-    public String encode(byte[] array, ByteOrder byteOrder) {
+    public String encode(byte[] array) {
         return encode(array, 0, array.length);
     }
 

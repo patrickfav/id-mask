@@ -2,8 +2,6 @@ package at.favre.lib.idmask;
 
 import at.favre.lib.bytes.Bytes;
 
-import java.nio.ByteOrder;
-
 /**
  * Responsible for encoding byte arrays to ASCII safe text and vice versa.
  * More precisely, it is an encoding of binary data in a sequence of printable characters.
@@ -20,6 +18,7 @@ public interface ByteToTextEncoding {
 
     /**
      * Decode given encoded string (see {@link #encode(byte[])} to a byte array
+     *
      * @param encoded text to unmask
      * @return raw bytes as array
      */
@@ -43,40 +42,22 @@ public interface ByteToTextEncoding {
     }
 
     /**
-     * Base32Rfc4648 uses a 32-character set comprising the twenty-six upper-case letters A–Z, and the digits 2–7.
-     *
-     * Example: <code>36YV2BTECHOTDTU4I23VND46HVXQ</code>
+     * Base encoding with alphabet of length 2^x (16, 32, 64, etc.)
      */
-    final class Base32Rfc4648 implements ByteToTextEncoding {
-        @Override
-        public String encode(byte[] bytes) {
-            return Bytes.wrap(bytes).encodeBase32().replaceAll("=", "");
-        }
-
-        @Override
-        public byte[] decode(CharSequence encoded) {
-            return Bytes.parseBase32(encoded).array();
-        }
-    }
-
-
-    /**
-     * Base32Rfc4648 uses a 32-character set comprising the twenty-six upper-case letters A–Z, and the digits 2–7.
-     * <p>
-     * Example: <code>36YV2BTECHOTDTU4I23VND46HVXQ</code>
-     */
-    final class SafeBase32Encoding implements ByteToTextEncoding {
+    class BaseMod8Encoding implements ByteToTextEncoding {
         private final BaseEncoding encoding;
 
-        //abdegkmnpqrvwxyzABDEGKMNPQRVWXYZ23456789
-        //abdegjklmnopqrvwxyzABDEGJKLMNOPQRVWXYZ23456789
-        public SafeBase32Encoding() {
-            this.encoding = new BaseEncoding(new BaseEncoding.Alphabet("abeknpqrwxyzBDEGKMPRVXYZ23456789".toCharArray()), '=');
+        public BaseMod8Encoding(char[] alphabet, Character paddingChar) {
+            int alphabetLength = alphabet.length;
+            if (alphabetLength != 16 && alphabetLength != 32 && alphabetLength != 64) {
+                throw new IllegalArgumentException("only alphabet length with 16, 32 or 64 supported");
+            }
+            this.encoding = new BaseEncoding(new BaseEncoding.Alphabet(alphabet), paddingChar);
         }
 
         @Override
         public String encode(byte[] bytes) {
-            return encoding.encode(bytes, ByteOrder.BIG_ENDIAN);
+            return encoding.encode(bytes);
         }
 
         @Override
@@ -86,10 +67,34 @@ public interface ByteToTextEncoding {
     }
 
     /**
+     * Base32 encoding dialect with some letters removed so to omit the accidental creation of english
+     * curse words. Also does not include usual letters/digits which can easily be confused (1,l,O,0,etc)
+     * <p>
+     * Example: <code>9RzRnY7XxzDYa5x3zxZ7PeE6yB</code>
+     */
+    final class CleanBase32Encoding extends BaseMod8Encoding {
+        public CleanBase32Encoding() {
+            super("abeknpqrwxyzBDEGKMPRVXYZ23456789".toCharArray(), null);
+        }
+    }
+
+    /**
+     * Base32Rfc4648 uses a 32-character set comprising the twenty-six upper-case letters A–Z, and the digits 2–7. Does NOT include padding.
+     * <p>
+     * Example: <code>36YV2BTECHOTDTU4I23VND46HVXQ</code>
+     */
+    final class Base32Rfc4648 extends BaseMod8Encoding {
+        public Base32Rfc4648() {
+            super("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567".toCharArray(), null);
+        }
+    }
+
+
+    /**
      * Hexadecimal (also base 16, or hex) is a positional numeral system with a radix,
      * or base, of 16. It uses sixteen distinct symbols, most often the symbols "0"–"9"
      * to represent values zero to nine, and "a"–"f" to represent values ten to fifteen.
-     *
+     * <p>
      * Example: <code>b6f3044af5d8c14f447e5ae7f30d9d3a3c</code>
      */
     final class Base16 implements ByteToTextEncoding {

@@ -16,7 +16,7 @@ public class ByteToTextEncodingTest {
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {new ByteToTextEncoding.Base64Url()}, {new ByteToTextEncoding.Base32Rfc4648()},
-                {new ByteToTextEncoding.SafeBase32Encoding()}, {new ByteToTextEncoding.Base16()}
+                {new ByteToTextEncoding.CleanBase32Encoding()}, {new ByteToTextEncoding.Base16()}
         });
     }
 
@@ -37,4 +37,8 @@ public class ByteToTextEncodingTest {
         }
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testInvalidMod8BaseEncoding() {
+        new ByteToTextEncoding.BaseMod8Encoding("abcdefghijklmno".toCharArray(), '=');
+    }
 }
