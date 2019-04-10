@@ -422,7 +422,60 @@ IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask8Byte   avgt    3   4174,282 ± 
 
 ### Encryption Schema
 
+Two slightly different encryption schemes are used to optimize for performance and output size for the specific case. 
+For each of these schemes two variation exist for deterministic and randomized encryption. 
+
 #### 8 Byte Encryption Schema
+
+This schema uses the following cryptographic primitives:
+
+* AES + [ECB](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_(ECB)) + [No Padding](https://en.wikipedia.org/wiki/Padding_(cryptography))
+
+Using the a full 16 byte AES block, we create a message containing of the 8 byte id (ie. the plaintext) and an 8 byte
+reference value. Then we encrypt it with AES/ECB (since we encrypt only a single block, a block mode using an IV like CBC
+wouldn't make a difference):
+
+    message_d = ( refValue_1a | id )
+    maskedId_d = ciphertext_d = AES_ECB( message_d )
+
+When decrypting, we compare the reference value, and if it has changed we discard the id, since either the key is incorrect,
+or this was a forgery attempt:
+
+    AES_ECB( maskedId_d ) = refValue_1b | id 
+    refValue_1a == refValue_1b
+
+##### Deterministic
+
+In the deterministic mode the reference value is just a 8 byte long array of zeros.
+
+##### Randomized
+
+In the randomized mode the reference value is a random 8 byte long array. Because the decryption requires knowledge
+of this value it will be prepended to the cipher text:
+
+    ciphertext_r = AES_ECB( refValue_rnd | id )
+    maskedId_r = refValue_rnd | ciphertext_r
+
+##### Version Byte
+
+Both modes have a version byte prepended which will be xor-ed with the first byte of the cipher text for simple obfuscation:
+
+    obfuscated_version_byte = version_byte ^ ciphertext[0]
+    
+Finally the message looks like this:
+
+    maskeId_msg_d = obfuscated_version_byte | maskedId_d
+    
+and     
+
+    maskeId_msg_r = obfuscated_version_byte | maskedId_r
+
+for randomized encryption.
+
+##### Summary
+
+This schema has the advantage of having forgery protection without the need for a dedicated MAC generation and also keeps
+the output reasonable small with 16 + 1 byte.
 
 #### 16 Byte Encryption Schema
 
