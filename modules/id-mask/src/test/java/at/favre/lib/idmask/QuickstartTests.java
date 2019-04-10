@@ -68,6 +68,46 @@ public class QuickstartTests {
     }
 
     @Test
+    public void useTwo32bit() {
+        byte[] key = Bytes.random(16).array();
+        int intId1 = 1;
+        int intId2 = 2;
+
+        IdMask<Long> idMask = IdMasks.forLongIds(Config.builder(key).build());
+
+        long encodedInts = Bytes.from(intId1, intId2).toLong();
+        String masked = idMask.mask(encodedInts);
+        long raw = idMask.unmask(masked);
+        int[] originalIds = Bytes.from(raw).toIntArray(); // originalIds[0] == intId1; originalIds[1] == intId2
+
+        assertEquals(Long.valueOf(encodedInts), idMask.unmask(masked));
+        assertEquals(intId1, originalIds[0]);
+        assertEquals(intId2, originalIds[1]);
+    }
+
+    @Test
+    public void useFour32bit() {
+        byte[] key = Bytes.random(16).array();
+        int intId1 = 1;
+        int intId2 = 2;
+        int intId3 = 3;
+        int intId4 = 4;
+
+        IdMask<byte[]> idMask = IdMasks.for128bitNumbers(Config.builder(key).build());
+
+        byte[] ids = Bytes.from(intId1, intId2, intId3, intId4).array();
+        String masked = idMask.mask(ids);
+        byte[] raw = idMask.unmask(masked);
+        int[] originalIds = Bytes.from(raw).toIntArray(); // originalIds[0] == intId1; originalIds[1] == intId2,...
+
+        assertArrayEquals(ids, idMask.unmask(masked));
+        assertEquals(intId1, originalIds[0]);
+        assertEquals(intId2, originalIds[1]);
+        assertEquals(intId3, originalIds[2]);
+        assertEquals(intId4, originalIds[3]);
+    }
+
+    @Test
     public void upgradeKey() {
         long id = 123456789L;
         byte[] key1 = Bytes.random(16).array();

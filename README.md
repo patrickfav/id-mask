@@ -16,6 +16,7 @@ This should make it impossible* for an attacker to understand provided ids (e.g.
 * **Secure**: Creates encrypted IDs with **no-nonsense cryptography** ([AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard), [HKDF](https://en.wikipedia.org/wiki/HKDF)) including **forgery protection** ([HMAC](https://en.wikipedia.org/wiki/HMAC))
 * **Wide range of Java type support**: mask ids from `long`, `UUID`, `BigInteger`, `LongTuple` and `byte[]`
 * **Full support of types**: no arbitrary restrictions like "only positive longs", etc.
+* **ID randomization**: if enabled, will create IDs which appear uncorrelated with the same underlying value.
 * **No collisions possible**: because the IDs are not hashed or otherwise compressed, collisions are impossible
 * **Built-in caching support**: To increase performance a simple caching framework can be facilitated.
 * **Lightweight & Easy-to-use**: the library has only minimal dependencies and a straight forward API
@@ -111,8 +112,8 @@ Data types with these byte lengths can be represented as various Java types ofte
 #### Option A: 64-bit integers (long)
 
 The most common case and the only one fitting in the '8 byte' category is an id with the type [`long`](https://docs.oracle.com/javase/7/docs/api/java/lang/Long.html). 
-In Java a `long` is signed integer an can represent `-2^63` to `2^63 -1`. IDMask can mask any valid `long` value.
-Internally it will be represented as 8 byte, two's complement representation.
+In Java a `long` is a signed integer and can represent `-2^63` to `2^63 -1`. IDMask can mask any valid `long` value.
+Internally it will be represented as 8 byte, two's complement.
 
 Create a new instance by calling:
 
@@ -142,7 +143,7 @@ String masked = idMask.mask(UUID.fromString("eb1c6999-5fc1-4d5f-b98a-792949c38c4
 
 #### Option C: Arbitrary-Precision Integers (BigInteger)
 
-If your ids are typed as [BigInteger](https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html) you can either convert them to long (if they are bound to 64 bit) or use the specific IDMask implementation. Note that the big integer will be converted to a [two's complement](https://en.wikipedia.org/wiki/Two%27s_complement) byte representation supported up to 15 byte length (i.e. up to `2^120`).
+If your ids are typed as [BigInteger](https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html) you can either convert them to long (if they are bound to 64 bit) or use the specific IDMask implementation. Note that the big integer will be converted to a [two's complement](https://en.wikipedia.org/wiki/Two%27s_complement) byte representation and are supported up to 15 byte length (i.e. up to `2^120`).
 
 ```java
 IdMask<BigInteger> idMask = IdMasks.forBigInteger(Config.builder(key).build());
@@ -166,7 +167,41 @@ IdMask<byte[]> idMask = IdMasks.for128bitNumbers(Config.builder(key).build());
 String masked = idMask.mask(new byte[] {0xE3, ....});
 ```
 
-#### Option F: Strings?
+#### Option F: Encoding multiple 32-bit integers
+
+Not supported directly, but still quite easy to implement - if you use only 4 byte (32-bit) integers (`int`), you can encoded multiple numbers. 
+
+Using the `long` schema you can encode up to two of those:
+
+```java
+int intId1 = 1;
+int intId2 = 2;
+
+IdMask<Long> idMask = IdMasks.forLongIds(Config.builder(key).build());
+
+long encodedInts = Bytes.from(intId1, intId2).toLong();
+String masked = idMask.mask(encodedInts);
+long raw = idMask.unmask(masked);
+int[] originalIds = Bytes.from(raw).toIntArray(); // originalIds[0] == intId1; originalIds[1] == intId2
+```
+
+or using four 32-bit integers with the `byte[]` schema:
+
+```java
+int intId1 = 1;
+int intId2 = 2;
+int intId3 = 3;
+int intId4 = 4;
+
+IdMask<byte[]> idMask = IdMasks.for128bitNumbers(Config.builder(key).build());
+
+byte[] ids = Bytes.from(intId1, intId2, intId3, intId4).array();
+String masked = idMask.mask(ids);
+byte[] raw = idMask.unmask(masked);
+int[] originalIds = Bytes.from(raw).toIntArray(); // originalIds[0] == intId1; originalIds[1] == intId2,...
+```
+
+#### Option G: Strings?
 
 Per design this library lacks the feature to mask string based ids. This is to discourage using it as general purpose encryption library. In most cases strings are encoded data: e.g. `UUIDs` string representation, `hex`, `base64`, etc. Best practice would be to decode these to a byte array (or `UUID` if possible) and use any of the other options provided above. (Note: *technically* it would be possible to convert the string to e.g. [ASCII](https://en.wikipedia.org/wiki/ASCII) bytes and just feed it `IdMask<byte[]>` if it's length is equal or under 16; **but this is highly discouraged**).
 
@@ -394,11 +429,11 @@ IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask8Byte   avgt    3   4174,282 ± 
 ### IDMask vs HashIds
 
 One of the reasons this library was created, was that the author was not happy how HashIds solved the issue of
-obfuscating/encryption of IDs. The two main criticism are as follows:
+obfuscating/encryption of IDs. Here are the main criticism:
 
 #### Weak, home-brew cryptography
 
-HashIds encryption schema is basically: Have an alphabet. Shuffle it with Yates Algorithm and a salt provided by the user. Use simple encoding schema to encode 53 bit integers. There is a well known [cryptanalysis](https://carnage.github.io/2015/08/cryptanalysis-of-hashids) and to be fair, the author does not directly claim any security - BUT a library called HashId which is used to obfuscate IDs for security purpose which does not claim any actual security does not make sense to me.
+HashIds encryption schema is basically: Have an alphabet. Shuffle it with Yates Algorithm and a salt provided by the user. Use this simple encoding schema to encode 53 bit integers. There is a well known [cryptanalysis](https://carnage.github.io/2015/08/cryptanalysis-of-hashids) and to be fair, the author of HashIds does not directly claim any security - BUT a library called HashId which is used to obfuscate IDs for security purpose which does not claim any actual security does not make sense to me.
 
 #### Arbitrary limitation inherited rom the original javascript implementation
 
