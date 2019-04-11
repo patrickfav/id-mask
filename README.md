@@ -1,9 +1,6 @@
 # IDMask - Encryption and Obfuscation of IDs
 
-IDMask is a library for masking **internal ids** (e.g. from your DB) when they need to be **publicly published to hide their actual value**.
-This should make it impossible* for an attacker to understand provided ids (e.g. by witnessing a sequence, deducting how many order you had, etc.). **Forgery protection** prevents guessing possible valid IDs. Masking is **fully reversible** and also supports optional **randomization of masked ids** for e.g. **shareable links** or **one-time tokens**. This library uses strong cryptographic primitives ([AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard), [HMAC](https://en.wikipedia.org/wiki/HMAC), [HKDF](https://en.wikipedia.org/wiki/HKDF)) to create a secure encryption schema. This project was inspired by [HashIds](https://hashids.org/) but tries to tackle most of it's shortcomings and depends on a sound and strong encryption schema.
-
-<small>*_if the cryptographic key remains secret_</small>
+IDMask is a library for masking **internal ids** (e.g. from your DB) when they need to be publicly published to **hide their actual value and to prevent forging**. This should make it very hard for an attacker to understand provided ids (e.g. by witnessing a sequence, deducting how many order you had, etc.) and **prevent guessing** of possible valid IDs. Masking is **fully reversible** and also supports optional **randomization** for e.g. **shareable links** or **one-time tokens**. It has a wide support for various **Java types** including `long`, `UUID` and `BigInteger`. This library bases its security on **strong cryptographic primitives** ([AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard), [HMAC](https://en.wikipedia.org/wiki/HMAC), [HKDF](https://en.wikipedia.org/wiki/HKDF)) to create a secure encryption schema. It was inspired by [HashIds](https://hashids.org/) but tries to tackle most of it's shortcomings and depends on a sound and strong encryption schema.
 
 
 [![Download](https://api.bintray.com/packages/patrickfav/maven/id-mask/images/download.svg)](https://bintray.com/patrickfav/maven/id-mask/_latestVersion)
@@ -313,11 +310,11 @@ byte[] originalId = idMask.unmask(maskedId);
 
 ### Upgrade of used Secret Key
 
-If you want to change the used secret key, because it became compromised, but still want to be able to unmask ids created
-with the previous key, you use this simple key upgrade scheme. Since every created id encodes the id of the used key, it
-is possible to choose the legacy key for decryption.
+If you want to change the secret key, because e.g. it became compromised, but still want to be able to unmask ids created
+with the previous key, you can use the built-in key migration scheme. Since every created id encodes the id of the used key, it
+is possible to choose a different key decryption.
 
-Here is a full example. First a new instance with `key1` will be created. If no `key-id` is passed, the library uses
+Here is a full example: First a new instance with `key1` will be created. If no `key-id` is passed, the library uses
 `KeyManager.Factory.DEFAULT_KEY_ID`.
 
 ```java
@@ -390,11 +387,16 @@ Add to your `build.gradle` module dependencies:
 
 ### Why?
 
+IDMask can be used in an environment, where you want to protect the knowledge of the value of your IDs. Usually a very
+easy workaround would be to add another column in your database and randomly create UUIDs and use this instead of your
+e.g. numeric ids. However sometimes this is not feasible (e.g. having millions of rows) or cannot change the DB schema.
+Additionally IDMask can make IDs appear random, a feature which cannot be satisfied with the above approach.
+
 #### When to use IDMask
 
 * If IDs are used which are easily guessable (ie. simple sequence) and knowledge of this ID might reveal confident information
 * If IDs expose row count in a database table, which in turn reveals business intelligence (e.g. how many orders per day, etc.)
-* For creating ad-hoc shareable links
+* For creating ad-hoc shareable links which should appear random to the public
 * For creating single-use tokens for various use cases
 
 #### When not to use IDMask
@@ -429,7 +431,7 @@ For each of these schemes two variation exist for deterministic and randomized e
 
 This schema uses the following cryptographic primitives:
 
-* AES + [ECB](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_(ECB)) + [No Padding](https://en.wikipedia.org/wiki/Padding_(cryptography))
+* [AES-128](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard) + [ECB](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_(ECB)) + [No Padding](https://en.wikipedia.org/wiki/Padding_(cryptography))
 
 Using the a full 16 byte AES block, we create a message containing of the 8 byte id (ie. the plaintext) and an 8 byte
 reference value. Then we encrypt it with AES/ECB (since we encrypt only a single block, a block mode using an IV like CBC
@@ -478,6 +480,19 @@ This schema has the advantage of having forgery protection without the need for 
 the output reasonable small with 16 + 1 byte.
 
 #### 16 Byte Encryption Schema
+
+This schema uses the following cryptographic primitives:
+
+* [AES-128](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard) + [CBC](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Cipher_Block_Chaining_(CBC)) + [No Padding](https://en.wikipedia.org/wiki/Padding_(cryptography))
+* [HMAC-SHA256](https://en.wikipedia.org/wiki/HMAC)
+* [HKDF-HMAC-SHA512](https://en.wikipedia.org/wiki/HKDF)
+
+
+     ciphertext_d = AES_CBC( iv , id )
+     mac_d = HMAC(ciphertext_d)
+     maskeId_msg_d= ciphertext_d | mac_d[0-8]
+
+
 
 ### IDMask vs HashIds
 
