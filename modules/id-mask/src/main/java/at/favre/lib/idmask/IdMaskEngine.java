@@ -16,7 +16,7 @@ import java.util.Objects;
 
 /**
  * The underlying engine responsible for encrypting the provided id.
- *
+ * <p>
  * IdMaskEngines are thread safe.
  */
 public interface IdMaskEngine {
@@ -223,14 +223,17 @@ public interface IdMaskEngine {
                 throw new IllegalArgumentException("input must be 8 byte long");
             }
 
-            byte[] random = getEntropyBytes(getSupportedIdByteLength());
-            byte[] message = Bytes.wrap(random).append(plainId).array();
-            SecretKey secretKey = new SecretKeySpec(Bytes.from(getCurrentIdKey(), 0, 16).array(), "AES");
-
+            byte[] random = null;
+            byte[] message = null;
+            byte[] cipherText = null;
             try {
+                random = getEntropyBytes(getSupportedIdByteLength());
+                message = Bytes.wrap(random).append(plainId).array();
+                SecretKey secretKey = new SecretKeySpec(Bytes.from(getCurrentIdKey(), 0, 16).array(), "AES");
+
                 Cipher c = getCipher();
                 c.init(Cipher.ENCRYPT_MODE, secretKey);
-                byte[] cipherText = c.doFinal(message);
+                cipherText = c.doFinal(message);
 
                 final ByteBuffer bb;
                 byte version = createVersionByte((byte) keyManager.getActiveKeyId(), cipherText);
@@ -245,9 +248,17 @@ public interface IdMaskEngine {
                     bb.put(cipherText);
                 }
 
-                return encoding.encode(bb.array());
+                try {
+                    return encoding.encode(bb.array());
+                } finally {
+                    Bytes.wrap(bb.array()).mutable().secureWipe();
+                }
             } catch (Exception e) {
                 throw new IllegalStateException(e);
+            } finally {
+                Bytes.wrapNullSafe(random).mutable().secureWipe();
+                Bytes.wrapNullSafe(message).mutable().secureWipe();
+                Bytes.wrapNullSafe(cipherText).mutable().secureWipe();
             }
         }
 
