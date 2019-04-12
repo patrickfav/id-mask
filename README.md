@@ -295,6 +295,18 @@ Config.builder(key)
     ...
 ```
 
+#### High Security Mode
+
+Only applicable with 16 byte ids (e.g. `UUID`, `byte[]`, `BigInteger`, ...) it is optionally possible to increase the security
+strength of the masked id in exchange for increased id lengths. By default a 8-byte [MAC](https://en.wikipedia.org/wiki/Message_authentication_code)
+ is appended to the ID and, if randomization is enabled, a 8-byte random nonce is prepended. In high security mode these 
+ numbers double to 16 byte, therefore high security IDs are 16 bytes longer. If you generate a massive amount of ids or don't 
+ mind the longer output length, high security mode is recommended.
+
+Issue with smaller MAC is increased chance of not recognizing a forgery and issue with smaller randomization nonce is higher
+chance of finding duplicated randomization values and recognizing equal ids (chance of duplicate after 5,000,000,000 randomized ids
+with 8 byte nonce is 50%). Increasing these numbers to 16 bytes make both those issue negligible.
+
 ### A Full Example
 
 Here is a fully wired example using the generic byte array IDMask:
