@@ -175,7 +175,7 @@
     <distributionManagement>
         <repository>
             <id>bintray-patrickfav</id>
-            <name>patrickfav-hkdf</name>
+            <name>patrickfav-id-mask</name>
             <url>https://api.bintray.com/maven/patrickfav/maven/id-mask/;publish=1</url>
         </repository>
     </distributionManagement>
