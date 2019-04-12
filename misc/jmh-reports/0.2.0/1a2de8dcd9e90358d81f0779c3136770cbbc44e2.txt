@@ -1,0 +1,171 @@
+# JMH version: 1.21
+# VM version: JDK 1.8.0_202, OpenJDK 64-Bit Server VM, 25.202-b08
+# VM invoker: C:\Program Files\AdoptOpenJDK\jdk-8.0.202.08\jre\bin\java.exe
+# VM options: -javaagent:C:\Users\PatrickF\Desktop\benchmark-jmh-0.2.0-full.jar -Dcapsule.address=0.0.0.0 -Djava.library.path=C:\Program Files\AdoptOpenJDK\jdk-8.0.202.08\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\Program Files\AdoptOpenJDK\jdk-8.0.202.08\bin;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Program Files (x86)\Intel\iCLS Client;C:\Program Files\Intel\iCLS Client;C:\ProgramData\Oracle\Java\javapath;C:\Program Files (x86)\ImageMagick-6.9.0-Q16;C:\Program Files\ImageMagick-6.9.0-Q16;C:\Perl64\site\bin;C:\Perl64\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0;C:\Program Files (x86)\PostgreSQL\9.3\bin;C:\Program Files (x86)\GetGnuWin32\gnuwin32\bin;C:\Program Files\MiKTeX 2.9\miktex\bin\x64;C:\Program Files\android\sdk\platform-tools;C:\Program Files (x86)\MiKTeX 2.9\miktex\bin;C:\Program Files (x86)\Common Files\Acronis\SnapAPI;C:\Program Files (x86)\gs\gs9.15\bin;C:\Program Files (x86)\gs\gs9.15\lib;C:\Program Files (x86)\libwebp\bin;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files (x86)\sha256sum;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0;C:\Program Files (x86)\gdipp;C:\Program Files (x86)\mozjpeg;C:\Program Files (x86)\gifsicle;C:\Program Files (x86)\GNU\GnuPG\pub;C:\Program Files (x86)\apache-maven-3.3.9\bin;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files (x86)\QuickTime\QTSystem;C:\Program Files (x86)\Skype\Phone;C:\Program Files\Git\cmd;C:\WINDOWS\System32\OpenSSH;C:\Program Files\nodejs;C:\ProgramData\chocolatey\bin;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Users\PatrickF\AppData\Local\Programs\Python\Python35\Scripts;C:\Users\PatrickF\AppData\Local\Programs\Python\Python35;C:\Users\PatrickF\AppData\Local\Microsoft\WindowsApps;C:\Users\PatrickF\AppData\Local\inkdrop\bin;C:\Users\PatrickF\AppData\Local\Microsoft\WindowsApps;C:\Users\PatrickF\AppData\Roaming\npm;C:\Program Files\JetBrains\IntelliJ IDEA 2018.3\bin;C:\Users\PatrickF\AppData\Local\capsule\apps\benchmark-jmh-0.2.0-full -Dcapsule.log=1 -Dcapsule.app=benchmark-jmh-0.2.0-full -Dcapsule.port=51828 -Dcapsule.dir=C:\Users\PatrickF\AppData\Local\capsule\apps\benchmark-jmh-0.2.0-full -Dcapsule.jar=C:\Users\PatrickF\Desktop\benchmark-jmh-0.2.0-full.jar
+# Warmup: 2 iterations, 6 s each
+# Measurement: 3 iterations, 15 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: at.favre.lib.idmaskbench.IdMaskAndHashIdsBenchmark.benchmarkHashIdEncode
+
+# Run progress: 0,00% complete, ETA 00:05:42
+# Fork: 1 of 1
+# Warmup Iteration   1: 2,671 ns/op
+# Warmup Iteration   2: 2,653 ns/op
+Iteration   1: 2,311 ns/op
+Iteration   2: 2,308 ns/op
+Iteration   3: 2,321 ns/op
+
+
+Result "at.favre.lib.idmaskbench.IdMaskAndHashIdsBenchmark.benchmarkHashIdEncode":
+  2,313 ±(99.9%) 0,125 ns/op [Average]
+  (min, avg, max) = (2,308, 2,313, 2,321), stdev = 0,007
+  CI (99.9%): [2,188, 2,438] (assumes normal distribution)
+
+
+# JMH version: 1.21
+# VM version: JDK 1.8.0_202, OpenJDK 64-Bit Server VM, 25.202-b08
+# VM invoker: C:\Program Files\AdoptOpenJDK\jdk-8.0.202.08\jre\bin\java.exe
+# VM options: -javaagent:C:\Users\PatrickF\Desktop\benchmark-jmh-0.2.0-full.jar -Dcapsule.address=0.0.0.0 -Djava.library.path=C:\Program Files\AdoptOpenJDK\jdk-8.0.202.08\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\Program Files\AdoptOpenJDK\jdk-8.0.202.08\bin;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Program Files (x86)\Intel\iCLS Client;C:\Program Files\Intel\iCLS Client;C:\ProgramData\Oracle\Java\javapath;C:\Program Files (x86)\ImageMagick-6.9.0-Q16;C:\Program Files\ImageMagick-6.9.0-Q16;C:\Perl64\site\bin;C:\Perl64\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0;C:\Program Files (x86)\PostgreSQL\9.3\bin;C:\Program Files (x86)\GetGnuWin32\gnuwin32\bin;C:\Program Files\MiKTeX 2.9\miktex\bin\x64;C:\Program Files\android\sdk\platform-tools;C:\Program Files (x86)\MiKTeX 2.9\miktex\bin;C:\Program Files (x86)\Common Files\Acronis\SnapAPI;C:\Program Files (x86)\gs\gs9.15\bin;C:\Program Files (x86)\gs\gs9.15\lib;C:\Program Files (x86)\libwebp\bin;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files (x86)\sha256sum;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0;C:\Program Files (x86)\gdipp;C:\Program Files (x86)\mozjpeg;C:\Program Files (x86)\gifsicle;C:\Program Files (x86)\GNU\GnuPG\pub;C:\Program Files (x86)\apache-maven-3.3.9\bin;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files (x86)\QuickTime\QTSystem;C:\Program Files (x86)\Skype\Phone;C:\Program Files\Git\cmd;C:\WINDOWS\System32\OpenSSH;C:\Program Files\nodejs;C:\ProgramData\chocolatey\bin;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Users\PatrickF\AppData\Local\Programs\Python\Python35\Scripts;C:\Users\PatrickF\AppData\Local\Programs\Python\Python35;C:\Users\PatrickF\AppData\Local\Microsoft\WindowsApps;C:\Users\PatrickF\AppData\Local\inkdrop\bin;C:\Users\PatrickF\AppData\Local\Microsoft\WindowsApps;C:\Users\PatrickF\AppData\Roaming\npm;C:\Program Files\JetBrains\IntelliJ IDEA 2018.3\bin;C:\Users\PatrickF\AppData\Local\capsule\apps\benchmark-jmh-0.2.0-full -Dcapsule.log=1 -Dcapsule.app=benchmark-jmh-0.2.0-full -Dcapsule.port=51828 -Dcapsule.dir=C:\Users\PatrickF\AppData\Local\capsule\apps\benchmark-jmh-0.2.0-full -Dcapsule.jar=C:\Users\PatrickF\Desktop\benchmark-jmh-0.2.0-full.jar
+# Warmup: 2 iterations, 6 s each
+# Measurement: 3 iterations, 15 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: at.favre.lib.idmaskbench.IdMaskAndHashIdsBenchmark.benchmarkHashIdEncodeDecode
+
+# Run progress: 16,67% complete, ETA 00:04:52
+# Fork: 1 of 1
+# Warmup Iteration   1: 3,993 ns/op
+# Warmup Iteration   2: 3,923 ns/op
+Iteration   1: 3,272 ns/op
+Iteration   2: 3,274 ns/op
+Iteration   3: 3,290 ns/op
+
+
+Result "at.favre.lib.idmaskbench.IdMaskAndHashIdsBenchmark.benchmarkHashIdEncodeDecode":
+  3,279 ±(99.9%) 0,182 ns/op [Average]
+  (min, avg, max) = (3,272, 3,279, 3,290), stdev = 0,010
+  CI (99.9%): [3,097, 3,461] (assumes normal distribution)
+
+
+# JMH version: 1.21
+# VM version: JDK 1.8.0_202, OpenJDK 64-Bit Server VM, 25.202-b08
+# VM invoker: C:\Program Files\AdoptOpenJDK\jdk-8.0.202.08\jre\bin\java.exe
+# VM options: -javaagent:C:\Users\PatrickF\Desktop\benchmark-jmh-0.2.0-full.jar -Dcapsule.address=0.0.0.0 -Djava.library.path=C:\Program Files\AdoptOpenJDK\jdk-8.0.202.08\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\Program Files\AdoptOpenJDK\jdk-8.0.202.08\bin;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Program Files (x86)\Intel\iCLS Client;C:\Program Files\Intel\iCLS Client;C:\ProgramData\Oracle\Java\javapath;C:\Program Files (x86)\ImageMagick-6.9.0-Q16;C:\Program Files\ImageMagick-6.9.0-Q16;C:\Perl64\site\bin;C:\Perl64\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0;C:\Program Files (x86)\PostgreSQL\9.3\bin;C:\Program Files (x86)\GetGnuWin32\gnuwin32\bin;C:\Program Files\MiKTeX 2.9\miktex\bin\x64;C:\Program Files\android\sdk\platform-tools;C:\Program Files (x86)\MiKTeX 2.9\miktex\bin;C:\Program Files (x86)\Common Files\Acronis\SnapAPI;C:\Program Files (x86)\gs\gs9.15\bin;C:\Program Files (x86)\gs\gs9.15\lib;C:\Program Files (x86)\libwebp\bin;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files (x86)\sha256sum;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0;C:\Program Files (x86)\gdipp;C:\Program Files (x86)\mozjpeg;C:\Program Files (x86)\gifsicle;C:\Program Files (x86)\GNU\GnuPG\pub;C:\Program Files (x86)\apache-maven-3.3.9\bin;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files (x86)\QuickTime\QTSystem;C:\Program Files (x86)\Skype\Phone;C:\Program Files\Git\cmd;C:\WINDOWS\System32\OpenSSH;C:\Program Files\nodejs;C:\ProgramData\chocolatey\bin;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Users\PatrickF\AppData\Local\Programs\Python\Python35\Scripts;C:\Users\PatrickF\AppData\Local\Programs\Python\Python35;C:\Users\PatrickF\AppData\Local\Microsoft\WindowsApps;C:\Users\PatrickF\AppData\Local\inkdrop\bin;C:\Users\PatrickF\AppData\Local\Microsoft\WindowsApps;C:\Users\PatrickF\AppData\Roaming\npm;C:\Program Files\JetBrains\IntelliJ IDEA 2018.3\bin;C:\Users\PatrickF\AppData\Local\capsule\apps\benchmark-jmh-0.2.0-full -Dcapsule.log=1 -Dcapsule.app=benchmark-jmh-0.2.0-full -Dcapsule.port=51828 -Dcapsule.dir=C:\Users\PatrickF\AppData\Local\capsule\apps\benchmark-jmh-0.2.0-full -Dcapsule.jar=C:\Users\PatrickF\Desktop\benchmark-jmh-0.2.0-full.jar
+# Warmup: 2 iterations, 6 s each
+# Measurement: 3 iterations, 15 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: at.favre.lib.idmaskbench.IdMaskAndHashIdsBenchmark.benchmarkIdMask16Byte
+
+# Run progress: 33,33% complete, ETA 00:03:53
+# Fork: 1 of 1
+# Warmup Iteration   1: 8060,316 ns/op
+# Warmup Iteration   2: 7510,884 ns/op
+Iteration   1: 7480,363 ns/op
+Iteration   2: 7496,618 ns/op
+Iteration   3: 7523,552 ns/op
+
+
+Result "at.favre.lib.idmaskbench.IdMaskAndHashIdsBenchmark.benchmarkIdMask16Byte":
+  7500,178 ±(99.9%) 397,964 ns/op [Average]
+  (min, avg, max) = (7480,363, 7500,178, 7523,552), stdev = 21,814
+  CI (99.9%): [7102,213, 7898,142] (assumes normal distribution)
+
+
+# JMH version: 1.21
+# VM version: JDK 1.8.0_202, OpenJDK 64-Bit Server VM, 25.202-b08
+# VM invoker: C:\Program Files\AdoptOpenJDK\jdk-8.0.202.08\jre\bin\java.exe
+# VM options: -javaagent:C:\Users\PatrickF\Desktop\benchmark-jmh-0.2.0-full.jar -Dcapsule.address=0.0.0.0 -Djava.library.path=C:\Program Files\AdoptOpenJDK\jdk-8.0.202.08\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\Program Files\AdoptOpenJDK\jdk-8.0.202.08\bin;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Program Files (x86)\Intel\iCLS Client;C:\Program Files\Intel\iCLS Client;C:\ProgramData\Oracle\Java\javapath;C:\Program Files (x86)\ImageMagick-6.9.0-Q16;C:\Program Files\ImageMagick-6.9.0-Q16;C:\Perl64\site\bin;C:\Perl64\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0;C:\Program Files (x86)\PostgreSQL\9.3\bin;C:\Program Files (x86)\GetGnuWin32\gnuwin32\bin;C:\Program Files\MiKTeX 2.9\miktex\bin\x64;C:\Program Files\android\sdk\platform-tools;C:\Program Files (x86)\MiKTeX 2.9\miktex\bin;C:\Program Files (x86)\Common Files\Acronis\SnapAPI;C:\Program Files (x86)\gs\gs9.15\bin;C:\Program Files (x86)\gs\gs9.15\lib;C:\Program Files (x86)\libwebp\bin;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files (x86)\sha256sum;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0;C:\Program Files (x86)\gdipp;C:\Program Files (x86)\mozjpeg;C:\Program Files (x86)\gifsicle;C:\Program Files (x86)\GNU\GnuPG\pub;C:\Program Files (x86)\apache-maven-3.3.9\bin;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files (x86)\QuickTime\QTSystem;C:\Program Files (x86)\Skype\Phone;C:\Program Files\Git\cmd;C:\WINDOWS\System32\OpenSSH;C:\Program Files\nodejs;C:\ProgramData\chocolatey\bin;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Users\PatrickF\AppData\Local\Programs\Python\Python35\Scripts;C:\Users\PatrickF\AppData\Local\Programs\Python\Python35;C:\Users\PatrickF\AppData\Local\Microsoft\WindowsApps;C:\Users\PatrickF\AppData\Local\inkdrop\bin;C:\Users\PatrickF\AppData\Local\Microsoft\WindowsApps;C:\Users\PatrickF\AppData\Roaming\npm;C:\Program Files\JetBrains\IntelliJ IDEA 2018.3\bin;C:\Users\PatrickF\AppData\Local\capsule\apps\benchmark-jmh-0.2.0-full -Dcapsule.log=1 -Dcapsule.app=benchmark-jmh-0.2.0-full -Dcapsule.port=51828 -Dcapsule.dir=C:\Users\PatrickF\AppData\Local\capsule\apps\benchmark-jmh-0.2.0-full -Dcapsule.jar=C:\Users\PatrickF\Desktop\benchmark-jmh-0.2.0-full.jar
+# Warmup: 2 iterations, 6 s each
+# Measurement: 3 iterations, 15 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: at.favre.lib.idmaskbench.IdMaskAndHashIdsBenchmark.benchmarkIdMask8Byte
+
+# Run progress: 50,00% complete, ETA 00:02:55
+# Fork: 1 of 1
+# Warmup Iteration   1: 2019,523 ns/op
+# Warmup Iteration   2: 1876,406 ns/op
+Iteration   1: 1854,561 ns/op
+Iteration   2: 1836,167 ns/op
+Iteration   3: 1835,036 ns/op
+
+
+Result "at.favre.lib.idmaskbench.IdMaskAndHashIdsBenchmark.benchmarkIdMask8Byte":
+  1841,921 ±(99.9%) 199,976 ns/op [Average]
+  (min, avg, max) = (1835,036, 1841,921, 1854,561), stdev = 10,961
+  CI (99.9%): [1641,945, 2041,897] (assumes normal distribution)
+
+
+# JMH version: 1.21
+# VM version: JDK 1.8.0_202, OpenJDK 64-Bit Server VM, 25.202-b08
+# VM invoker: C:\Program Files\AdoptOpenJDK\jdk-8.0.202.08\jre\bin\java.exe
+# VM options: -javaagent:C:\Users\PatrickF\Desktop\benchmark-jmh-0.2.0-full.jar -Dcapsule.address=0.0.0.0 -Djava.library.path=C:\Program Files\AdoptOpenJDK\jdk-8.0.202.08\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\Program Files\AdoptOpenJDK\jdk-8.0.202.08\bin;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Program Files (x86)\Intel\iCLS Client;C:\Program Files\Intel\iCLS Client;C:\ProgramData\Oracle\Java\javapath;C:\Program Files (x86)\ImageMagick-6.9.0-Q16;C:\Program Files\ImageMagick-6.9.0-Q16;C:\Perl64\site\bin;C:\Perl64\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0;C:\Program Files (x86)\PostgreSQL\9.3\bin;C:\Program Files (x86)\GetGnuWin32\gnuwin32\bin;C:\Program Files\MiKTeX 2.9\miktex\bin\x64;C:\Program Files\android\sdk\platform-tools;C:\Program Files (x86)\MiKTeX 2.9\miktex\bin;C:\Program Files (x86)\Common Files\Acronis\SnapAPI;C:\Program Files (x86)\gs\gs9.15\bin;C:\Program Files (x86)\gs\gs9.15\lib;C:\Program Files (x86)\libwebp\bin;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files (x86)\sha256sum;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0;C:\Program Files (x86)\gdipp;C:\Program Files (x86)\mozjpeg;C:\Program Files (x86)\gifsicle;C:\Program Files (x86)\GNU\GnuPG\pub;C:\Program Files (x86)\apache-maven-3.3.9\bin;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files (x86)\QuickTime\QTSystem;C:\Program Files (x86)\Skype\Phone;C:\Program Files\Git\cmd;C:\WINDOWS\System32\OpenSSH;C:\Program Files\nodejs;C:\ProgramData\chocolatey\bin;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Users\PatrickF\AppData\Local\Programs\Python\Python35\Scripts;C:\Users\PatrickF\AppData\Local\Programs\Python\Python35;C:\Users\PatrickF\AppData\Local\Microsoft\WindowsApps;C:\Users\PatrickF\AppData\Local\inkdrop\bin;C:\Users\PatrickF\AppData\Local\Microsoft\WindowsApps;C:\Users\PatrickF\AppData\Roaming\npm;C:\Program Files\JetBrains\IntelliJ IDEA 2018.3\bin;C:\Users\PatrickF\AppData\Local\capsule\apps\benchmark-jmh-0.2.0-full -Dcapsule.log=1 -Dcapsule.app=benchmark-jmh-0.2.0-full -Dcapsule.port=51828 -Dcapsule.dir=C:\Users\PatrickF\AppData\Local\capsule\apps\benchmark-jmh-0.2.0-full -Dcapsule.jar=C:\Users\PatrickF\Desktop\benchmark-jmh-0.2.0-full.jar
+# Warmup: 2 iterations, 6 s each
+# Measurement: 3 iterations, 15 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: at.favre.lib.idmaskbench.IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask16Byte
+
+# Run progress: 66,67% complete, ETA 00:01:56
+# Fork: 1 of 1
+# Warmup Iteration   1: 16150,966 ns/op
+# Warmup Iteration   2: 15073,489 ns/op
+Iteration   1: 14945,885 ns/op
+Iteration   2: 14939,649 ns/op
+Iteration   3: 15009,206 ns/op
+
+
+Result "at.favre.lib.idmaskbench.IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask16Byte":
+  14964,914 ±(99.9%) 702,110 ns/op [Average]
+  (min, avg, max) = (14939,649, 14964,914, 15009,206), stdev = 38,485
+  CI (99.9%): [14262,804, 15667,024] (assumes normal distribution)
+
+
+# JMH version: 1.21
+# VM version: JDK 1.8.0_202, OpenJDK 64-Bit Server VM, 25.202-b08
+# VM invoker: C:\Program Files\AdoptOpenJDK\jdk-8.0.202.08\jre\bin\java.exe
+# VM options: -javaagent:C:\Users\PatrickF\Desktop\benchmark-jmh-0.2.0-full.jar -Dcapsule.address=0.0.0.0 -Djava.library.path=C:\Program Files\AdoptOpenJDK\jdk-8.0.202.08\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\Program Files\AdoptOpenJDK\jdk-8.0.202.08\bin;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Program Files (x86)\Intel\iCLS Client;C:\Program Files\Intel\iCLS Client;C:\ProgramData\Oracle\Java\javapath;C:\Program Files (x86)\ImageMagick-6.9.0-Q16;C:\Program Files\ImageMagick-6.9.0-Q16;C:\Perl64\site\bin;C:\Perl64\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0;C:\Program Files (x86)\PostgreSQL\9.3\bin;C:\Program Files (x86)\GetGnuWin32\gnuwin32\bin;C:\Program Files\MiKTeX 2.9\miktex\bin\x64;C:\Program Files\android\sdk\platform-tools;C:\Program Files (x86)\MiKTeX 2.9\miktex\bin;C:\Program Files (x86)\Common Files\Acronis\SnapAPI;C:\Program Files (x86)\gs\gs9.15\bin;C:\Program Files (x86)\gs\gs9.15\lib;C:\Program Files (x86)\libwebp\bin;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files (x86)\sha256sum;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0;C:\Program Files (x86)\gdipp;C:\Program Files (x86)\mozjpeg;C:\Program Files (x86)\gifsicle;C:\Program Files (x86)\GNU\GnuPG\pub;C:\Program Files (x86)\apache-maven-3.3.9\bin;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files (x86)\QuickTime\QTSystem;C:\Program Files (x86)\Skype\Phone;C:\Program Files\Git\cmd;C:\WINDOWS\System32\OpenSSH;C:\Program Files\nodejs;C:\ProgramData\chocolatey\bin;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Users\PatrickF\AppData\Local\Programs\Python\Python35\Scripts;C:\Users\PatrickF\AppData\Local\Programs\Python\Python35;C:\Users\PatrickF\AppData\Local\Microsoft\WindowsApps;C:\Users\PatrickF\AppData\Local\inkdrop\bin;C:\Users\PatrickF\AppData\Local\Microsoft\WindowsApps;C:\Users\PatrickF\AppData\Roaming\npm;C:\Program Files\JetBrains\IntelliJ IDEA 2018.3\bin;C:\Users\PatrickF\AppData\Local\capsule\apps\benchmark-jmh-0.2.0-full -Dcapsule.log=1 -Dcapsule.app=benchmark-jmh-0.2.0-full -Dcapsule.port=51828 -Dcapsule.dir=C:\Users\PatrickF\AppData\Local\capsule\apps\benchmark-jmh-0.2.0-full -Dcapsule.jar=C:\Users\PatrickF\Desktop\benchmark-jmh-0.2.0-full.jar
+# Warmup: 2 iterations, 6 s each
+# Measurement: 3 iterations, 15 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: at.favre.lib.idmaskbench.IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask8Byte
+
+# Run progress: 83,33% complete, ETA 00:00:58
+# Fork: 1 of 1
+# Warmup Iteration   1: 4296,912 ns/op
+# Warmup Iteration   2: 4005,122 ns/op
+Iteration   1: 4031,224 ns/op
+Iteration   2: 4033,668 ns/op
+Iteration   3: 4031,708 ns/op
+
+
+Result "at.favre.lib.idmaskbench.IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask8Byte":
+  4032,200 ±(99.9%) 23,610 ns/op [Average]
+  (min, avg, max) = (4031,224, 4032,200, 4033,668), stdev = 1,294
+  CI (99.9%): [4008,590, 4055,810] (assumes normal distribution)
+
+
+# Run complete. Total time: 00:05:50
+
+REMEMBER: The numbers below are just data. To gain reusable insights, you need to follow up on
+why the numbers are the way they are. Use profilers (see -prof, -lprof), design factorial
+experiments, perform baseline and negative tests that provide experimental control, make sure
+the benchmarking environment is safe on JVM/OS/HW level, ask for reviews from the domain experts.
+Do not assume the numbers tell you what you want them to tell.
+
+Benchmark                                               Mode  Cnt      Score     Error  Units
+IdMaskAndHashIdsBenchmark.benchmarkHashIdEncode         avgt    3      2,313 ±   0,125  ns/op
+IdMaskAndHashIdsBenchmark.benchmarkHashIdEncodeDecode   avgt    3      3,279 ±   0,182  ns/op
+IdMaskAndHashIdsBenchmark.benchmarkIdMask16Byte         avgt    3   7500,178 ± 397,964  ns/op
+IdMaskAndHashIdsBenchmark.benchmarkIdMask8Byte          avgt    3   1841,921 ± 199,976  ns/op
+IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask16Byte  avgt    3  14964,914 ± 702,110  ns/op
+IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask8Byte   avgt    3   4032,200 ±  23,610  ns/op

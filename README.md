@@ -410,16 +410,16 @@ IDMask requires a non-trivial amount of work to encrypt ids. The 8-byte-schema o
 
 #### JMH Benchmark
 
-Here is an benchmark done on a [i7-7700k](https://ark.intel.com/content/www/us/en/ark/products/97129/intel-core-i7-7700k-processor-8m-cache-up-to-4-50-ghz.html)
+Here is an benchmark done on a [i7-7700k](https://ark.intel.com/content/www/us/en/ark/products/97129/intel-core-i7-7700k-processor-8m-cache-up-to-4-50-ghz.html):
 
 ```
 Benchmark                                               Mode  Cnt      Score     Error  Units
-IdMaskAndHashIdsBenchmark.benchmarkHashIdEncode         avgt    3      2,407 ±   0,038  ns/op
-IdMaskAndHashIdsBenchmark.benchmarkHashIdEncodeDecode   avgt    3      3,317 ±   0,042  ns/op
-IdMaskAndHashIdsBenchmark.benchmarkIdMask16Byte         avgt    3   7416,257 ±  43,564  ns/op
-IdMaskAndHashIdsBenchmark.benchmarkIdMask8Byte          avgt    3   2028,520 ±   5,286  ns/op
-IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask16Byte  avgt    3  15130,483 ± 696,314  ns/op
-IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask8Byte   avgt    3   4174,282 ±  76,482  ns/op
+IdMaskAndHashIdsBenchmark.benchmarkHashIdEncode         avgt    3      2,313 ±   0,125  ns/op
+IdMaskAndHashIdsBenchmark.benchmarkHashIdEncodeDecode   avgt    3      3,279 ±   0,182  ns/op
+IdMaskAndHashIdsBenchmark.benchmarkIdMask16Byte         avgt    3   7500,178 ± 397,964  ns/op
+IdMaskAndHashIdsBenchmark.benchmarkIdMask8Byte          avgt    3   1841,921 ± 199,976  ns/op
+IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask16Byte  avgt    3  14964,914 ± 702,110  ns/op
+IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask8Byte   avgt    3   4032,200 ±  23,610  ns/op
 ```
 
 ### Encryption Schema
