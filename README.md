@@ -250,8 +250,17 @@ Config.builder(key)
     .encoding(new ByteToTextEncoding.Base32Rfc4648())
     ...
 ```
-
 Implement your own encoding by using the `ByteToTextEncoding` interface.
+
+#### Formatted IDs
+
+For IDs that are better readable for humans you can use the `ByteToTextEncoding.Formatter` and use it to wrap any other encoding instance with: 
+
+    ByteToTextEncoding.Formatter.wrap(myEncoding);
+
+For example with Base32 this could look like this
+
+    SH4RT-7LNHU7X-X3TMJ-OJYNMDS-ETVQ
 
 #### Q3: Do you need Caching?
 

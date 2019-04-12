@@ -2,6 +2,9 @@ package at.favre.lib.idmask;
 
 import at.favre.lib.bytes.Bytes;
 
+import java.util.Objects;
+import java.util.regex.Pattern;
+
 /**
  * Responsible for encoding byte arrays to ASCII safe text and vice versa.
  * More precisely, it is an encoding of binary data in a sequence of printable characters.
@@ -89,36 +92,111 @@ public interface ByteToTextEncoding {
         }
     }
 
-    final class Base32Formatted extends Base32Rfc4648 {
+    /**
+     * Hexadecimal (also base 16, or hex) is a positional numeral system with a radix,
+     * or base, of 16. It uses sixteen distinct symbols, most often the symbols "0"–"9"
+     * to represent values zero to nine, and "a"–"f" to represent values ten to fifteen.
+     * <p>
+     * Example: <code>b6f3044af5d8c14f447e5ae7f30d9d3a3c</code>
+     */
+    final class Base16 implements ByteToTextEncoding {
+        @Override
+        public String encode(byte[] bytes) {
+            return Bytes.wrap(bytes).encodeHex();
+        }
+
+        @Override
+        public byte[] decode(CharSequence encoded) {
+            return Bytes.parseHex(encoded).array();
+        }
+    }
+
+    /**
+     * ID formatting decorator.
+     * Wrap an existing {@link ByteToTextEncoding} instance to add simple formatting capabilities.
+     * <p>
+     * A call can set the interval and separator. An id will be formatted similar to:
+     *
+     * <pre>
+     *     xxxx-yyyyyy-xxxx-yyyyyy-xx
+     * </pre>
+     * <p>
+     * where <code>-</code> is the separator and the interval is 4. Note that every other id part will have length
+     * <code>interval+2</code> to improve readability.
+     */
+    final class IdFormatter implements ByteToTextEncoding {
+        private final ByteToTextEncoding byteToTextEncoding;
         private static final String SEPARATOR = "-";
         private static final int INTERVAL = 4;
 
         private final int currentInterval;
         private final String currentSeparator;
 
-        public Base32Formatted() {
-            this(INTERVAL, SEPARATOR);
+        /**
+         * Create new formatter instance with default separator and interval.
+         *
+         * @param byteToTextEncoding to wrap
+         * @return formatted byteToTextEncoding
+         */
+        public static IdFormatter wrap(ByteToTextEncoding byteToTextEncoding) {
+            return new IdFormatter(byteToTextEncoding, INTERVAL, SEPARATOR);
         }
 
-        public Base32Formatted(int currentInterval, String currentSeparator) {
+        /**
+         * Create new formatter instance.
+         *
+         * @param byteToTextEncoding to wrap
+         * @param interval           of the single parts of the id. E.g. 4 looks like this: <code>xxxx-yyyyyy-xxxxx-...</code>
+         * @return formatted byteToTextEncoding
+         */
+        public static IdFormatter wrap(ByteToTextEncoding byteToTextEncoding, int interval) {
+            return new IdFormatter(byteToTextEncoding, interval, SEPARATOR);
+        }
+
+        /**
+         * Create new formatter instance.
+         *
+         * @param byteToTextEncoding to wrap
+         * @param interval           of the single parts of the id. E.g. 4 looks like this: <code>xxxx-yyyyyy-xxxxx-...</code>
+         * @param separator          between the id parts; be aware not to use a character used in the encoding alphabet
+         * @return formatted byteToTextEncoding
+         */
+        public static IdFormatter wrap(ByteToTextEncoding byteToTextEncoding, int interval, String separator) {
+            return new IdFormatter(byteToTextEncoding, interval, separator);
+        }
+
+        IdFormatter(ByteToTextEncoding byteToTextEncoding, int currentInterval, String currentSeparator) {
+            this.byteToTextEncoding = Objects.requireNonNull(byteToTextEncoding, "byteToTextEncoding");
             this.currentInterval = currentInterval;
-            this.currentSeparator = currentSeparator;
+            this.currentSeparator = Objects.requireNonNull(currentSeparator, "separator");
+
+            if (currentInterval < 2) {
+                throw new IllegalArgumentException("interval must be at least 2");
+            }
+
+            if (currentSeparator.length() < 1 || currentSeparator.length() > 6) {
+                throw new IllegalArgumentException("separator must be between 1 and 6 chars long");
+            }
         }
 
         @Override
         public String encode(byte[] bytes) {
-            return format(super.encode(bytes));
+            return format(byteToTextEncoding.encode(bytes));
         }
 
         @Override
         public byte[] decode(CharSequence encoded) {
-            return super.decode(encoded.toString().replaceAll(currentSeparator, ""));
+            return byteToTextEncoding.decode(encoded.toString().replaceAll(Pattern.quote(currentSeparator), ""));
         }
 
         private String format(String unformatted) {
             if (unformatted.length() < currentInterval * 2 - 1) {
                 return unformatted;
             } else {
+                if (unformatted.contains(currentSeparator)) {
+                    throw new IllegalArgumentException("Current separator '" + currentSeparator +
+                            "' can be found in the encoding of the id '" + unformatted + "' - please choose different one.");
+                }
                 StringBuilder sb = new StringBuilder();
                 int remainingLength = unformatted.length();
                 boolean even = true;
@@ -139,25 +217,6 @@ public interface ByteToTextEncoding {
                 }
                 return sb.toString();
             }
-        }
-    }
-
-    /**
-     * Hexadecimal (also base 16, or hex) is a positional numeral system with a radix,
-     * or base, of 16. It uses sixteen distinct symbols, most often the symbols "0"–"9"
-     * to represent values zero to nine, and "a"–"f" to represent values ten to fifteen.
-     * <p>
-     * Example: <code>b6f3044af5d8c14f447e5ae7f30d9d3a3c</code>
-     */
-    final class Base16 implements ByteToTextEncoding {
-        @Override
-        public String encode(byte[] bytes) {
-            return Bytes.wrap(bytes).encodeHex();
-        }
-
-        @Override
-        public byte[] decode(CharSequence encoded) {
-            return Bytes.parseHex(encoded).array();
         }
     }
 }
