@@ -312,12 +312,12 @@ with 8 byte nonce is 50%). Increasing these numbers to 16 bytes make both those 
 Here is a fully wired example using the generic byte array IDMask:
 
 ```java
-IdMask<byte[]> idMask = IdMaskFactory.createFor128bitNumbers(
+IdMask<byte[]> idMask = IdMasks.for128bitNumbers(
         Config.builder(KeyManager.Factory.with(key))
                 .randomizedIds(true) //non-deterministic output
                 .enableCache(true)
                 .cacheImpl(new Cache.SimpleLruMemCache(64))
-                .encoding(new ByteToTextEncoding.Base32())
+                .encoding(new ByteToTextEncoding.Base32Rfc4648())
                 .secureRandom(new SecureRandom())
                 .securityProvider(Security.getProvider("BC"))
                 .build());
