@@ -1,6 +1,6 @@
 # IDMask - Encryption and Obfuscation of IDs
 
-IDMask is a library for masking **internal ids** (e.g. from your DB) when they need to be publicly published to **hide their actual value and to prevent forging**. This should make it very hard for an attacker to understand provided ids (e.g. by witnessing a sequence, deducting how many order you had, etc.) and **prevent guessing** of possible valid IDs. Masking is **fully reversible** and also supports optional **randomization** for e.g. **shareable links** or **one-time tokens**. It has a wide support for various **Java types** including `long`, `UUID` and `BigInteger`. This library bases its security on **strong cryptographic primitives** ([AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard), [HMAC](https://en.wikipedia.org/wiki/HMAC), [HKDF](https://en.wikipedia.org/wiki/HKDF)) to create a secure encryption schema. It was inspired by [HashIds](https://hashids.org/) but tries to tackle most of it's shortcomings and depends on a sound and strong encryption schema.
+IDMask is a library for masking **internal ids** (e.g. from your DB) when they need to be publicly published to **hide their actual value and to prevent forging**. This should make it very hard for an attacker to understand provided ids (e.g. by witnessing a sequence, deducting how many order you had, etc.) and **prevent guessing** of possible valid IDs. Masking is **fully reversible** and also supports optional **randomization** for e.g. **shareable links** or **one-time tokens**. It has a wide support for various **Java types** including `long`, `UUID` and `BigInteger`. This library bases its security on **strong cryptographic primitives** ([AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard), [HMAC](https://en.wikipedia.org/wiki/HMAC), [HKDF](https://en.wikipedia.org/wiki/HKDF)) to create a secure encryption schema. It was inspired by [HashIds](https://hashids.org/) but tries to tackle most of it's shortcomings.
 
 
 [![Download](https://api.bintray.com/packages/patrickfav/maven/id-mask/images/download.svg)](https://bintray.com/patrickfav/maven/id-mask/_latestVersion)
@@ -41,7 +41,7 @@ long id = ...
 IdMask<Long> idMask = IdMasks.forLongIds(Config.builder(key).build());
 
 String maskedId = idMask.mask(id);
-//example: rK0wpnG1lwvG0xiZn5swxOYmAvxhA4A7yg
+//example: NPSBolhMyabUBdTyanrbqT8
 long originalId = idMask.unmask(maskedId);
 ```
 
