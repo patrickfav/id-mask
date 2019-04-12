@@ -72,7 +72,7 @@ public interface ByteToTextEncoding {
      * <p>
      * Example: <code>9RzRnY7XxzDYa5x3zxZ7PeE6yB</code>
      */
-    final class CleanBase32Encoding extends BaseMod8Encoding {
+    class CleanBase32Encoding extends BaseMod8Encoding {
         public CleanBase32Encoding() {
             super("abeknpqrwxyzBDEGKMPRVXYZ23456789".toCharArray(), null);
         }
@@ -83,12 +83,64 @@ public interface ByteToTextEncoding {
      * <p>
      * Example: <code>36YV2BTECHOTDTU4I23VND46HVXQ</code>
      */
-    final class Base32Rfc4648 extends BaseMod8Encoding {
+    class Base32Rfc4648 extends BaseMod8Encoding {
         public Base32Rfc4648() {
             super("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567".toCharArray(), null);
         }
     }
 
+    final class Base32Formatted extends Base32Rfc4648 {
+        private static final String SEPARATOR = "-";
+        private static final int INTERVAL = 4;
+
+        private final int currentInterval;
+        private final String currentSeparator;
+
+        public Base32Formatted() {
+            this(INTERVAL, SEPARATOR);
+        }
+
+        public Base32Formatted(int currentInterval, String currentSeparator) {
+            this.currentInterval = currentInterval;
+            this.currentSeparator = currentSeparator;
+        }
+
+        @Override
+        public String encode(byte[] bytes) {
+            return format(super.encode(bytes));
+        }
+
+        @Override
+        public byte[] decode(CharSequence encoded) {
+            return super.decode(encoded.toString().replaceAll(currentSeparator, ""));
+        }
+
+        private String format(String unformatted) {
+            if (unformatted.length() < currentInterval * 2 - 1) {
+                return unformatted;
+            } else {
+                StringBuilder sb = new StringBuilder();
+                int remainingLength = unformatted.length();
+                boolean even = true;
+                while (remainingLength > 0) {
+                    int interval = even ? currentInterval : currentInterval + 2;
+                    int startIndex = unformatted.length() - remainingLength;
+                    if (remainingLength < interval) {
+                        sb.append(unformatted, startIndex, unformatted.length());
+                        remainingLength = 0;
+                    } else {
+                        sb.append(unformatted, startIndex, startIndex + interval);
+                        remainingLength -= interval;
+                        if (remainingLength != 0) {
+                            sb.append(currentSeparator);
+                        }
+                    }
+                    even = !even;
+                }
+                return sb.toString();
+            }
+        }
+    }
 
     /**
      * Hexadecimal (also base 16, or hex) is a positional numeral system with a radix,
