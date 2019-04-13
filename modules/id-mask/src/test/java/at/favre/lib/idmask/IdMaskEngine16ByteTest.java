@@ -180,7 +180,8 @@ public class IdMaskEngine16ByteTest {
         try {
             assertArrayEquals(id, engine1.unmask(maskedId2));
             fail();
-        } catch (IllegalStateException ignored) {
+        } catch (IdMaskSecurityException e) {
+            assertEquals(IdMaskSecurityException.Reason.UNKNOWN_KEY_ID, e.getReason());
         }
         assertArrayEquals(id, engine2.unmask(maskedId2));
         assertArrayEquals(id, engine3.unmask(maskedId2));
@@ -189,12 +190,14 @@ public class IdMaskEngine16ByteTest {
         try {
             assertArrayEquals(id, engine1.unmask(maskedId3));
             fail();
-        } catch (IllegalStateException ignored) {
+        } catch (IdMaskSecurityException e) {
+            assertEquals(IdMaskSecurityException.Reason.UNKNOWN_KEY_ID, e.getReason());
         }
         try {
             assertArrayEquals(id, engine2.unmask(maskedId3));
             fail();
-        } catch (IllegalStateException ignored) {
+        } catch (IdMaskSecurityException e) {
+            assertEquals(IdMaskSecurityException.Reason.UNKNOWN_KEY_ID, e.getReason());
         }
         assertArrayEquals(id, engine3.unmask(maskedId3));
     }
@@ -213,7 +216,8 @@ public class IdMaskEngine16ByteTest {
         try {
             idMaskEngine.unmask(forged);
             fail();
-        } catch (SecurityException ignored) {
+        } catch (IdMaskSecurityException e) {
+            assertEquals(IdMaskSecurityException.Reason.AUTH_TAG_DOES_NOT_MATCH_OR_INVALID_KEY, e.getReason());
         }
     }
 
@@ -230,7 +234,8 @@ public class IdMaskEngine16ByteTest {
         try {
             idMaskEngine.unmask(masked);
             fail();
-        } catch (SecurityException ignored) {
+        } catch (IdMaskSecurityException e) {
+            assertEquals(IdMaskSecurityException.Reason.AUTH_TAG_DOES_NOT_MATCH_OR_INVALID_KEY, e.getReason());
         }
     }
 
@@ -267,5 +272,15 @@ public class IdMaskEngine16ByteTest {
     @Test(expected = IllegalArgumentException.class)
     public void testUnmaskEncodedTooLong() {
         idMaskEngine.unmask(Bytes.allocate(IdMaskEngine.BaseEngine.MAX_MASKED_ID_ENCODED_LENGTH / 2).encodeHex());
+    }
+
+    @Test
+    public void testWrongId() {
+        try {
+            idMaskEngine.unmask("dGlxN7fmLBvpKKOCDi3Ps1m_-sxvPcbFzg");
+            fail();
+        } catch (IdMaskSecurityException e) {
+            assertEquals(IdMaskSecurityException.Reason.UNKNOWN_ENGINE_ID, e.getReason());
+        }
     }
 }

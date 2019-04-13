@@ -150,7 +150,8 @@ public class IdMaskEngine8ByteTest {
         try {
             assertArrayEquals(id, engine1.unmask(maskedId2));
             fail();
-        } catch (IllegalStateException ignored) {
+        } catch (IdMaskSecurityException e) {
+            assertEquals(IdMaskSecurityException.Reason.UNKNOWN_KEY_ID, e.getReason());
         }
         assertArrayEquals(id, engine2.unmask(maskedId2));
         assertArrayEquals(id, engine3.unmask(maskedId2));
@@ -159,12 +160,14 @@ public class IdMaskEngine8ByteTest {
         try {
             assertArrayEquals(id, engine1.unmask(maskedId3));
             fail();
-        } catch (IllegalStateException ignored) {
+        } catch (IdMaskSecurityException e) {
+            assertEquals(IdMaskSecurityException.Reason.UNKNOWN_KEY_ID, e.getReason());
         }
         try {
             assertArrayEquals(id, engine2.unmask(maskedId3));
             fail();
-        } catch (IllegalStateException ignored) {
+        } catch (IdMaskSecurityException e) {
+            assertEquals(IdMaskSecurityException.Reason.UNKNOWN_KEY_ID, e.getReason());
         }
         assertArrayEquals(id, engine3.unmask(maskedId3));
     }
@@ -213,7 +216,8 @@ public class IdMaskEngine8ByteTest {
         try {
             idMaskEngine.unmask(forged);
             fail();
-        } catch (SecurityException ignored) {
+        } catch (IdMaskSecurityException e) {
+            assertEquals(IdMaskSecurityException.Reason.AUTH_TAG_DOES_NOT_MATCH_OR_INVALID_KEY, e.getReason());
         }
     }
 
@@ -231,7 +235,8 @@ public class IdMaskEngine8ByteTest {
         try {
             idMaskEngine.unmask(forged);
             fail();
-        } catch (SecurityException ignored) {
+        } catch (IdMaskSecurityException e) {
+            assertEquals(IdMaskSecurityException.Reason.AUTH_TAG_DOES_NOT_MATCH_OR_INVALID_KEY, e.getReason());
         }
     }
 
@@ -257,7 +262,18 @@ public class IdMaskEngine8ByteTest {
         try {
             idMaskEngine.unmask(masked);
             fail();
-        } catch (SecurityException ignored) {
+        } catch (IdMaskSecurityException e) {
+            assertEquals(IdMaskSecurityException.Reason.AUTH_TAG_DOES_NOT_MATCH_OR_INVALID_KEY, e.getReason());
+        }
+    }
+
+    @Test
+    public void testWrongId() {
+        try {
+            idMaskEngine.unmask("MB8GIdO1rkNLN88yCLaxB_U");
+            fail();
+        } catch (IdMaskSecurityException e) {
+            assertEquals(IdMaskSecurityException.Reason.UNKNOWN_ENGINE_ID, e.getReason());
         }
     }
 }

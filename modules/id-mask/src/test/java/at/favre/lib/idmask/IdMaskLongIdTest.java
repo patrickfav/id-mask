@@ -6,6 +6,7 @@ import org.junit.Test;
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class IdMaskLongIdTest extends ABaseIdMaskTest {
     private IdMask<Long> idMask = new IdMask.LongIdMask(Config.builder(Bytes.random(16).array()).enableCache(false).build());
@@ -71,6 +72,16 @@ public class IdMaskLongIdTest extends ABaseIdMaskTest {
         for (ByteToTextEncoding encoding : encodings) {
             maskAndUnmask(new IdMask.LongIdMask(Config.builder(Bytes.random(16).array()).enableCache(false).encoding(encoding).build()), new Random().nextLong());
             maskAndUnmask(new IdMask.LongIdMask(Config.builder(Bytes.random(16).array()).randomizedIds(true).enableCache(false).encoding(encoding).build()), new Random().nextLong());
+        }
+    }
+
+    @Test
+    public void testIncorrectId() {
+        try {
+            idMask.unmask("MB8GIdO1rkNLN88yCLaxB_U");
+            fail();
+        } catch (IdMaskSecurityException e) {
+            assertEquals(IdMaskSecurityException.Reason.UNKNOWN_ENGINE_ID, e.getReason());
         }
     }
 }

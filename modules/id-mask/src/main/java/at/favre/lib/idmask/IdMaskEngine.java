@@ -26,6 +26,7 @@ public interface IdMaskEngine {
      *
      * @param plainId (aka plaintext) to mask
      * @return masked (aka cipher text)
+     * @throws IllegalArgumentException if basic parameter validation fails
      */
     CharSequence mask(byte[] plainId);
 
@@ -33,7 +34,9 @@ public interface IdMaskEngine {
      * Unmask (or decrypt) given masked id.
      *
      * @param maskedId to unmask
-     * @return unmaksed, plain id as passed in {@link #mask(byte[])}
+     * @return unmasked, plain id as passed in {@link #mask(byte[])}
+     * @throws IdMaskSecurityException  if used secret key, authentication tag, or version identifiers are incorrect
+     * @throws IllegalArgumentException if basic parameter validation fails
      */
     byte[] unmask(CharSequence maskedId);
 
@@ -192,19 +195,22 @@ public interface IdMaskEngine {
          * @return secret key to decode
          */
         byte[] checkAndGetCurrentKey(byte version, byte[] cipherText) {
-            if (getEngineIdFromVersion(version, cipherText) != engineId()) {
-                throw new SecurityException("wrong id-engine used according to version byte");
+            byte versionEngineId = getEngineIdFromVersion(version, cipherText);
+            if (versionEngineId != engineId()) {
+                throw new IdMaskSecurityException("wrong idMask engine used according to version byte - expected '" + engineId() + "' got '" + versionEngineId + "'",
+                        IdMaskSecurityException.Reason.UNKNOWN_ENGINE_ID);
             }
-
-            byte[] currentSecretKey = getKeyForId(getKeyIdFromVersion(version, cipherText));
+            byte keyId = getKeyIdFromVersion(version, cipherText);
+            byte[] currentSecretKey = getKeyForId(keyId);
 
             if (currentSecretKey == null) {
-                throw new IllegalStateException("unknown key id");
+                throw new IdMaskSecurityException("unknown key id '" + keyId + "'", IdMaskSecurityException.Reason.UNKNOWN_KEY_ID);
             }
             return currentSecretKey;
         }
     }
 
+    @SuppressWarnings("WeakerAccess")
     final class EightByteEncryptionEngine extends BaseEngine implements IdMaskEngine {
         private static final String ALGORITHM = "AES/ECB/NoPadding";
         private static final int ENGINE_ID = 0;
@@ -297,7 +303,7 @@ public interface IdMaskEngine {
                 }
 
                 if (!Bytes.from(message, 0, getSupportedIdByteLength()).equalsConstantTime(entropyData)) {
-                    throw new SecurityException("internal reference entropy does not match, probably forgery attempt or incorrect key");
+                    throw new IdMaskSecurityException("internal reference entropy does not match, probably forgery attempt or incorrect key", IdMaskSecurityException.Reason.AUTH_TAG_DOES_NOT_MATCH_OR_INVALID_KEY);
                 }
 
                 return Bytes.from(message, 8, getSupportedIdByteLength()).array();
@@ -435,7 +441,7 @@ public interface IdMaskEngine {
 
                 refMac = Bytes.from(macCipherText(macKey, cipherText, iv, new byte[]{version}), 0, getMacLength()).array();
                 if (!Bytes.wrap(mac).equalsConstantTime(refMac)) {
-                    throw new SecurityException("mac does not match");
+                    throw new IdMaskSecurityException("mac does not match", IdMaskSecurityException.Reason.AUTH_TAG_DOES_NOT_MATCH_OR_INVALID_KEY);
                 }
                 try {
                     Cipher cipher = getCipher();
@@ -458,7 +464,7 @@ public interface IdMaskEngine {
         private void checkDecodedLength(int size) {
             int expectedLength = 1 + getSupportedIdByteLength() + (randomizeIds ? getSupportedIdByteLength() : 0) + getMacLength();
             if (size != expectedLength) {
-                throw new IllegalArgumentException("unexpected message id length " + size);
+                throw new IllegalArgumentException("unexpected message id length " + size + " - expected " + expectedLength);
             }
         }
 

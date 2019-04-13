@@ -24,6 +24,7 @@ public interface IdMask<T> {
      *
      * @param id to mask
      * @return encoded masked id
+     * @throws IllegalArgumentException if basic parameter validation fails
      */
     String mask(T id);
 
@@ -32,6 +33,8 @@ public interface IdMask<T> {
      *
      * @param encoded to unmask
      * @return original id
+     * @throws IdMaskSecurityException  if used secret key, authentication tag, or version identifiers are incorrect
+     * @throws IllegalArgumentException if basic parameter validation fails
      */
     T unmask(String encoded);
 

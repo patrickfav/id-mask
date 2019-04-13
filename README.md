@@ -380,6 +380,18 @@ assert idMask2.unmask(maskKey1).equals(idMask2.unmask(maskKey2));
 
 _Be aware that changing the secret key, will destroy equality of masked ids cached with clients or elsewhere._
 
+### Error Handling
+
+An `IdMask` instance will basically throws 2 types of _unchecked exceptions_:
+
+1) `IllegalArgumentException`
+2) `IdMaskSecurityException` (`extends SecurityException`)
+
+The first will be thrown on basic parameter validation errors which usually stems from incorrect use of the library (e.g. 
+masked id too long or short, null reference, etc.). The second are errors thrown from the id masking decryption logic which may be security
+relevant. It would make sense to at least catch and log them. The `IdMaskSecurityException.getReason()` can be used to group
+detailed causes.
+
 ## Download
 
 The artifacts are deployed to [jcenter](https://bintray.com/bintray/jcenter) and [Maven Central](https://search.maven.org/).

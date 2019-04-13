@@ -5,6 +5,9 @@ import org.junit.Test;
 
 import java.util.UUID;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 public class IdMaskUuidTest extends ABaseIdMaskTest {
     private IdMask<UUID> idMask = new IdMask.UuidMask(
             Config.builder(Bytes.random(16).array())
@@ -23,6 +26,16 @@ public class IdMaskUuidTest extends ABaseIdMaskTest {
         for (ByteToTextEncoding encoding : encodings) {
             maskAndUnmask(new IdMask.UuidMask(Config.builder(Bytes.random(16).array()).enableCache(false).encoding(encoding).build()), UUID.randomUUID());
             maskAndUnmask(new IdMask.UuidMask(Config.builder(Bytes.random(16).array()).randomizedIds(true).enableCache(false).encoding(encoding).build()), UUID.randomUUID());
+        }
+    }
+
+    @Test
+    public void testIncorrectId() {
+        try {
+            idMask.unmask("dGlxN7fmLBvpKKOCDi3Ps1m_-sxvPcbFzg");
+            fail();
+        } catch (IdMaskSecurityException e) {
+            assertEquals(IdMaskSecurityException.Reason.UNKNOWN_ENGINE_ID, e.getReason());
         }
     }
 }
