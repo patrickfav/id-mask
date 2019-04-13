@@ -1,3 +1,5 @@
+![id-mask logo](misc/icon_sm.png)
+
 # IDMask - Encryption and Obfuscation of IDs
 
 IDMask is a library for masking **internal ids** (e.g. from your DB) when they need to be publicly published to **hide their actual value and to prevent forging**. This should make it very hard for an attacker to understand provided ids (e.g. by witnessing a sequence, deducting how many order you had, etc.) and **prevent guessing** of possible valid IDs. Masking is **fully reversible** and also supports optional **randomization** for e.g. **shareable links** or **one-time tokens**. It has a wide support for various **Java types** including `long`, `UUID` and `BigInteger`. This library bases its security on **strong cryptographic primitives** ([AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard), [HMAC](https://en.wikipedia.org/wiki/HMAC), [HKDF](https://en.wikipedia.org/wiki/HKDF)) to create a secure encryption schema. It was inspired by [HashIds](https://hashids.org/) but tries to tackle most of it's shortcomings.
@@ -7,6 +9,9 @@ IDMask is a library for masking **internal ids** (e.g. from your DB) when they n
 [![Build Status](https://travis-ci.org/patrickfav/id-mask.svg?branch=master)](https://travis-ci.org/patrickfav/id-mask)
 [![Javadocs](https://www.javadoc.io/badge/at.favre.lib/id-mask.svg)](https://www.javadoc.io/doc/at.favre.lib/id-mask)
 [![Coverage Status](https://coveralls.io/repos/github/patrickfav/id-mask/badge.svg?branch=master)](https://coveralls.io/github/patrickfav/id-mask?branch=master) [![Maintainability](https://api.codeclimate.com/v1/badges/fc50d911e4146a570d4e/maintainability)](https://codeclimate.com/github/patrickfav/id-mask/maintainability)
+
+
+
 
 ## Feature Overview
 
@@ -623,6 +628,10 @@ Use the Maven wrapper to create a jar including all dependencies
 
 * [HashIds](https://github.com/10cella/hashids-java)
 * [NanoId](https://github.com/ai/nanoid)
+
+### Credits
+
+* [Icon made by mynamepong (CC 3.0 BY)](https://www.flaticon.com/authors/mynamepong)
 
 # License
 
