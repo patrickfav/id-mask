@@ -617,6 +617,7 @@ Use the Maven wrapper to create a jar including all dependencies
 * [Why not expose a primary key](https://softwareengineering.stackexchange.com/questions/218306/why-not-expose-a-primary-key)
 * [Sharding & IDs at Instagram](https://instagram-engineering.com/sharding-ids-at-instagram-1cf5a71e5a5c)
 * [HashId Cryptanalysis](https://carnage.github.io/2015/08/cryptanalysis-of-hashids)
+* [Discussion about IDMask encryption schema](https://crypto.stackexchange.com/q/68415/44838)
 
 ### Similar Libraries
 
