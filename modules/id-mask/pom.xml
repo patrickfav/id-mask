@@ -19,6 +19,10 @@
         to make it infeasible to guess them. This masking is reversible.
     </description>
 
+    <properties>
+        <maven.deploy.skip>false</maven.deploy.skip>
+    </properties>
+
     <build>
         <plugins>
             <plugin>
