@@ -210,6 +210,57 @@ public interface IdMaskEngine {
         }
     }
 
+    /**
+     * This schema uses the following cryptographic primitives:
+     *
+     * <ul>
+     * <li>AES-128 + ECB + No Padding</li>
+     * </ul>
+     * <p>
+     * Using the a full 16 byte AES block, we create a message containing of the 8 byte id (ie. the plaintext) and an 8 byte
+     * reference value. Then we encrypt it with AES/ECB (since we encrypt only a single block, a block mode using an IV like CBC
+     * wouldn't make a difference):
+     *
+     * <pre>
+     *     message_d = ( refValue_1a | id )
+     *     maskedId_d = ciphertext_d = AES_ECB( message_d )
+     * </pre>
+     * <p>
+     * When decrypting, we compare the reference value, and if it has changed we discard the id, since either the key is incorrect,
+     * or this was a forgery attempt:
+     * <pre>
+     *     AES_ECB( maskedId_d ) = refValue_1b | id
+     *     refValue_1a == refValue_1b
+     * </pre>
+     *
+     * <h3>Deterministic</h3>
+     * <p>
+     * In the deterministic mode the reference value is just a 8 byte long array of zeros.
+     *
+     * <h3>Randomized</h3>
+     * <p>
+     * In the randomized mode the reference value is a random 8 byte long array. Because the decryption requires knowledge
+     * of this value it will be prepended to the cipher text:
+     * <pre>
+     *     ciphertext_r = AES_ECB( refValue_rnd | id )
+     *     maskedId_r = refValue_rnd | ciphertext_r
+     * </pre>
+     *
+     * <h3>Versione Byte</h3>
+     * Both modes have a version byte prepended which will be xor-ed with the first byte of the cipher text for simple obfuscation:
+     * <pre>
+     *     obfuscated_version_byte = version_byte ^ ciphertext[0]
+     * </pre>
+     * Finally the message looks like this:
+     * <pre>
+     *     maskeId_msg_d = obfuscated_version_byte | maskedId_d
+     * </pre>
+     * and
+     * <pre>
+     *     maskeId_msg_r = obfuscated_version_byte | maskedId_r
+     * </pre>
+     * for randomized encryption.
+     */
     @SuppressWarnings("WeakerAccess")
     final class EightByteEncryptionEngine extends BaseEngine implements IdMaskEngine {
         private static final String ALGORITHM = "AES/ECB/NoPadding";
