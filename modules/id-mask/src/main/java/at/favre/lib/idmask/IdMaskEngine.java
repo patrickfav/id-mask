@@ -272,33 +272,41 @@ public interface IdMaskEngine {
                 throw new IllegalArgumentException("unexpected message id length " + bb.remaining());
             }
 
+            byte[] entropyData = null;
+            byte[] cipherText = null;
+            byte[] message = null;
             byte version = bb.get();
-
-            final byte[] entropyData = getEntropyBytes(getSupportedIdByteLength());
-            if (randomizeIds) {
-                bb.get(entropyData);
-            }
-
-            byte[] cipherText = new byte[bb.remaining()];
-            bb.get(cipherText);
-
-            byte[] currentSecretKey = checkAndGetCurrentKey(version, cipherText);
-
-            byte[] message;
             try {
-                SecretKey secretKey = new SecretKeySpec(Bytes.from(currentSecretKey, 0, 16).array(), "AES");
-                Cipher c = getCipher();
-                c.init(Cipher.DECRYPT_MODE, secretKey);
-                message = c.doFinal(cipherText);
-            } catch (Exception e) {
-                throw new IllegalStateException(e);
-            }
+                entropyData = getEntropyBytes(getSupportedIdByteLength());
+                if (randomizeIds) {
+                    bb.get(entropyData);
+                }
 
-            if (!Bytes.from(message, 0, getSupportedIdByteLength()).equalsConstantTime(entropyData)) {
-                throw new SecurityException("internal reference entropy does not match, probably forgery attempt or incorrect key");
-            }
+                cipherText = new byte[bb.remaining()];
+                bb.get(cipherText);
 
-            return Bytes.from(message, 8, getSupportedIdByteLength()).array();
+                final byte[] currentSecretKey = checkAndGetCurrentKey(version, cipherText);
+
+                try {
+                    SecretKey secretKey = new SecretKeySpec(Bytes.from(currentSecretKey, 0, 16).array(), "AES");
+                    Cipher c = getCipher();
+                    c.init(Cipher.DECRYPT_MODE, secretKey);
+                    message = c.doFinal(cipherText);
+                } catch (Exception e) {
+                    throw new IllegalStateException(e);
+                }
+
+                if (!Bytes.from(message, 0, getSupportedIdByteLength()).equalsConstantTime(entropyData)) {
+                    throw new SecurityException("internal reference entropy does not match, probably forgery attempt or incorrect key");
+                }
+
+                return Bytes.from(message, 8, getSupportedIdByteLength()).array();
+
+            } finally {
+                Bytes.wrapNullSafe(entropyData).mutable().secureWipe();
+                Bytes.wrapNullSafe(cipherText).mutable().secureWipe();
+                Bytes.wrapNullSafe(message).mutable().secureWipe();
+            }
         }
 
         @Override
@@ -312,6 +320,7 @@ public interface IdMaskEngine {
         }
     }
 
+    @SuppressWarnings("WeakerAccess")
     final class SixteenByteEngine extends BaseEngine implements IdMaskEngine {
         private static final String ALGORITHM = "AES/CBC/NoPadding";
         private static final String HMAC_ALGORITHM = "HmacSHA256";
@@ -332,6 +341,7 @@ public interface IdMaskEngine {
             this.highSecurityMode = highSecurityMode;
         }
 
+        @SuppressWarnings("Duplicates")
         @Override
         public CharSequence mask(byte[] plainId) {
             Objects.requireNonNull(plainId, "id");
@@ -340,21 +350,28 @@ public interface IdMaskEngine {
                 throw new IllegalArgumentException(String.format("id length must be between 1 and %d bytes", getSupportedIdByteLength()));
             }
 
+            byte[] entropy = null;
+            byte[] keys = null;
+            byte[] currentKey = null;
+            byte[] iv;
+            byte[] macKey = null;
+            byte[] encryptedId = null;
+            byte[] mac = null;
             try {
-                byte[] entropy = getEntropyBytes(getSupportedIdByteLength());
-                byte[] keys = hkdf.expand(getCurrentIdKey(), entropy, 64);
+                entropy = getEntropyBytes(getSupportedIdByteLength());
+                keys = hkdf.expand(getCurrentIdKey(), entropy, 64);
 
-                byte[] currentKey = Bytes.from(keys, 0, 16).array();
-                byte[] iv = Bytes.from(keys, 16, 16).array();
-                byte[] macKey = Bytes.from(keys, 32, 32).array();
+                currentKey = Bytes.from(keys, 0, 16).array();
+                iv = Bytes.from(keys, 16, 16).array();
+                macKey = Bytes.from(keys, 32, 32).array();
 
                 Cipher cipher = getCipher();
                 cipher.init(Cipher.ENCRYPT_MODE,
                         new SecretKeySpec(currentKey, "AES"),
                         new IvParameterSpec(iv));
-                byte[] encryptedId = cipher.doFinal(Bytes.from(plainId).xor(entropy).array());
+                encryptedId = cipher.doFinal(Bytes.from(plainId).xor(entropy).array());
                 byte version = createVersionByte((byte) keyManager.getActiveKeyId(), encryptedId);
-                byte[] mac = Bytes.from(macCipherText(macKey, encryptedId, iv, new byte[]{version}), 0, getMacLength()).array();
+                mac = Bytes.from(macCipherText(macKey, encryptedId, iv, new byte[]{version}), 0, getMacLength()).array();
 
                 ByteBuffer bb = ByteBuffer.allocate(1 + encryptedId.length + mac.length + (randomizeIds ? entropy.length : 0));
                 bb.put(version);
@@ -369,9 +386,17 @@ public interface IdMaskEngine {
                 return encoding.encode(bb.array());
             } catch (Exception e) {
                 throw new IllegalStateException(e);
+            } finally {
+                Bytes.wrapNullSafe(entropy).mutable().secureWipe();
+                Bytes.wrapNullSafe(keys).mutable().secureWipe();
+                Bytes.wrapNullSafe(currentKey).mutable().secureWipe();
+                Bytes.wrapNullSafe(macKey).mutable().secureWipe();
+                Bytes.wrapNullSafe(encryptedId).mutable().secureWipe();
+                Bytes.wrapNullSafe(mac).mutable().secureWipe();
             }
         }
 
+        @SuppressWarnings("Duplicates")
         @Override
         public byte[] unmask(CharSequence maskedId) {
             checkInput(maskedId);
@@ -380,35 +405,53 @@ public interface IdMaskEngine {
 
             checkDecodedLength(bb.remaining());
 
-            byte version = bb.get();
-            byte[] entropy = getEntropyBytes(getSupportedIdByteLength());
-            if (randomizeIds) {
-                bb.get(entropy);
-            }
-            byte[] cipherText = new byte[getSupportedIdByteLength()];
-            bb.get(cipherText);
-
-            byte[] mac = new byte[getMacLength()];
-            bb.get(mac);
-
-            byte[] currentSecretKey = checkAndGetCurrentKey(version, cipherText);
-
-            byte[] keys = hkdf.expand(currentSecretKey, entropy, 64);
-
-            byte[] currentKey = Bytes.from(keys, 0, 16).array();
-            byte[] iv = Bytes.from(keys, 16, 16).array();
-            byte[] macKey = Bytes.from(keys, 32, 32).array();
-
-            byte[] refMac = Bytes.from(macCipherText(macKey, cipherText, iv, new byte[]{version}), 0, getMacLength()).array();
-            if (!Bytes.wrap(mac).equalsConstantTime(refMac)) {
-                throw new SecurityException("mac does not match");
-            }
+            byte[] entropy;
+            byte[] keys = null;
+            byte[] currentKey = null;
+            byte[] iv = null;
+            byte[] macKey = null;
+            byte[] cipherText = null;
+            byte[] mac = null;
+            byte[] refMac = null;
             try {
-                Cipher cipher = getCipher();
-                cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(currentKey, "AES"), new IvParameterSpec(iv));
-                return Bytes.wrap(cipher.doFinal(cipherText)).xor(entropy).array();
-            } catch (Exception e) {
-                throw new IllegalStateException(e);
+                byte version = bb.get();
+                entropy = getEntropyBytes(getSupportedIdByteLength());
+                if (randomizeIds) {
+                    bb.get(entropy);
+                }
+                cipherText = new byte[getSupportedIdByteLength()];
+                bb.get(cipherText);
+
+                mac = new byte[getMacLength()];
+                bb.get(mac);
+
+                byte[] currentSecretKey = checkAndGetCurrentKey(version, cipherText);
+
+                keys = hkdf.expand(currentSecretKey, entropy, 64);
+
+                currentKey = Bytes.from(keys, 0, 16).array();
+                iv = Bytes.from(keys, 16, 16).array();
+                macKey = Bytes.from(keys, 32, 32).array();
+
+                refMac = Bytes.from(macCipherText(macKey, cipherText, iv, new byte[]{version}), 0, getMacLength()).array();
+                if (!Bytes.wrap(mac).equalsConstantTime(refMac)) {
+                    throw new SecurityException("mac does not match");
+                }
+                try {
+                    Cipher cipher = getCipher();
+                    cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(currentKey, "AES"), new IvParameterSpec(iv));
+                    return Bytes.wrap(cipher.doFinal(cipherText)).xor(entropy).array();
+                } catch (Exception e) {
+                    throw new IllegalStateException(e);
+                }
+            } finally {
+                Bytes.wrapNullSafe(cipherText).mutable().secureWipe();
+                Bytes.wrapNullSafe(mac).mutable().secureWipe();
+                Bytes.wrapNullSafe(keys).mutable().secureWipe();
+                Bytes.wrapNullSafe(currentKey).mutable().secureWipe();
+                Bytes.wrapNullSafe(iv).mutable().secureWipe();
+                Bytes.wrapNullSafe(macKey).mutable().secureWipe();
+                Bytes.wrapNullSafe(refMac).mutable().secureWipe();
             }
         }
 
