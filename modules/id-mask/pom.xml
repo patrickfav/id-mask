@@ -7,7 +7,7 @@
     <parent>
         <artifactId>id-mask-parent</artifactId>
         <groupId>at.favre.lib</groupId>
-        <version>0.3.0</version>
+        <version>0.4.0</version>
         <relativePath>../../</relativePath>
     </parent>
 
