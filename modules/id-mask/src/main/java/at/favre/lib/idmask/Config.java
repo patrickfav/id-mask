@@ -70,6 +70,14 @@ public abstract class Config {
     abstract boolean enableCache();
 
     /**
+     * Wipes memory of security relevant date (e.g. byte arrays)
+     * in the expensive of making the process a bit slower.
+     *
+     * @return if auto wipe is enabled
+     */
+    abstract boolean autoWipeMemory();
+
+    /**
      * Creates a new build with the following defaults:
      *
      * <ul>
@@ -92,6 +100,7 @@ public abstract class Config {
                 .securityProvider(null)
                 .cacheImpl(new Cache.SimpleLruMemCache())
                 .enableCache(true)
+                .autoWipeMemory(false)
                 .secureRandom(new SecureRandom());
     }
 
@@ -208,6 +217,15 @@ public abstract class Config {
          * @return builder
          */
         public abstract Builder enableCache(boolean shouldCache);
+
+        /**
+         * Wipes memory of security relevant date (e.g. byte arrays) immediately after usage
+         * in the expensive of making masking a bit slower. This is an advanced security feature.
+         *
+         * @param shouldAutoWipe true if enabled
+         * @return builder
+         */
+        public abstract Builder autoWipeMemory(boolean shouldAutoWipe);
 
         /**
          * Create config

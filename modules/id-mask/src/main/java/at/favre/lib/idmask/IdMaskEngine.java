@@ -63,9 +63,10 @@ public interface IdMaskEngine {
         final HKDF hkdf;
         final KeyManager keyManager;
         final boolean randomizeIds;
+        final boolean autoWipeMemory;
         final int supportedIdByteLength;
 
-        BaseEngine(int supportedIdByteLength, KeyManager keyManager, Provider provider, SecureRandom secureRandom, ByteToTextEncoding encoding, boolean randomizeIds) {
+        BaseEngine(int supportedIdByteLength, KeyManager keyManager, Provider provider, SecureRandom secureRandom, ByteToTextEncoding encoding, boolean randomizeIds, boolean autoWipeMemory) {
             this.hkdf = HKDF.fromHmacSha512();
             this.provider = provider;
             this.secureRandom = Objects.requireNonNull(secureRandom, "secureRandom");
@@ -77,6 +78,7 @@ public interface IdMaskEngine {
                 }
             });
             this.randomizeIds = randomizeIds;
+            this.autoWipeMemory = autoWipeMemory;
             this.supportedIdByteLength = supportedIdByteLength;
         }
 
@@ -267,11 +269,11 @@ public interface IdMaskEngine {
         private static final int ENGINE_ID = 0;
 
         EightByteEncryptionEngine(KeyManager keyManager) {
-            this(keyManager, null, new SecureRandom(), new ByteToTextEncoding.Base64Url(), false);
+            this(keyManager, null, new SecureRandom(), new ByteToTextEncoding.Base64Url(), false, false);
         }
 
-        public EightByteEncryptionEngine(KeyManager keyManager, Provider provider, SecureRandom secureRandom, ByteToTextEncoding encoding, boolean randomizeIds) {
-            super(8, keyManager, provider, secureRandom, encoding, randomizeIds);
+        public EightByteEncryptionEngine(KeyManager keyManager, Provider provider, SecureRandom secureRandom, ByteToTextEncoding encoding, boolean randomizeIds, boolean autoWipeMemory) {
+            super(8, keyManager, provider, secureRandom, encoding, randomizeIds, autoWipeMemory);
         }
 
         @Override
@@ -313,9 +315,11 @@ public interface IdMaskEngine {
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             } finally {
-                Bytes.wrapNullSafe(random).mutable().secureWipe();
-                Bytes.wrapNullSafe(message).mutable().secureWipe();
-                Bytes.wrapNullSafe(cipherText).mutable().secureWipe();
+                if (autoWipeMemory) {
+                    Bytes.wrapNullSafe(random).mutable().secureWipe();
+                    Bytes.wrapNullSafe(message).mutable().secureWipe();
+                    Bytes.wrapNullSafe(cipherText).mutable().secureWipe();
+                }
             }
         }
 
@@ -360,9 +364,11 @@ public interface IdMaskEngine {
                 return Bytes.from(message, 8, getSupportedIdByteLength()).array();
 
             } finally {
-                Bytes.wrapNullSafe(entropyData).mutable().secureWipe();
-                Bytes.wrapNullSafe(cipherText).mutable().secureWipe();
-                Bytes.wrapNullSafe(message).mutable().secureWipe();
+                if (autoWipeMemory) {
+                    Bytes.wrapNullSafe(entropyData).mutable().secureWipe();
+                    Bytes.wrapNullSafe(cipherText).mutable().secureWipe();
+                    Bytes.wrapNullSafe(message).mutable().secureWipe();
+                }
             }
         }
 
@@ -390,11 +396,11 @@ public interface IdMaskEngine {
         private ThreadLocal<Mac> macThreadLocal = new ThreadLocal<>();
 
         SixteenByteEngine(KeyManager keyManager) {
-            this(keyManager, false, new ByteToTextEncoding.Base64Url(), new SecureRandom(), null, false);
+            this(keyManager, false, new ByteToTextEncoding.Base64Url(), new SecureRandom(), null, false, false);
         }
 
-        public SixteenByteEngine(KeyManager keyManager, boolean highSecurityMode, ByteToTextEncoding encoding, SecureRandom secureRandom, Provider provider, boolean randomizeIds) {
-            super(16, keyManager, provider, secureRandom, encoding, randomizeIds);
+        public SixteenByteEngine(KeyManager keyManager, boolean highSecurityMode, ByteToTextEncoding encoding, SecureRandom secureRandom, Provider provider, boolean randomizeIds, boolean autoWipeMemory) {
+            super(16, keyManager, provider, secureRandom, encoding, randomizeIds, autoWipeMemory);
             this.highSecurityMode = highSecurityMode;
         }
 
@@ -444,12 +450,14 @@ public interface IdMaskEngine {
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             } finally {
-                Bytes.wrapNullSafe(entropy).mutable().secureWipe();
-                Bytes.wrapNullSafe(keys).mutable().secureWipe();
-                Bytes.wrapNullSafe(currentKey).mutable().secureWipe();
-                Bytes.wrapNullSafe(macKey).mutable().secureWipe();
-                Bytes.wrapNullSafe(encryptedId).mutable().secureWipe();
-                Bytes.wrapNullSafe(mac).mutable().secureWipe();
+                if (autoWipeMemory) {
+                    Bytes.wrapNullSafe(entropy).mutable().secureWipe();
+                    Bytes.wrapNullSafe(keys).mutable().secureWipe();
+                    Bytes.wrapNullSafe(currentKey).mutable().secureWipe();
+                    Bytes.wrapNullSafe(macKey).mutable().secureWipe();
+                    Bytes.wrapNullSafe(encryptedId).mutable().secureWipe();
+                    Bytes.wrapNullSafe(mac).mutable().secureWipe();
+                }
             }
         }
 
@@ -502,13 +510,15 @@ public interface IdMaskEngine {
                     throw new IllegalStateException(e);
                 }
             } finally {
-                Bytes.wrapNullSafe(cipherText).mutable().secureWipe();
-                Bytes.wrapNullSafe(mac).mutable().secureWipe();
-                Bytes.wrapNullSafe(keys).mutable().secureWipe();
-                Bytes.wrapNullSafe(currentKey).mutable().secureWipe();
-                Bytes.wrapNullSafe(iv).mutable().secureWipe();
-                Bytes.wrapNullSafe(macKey).mutable().secureWipe();
-                Bytes.wrapNullSafe(refMac).mutable().secureWipe();
+                if (autoWipeMemory) {
+                    Bytes.wrapNullSafe(cipherText).mutable().secureWipe();
+                    Bytes.wrapNullSafe(mac).mutable().secureWipe();
+                    Bytes.wrapNullSafe(keys).mutable().secureWipe();
+                    Bytes.wrapNullSafe(currentKey).mutable().secureWipe();
+                    Bytes.wrapNullSafe(iv).mutable().secureWipe();
+                    Bytes.wrapNullSafe(macKey).mutable().secureWipe();
+                    Bytes.wrapNullSafe(refMac).mutable().secureWipe();
+                }
             }
         }
 

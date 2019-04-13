@@ -27,8 +27,8 @@ public class IdMaskEngine8ByteTest {
         KeyManager key = KeyManager.Factory.withRandom();
         byte[] id = Bytes.from(Bytes.from(9182746139874612986L)).array();
 
-        IdMaskEngine idMaskRandomized = new IdMaskEngine.EightByteEncryptionEngine(key, null, new SecureRandom(), new ByteToTextEncoding.Base64Url(), true);
-        IdMaskEngine idMaskDeterministic = new IdMaskEngine.EightByteEncryptionEngine(key, null, new SecureRandom(), new ByteToTextEncoding.Base64Url(), false);
+        IdMaskEngine idMaskRandomized = new IdMaskEngine.EightByteEncryptionEngine(key, null, new SecureRandom(), new ByteToTextEncoding.Base64Url(), true, false);
+        IdMaskEngine idMaskDeterministic = new IdMaskEngine.EightByteEncryptionEngine(key, null, new SecureRandom(), new ByteToTextEncoding.Base64Url(), false, false);
 
         CharSequence maskedId1 = idMaskRandomized.mask(id);
         CharSequence maskedId2 = idMaskDeterministic.mask(id);
@@ -43,7 +43,7 @@ public class IdMaskEngine8ByteTest {
     @Test
     public void testRandomizedIdsShouldNotReturnSameMaskedId() {
         IdMaskEngine idMaskEngine = new IdMaskEngine.EightByteEncryptionEngine(KeyManager.Factory.withRandom(),
-                null, new SecureRandom(), new ByteToTextEncoding.Base64Url(), true);
+                null, new SecureRandom(), new ByteToTextEncoding.Base64Url(), true, false);
         byte[] id = Bytes.from(7239562391234L).array();
 
         CharSequence maskedId1 = idMaskEngine.mask(id);
@@ -71,7 +71,7 @@ public class IdMaskEngine8ByteTest {
     @Test
     public void testDeterministicIdsShouldReturnSameMaskedId() {
         IdMaskEngine idMaskEngine = new IdMaskEngine.EightByteEncryptionEngine(KeyManager.Factory.withRandom(),
-                null, new SecureRandom(), new ByteToTextEncoding.Base64Url(), false);
+                null, new SecureRandom(), new ByteToTextEncoding.Base64Url(), false, false);
         byte[] id = Bytes.from(7239562391234L).array();
 
         CharSequence maskedId1 = idMaskEngine.mask(id);
@@ -274,6 +274,17 @@ public class IdMaskEngine8ByteTest {
             fail();
         } catch (IdMaskSecurityException e) {
             assertEquals(IdMaskSecurityException.Reason.UNKNOWN_ENGINE_ID, e.getReason());
+        }
+    }
+
+    @Test
+    public void testAutoWipeMemory() {
+        byte[] id = Bytes.from(397849238741625487L).array();
+        IdMaskEngine idMaskRandomized = new IdMaskEngine.EightByteEncryptionEngine(KeyManager.Factory.withRandom(), null, new SecureRandom(), new ByteToTextEncoding.Base64Url(), true, true);
+        for (int i = 0; i < 10; i++) {
+            CharSequence maskedId = idMaskRandomized.mask(id);
+            assertNotNull(maskedId);
+            assertArrayEquals(id, idMaskRandomized.unmask(maskedId));
         }
     }
 }

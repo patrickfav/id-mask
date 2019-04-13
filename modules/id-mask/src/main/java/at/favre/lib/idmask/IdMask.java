@@ -92,7 +92,7 @@ public interface IdMask<T> {
 
         LongIdMask(Config config) {
             super(new IdMaskEngine.EightByteEncryptionEngine(config.keyManager(), config.securityProvider(),
-                    config.secureRandom(), config.encoding(), config.randomizedIds()), config);
+                    config.secureRandom(), config.encoding(), config.randomizedIds(), config.autoWipeMemory()), config);
         }
 
         @Override
@@ -114,7 +114,7 @@ public interface IdMask<T> {
 
         LongIdTupleMask(Config config) {
             super(new IdMaskEngine.SixteenByteEngine(config.keyManager(), config.highSecurityMode(), config.encoding(),
-                    config.secureRandom(), config.securityProvider(), config.randomizedIds()), config);
+                    config.secureRandom(), config.securityProvider(), config.randomizedIds(), config.autoWipeMemory()), config);
         }
 
         @Override
@@ -139,7 +139,7 @@ public interface IdMask<T> {
 
         UuidMask(Config config) {
             super(new IdMaskEngine.SixteenByteEngine(config.keyManager(), config.highSecurityMode(), config.encoding(),
-                    config.secureRandom(), config.securityProvider(), config.randomizedIds()), config);
+                    config.secureRandom(), config.securityProvider(), config.randomizedIds(), config.autoWipeMemory()), config);
         }
 
         @Override
@@ -162,7 +162,7 @@ public interface IdMask<T> {
 
         ByteArray128bitMask(Config config) {
             super(new IdMaskEngine.SixteenByteEngine(config.keyManager(), config.highSecurityMode(), config.encoding(),
-                    config.secureRandom(), config.securityProvider(), config.randomizedIds()), config);
+                    config.secureRandom(), config.securityProvider(), config.randomizedIds(), config.autoWipeMemory()), config);
         }
 
         @Override
@@ -184,7 +184,7 @@ public interface IdMask<T> {
 
         BigIntegerIdMask(Config config) {
             super(new IdMaskEngine.SixteenByteEngine(config.keyManager(), config.highSecurityMode(), config.encoding(),
-                    config.secureRandom(), config.securityProvider(), config.randomizedIds()), config);
+                    config.secureRandom(), config.securityProvider(), config.randomizedIds(), config.autoWipeMemory()), config);
         }
 
         @Override

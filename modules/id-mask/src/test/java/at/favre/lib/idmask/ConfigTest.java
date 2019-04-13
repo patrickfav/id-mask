@@ -37,6 +37,7 @@ public class ConfigTest {
                 .cacheImpl(cache)
                 .highSecurityMode(true)
                 .secureRandom(secureRandom)
+                .autoWipeMemory(false)
                 .build();
 
         assertSame(keyManager, config.keyManager());
@@ -47,6 +48,7 @@ public class ConfigTest {
         assertSame(secureRandom, config.secureRandom());
         assertFalse(config.enableCache());
         assertFalse(config.enableCache());
+        assertFalse(config.autoWipeMemory());
         assertTrue(config.randomizedIds());
         assertTrue(config.highSecurityMode());
     }
