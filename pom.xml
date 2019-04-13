@@ -10,8 +10,10 @@
     <packaging>pom</packaging>
 
     <name>ID Masking Library Parent</name>
-    <description>This library uses strong cryptographic primitives to mask private technical IDs (e.g. from your DB)
-        to make it infeasible to guess them. This masking is reversible.
+    <description>IDMask is a Java library for masking internal ids (e.g. from your DB) when they need to be published to
+        hide their actual value and to prevent forging. It has support optional randomisation has a wide support for
+        various Java types including long, UUID and BigInteger. This library bases its security on strong cryptographic
+        primitives.
     </description>
     <url>https://github.com/patrickfav/id-mask</url>
     <inceptionYear>2019</inceptionYear>
@@ -74,6 +76,7 @@
                 <artifactId>flatten-maven-plugin</artifactId>
                 <version>1.1.0</version>
                 <configuration>
+                    <flattenMode>oss</flattenMode>
                 </configuration>
                 <executions>
                     <!-- enable flattening -->

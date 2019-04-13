@@ -15,9 +15,6 @@
     <packaging>jar</packaging>
 
     <name>ID Masking Library</name>
-    <description>This library uses strong cryptographic primitives to mask private technical IDs (e.g. from your DB)
-        to make it infeasible to guess them. This masking is reversible.
-    </description>
 
     <properties>
         <maven.deploy.skip>false</maven.deploy.skip>
