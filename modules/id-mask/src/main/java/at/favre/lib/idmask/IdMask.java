@@ -13,7 +13,7 @@ import java.util.UUID;
  * and should be obfuscated as to make it harder to guess and understand related ids
  * (e.g in a sequence).
  * <p>
- * IdMask should be thread
+ * IdMask should be thread-safe.
  *
  * @param <T> type of the id
  */
