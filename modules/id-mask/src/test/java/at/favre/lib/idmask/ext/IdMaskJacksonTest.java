@@ -41,8 +41,8 @@ public class IdMaskJacksonTest {
     }
 
     static class LongIdUser {
-        @JsonSerialize(using = IdMaskJackson.LongSerializer.class)
-        @JsonDeserialize(using = IdMaskJackson.LongDeserializer.class)
+        @JsonSerialize(using = MyIdMaskLongSerializers.Serializer.class)
+        @JsonDeserialize(using = MyIdMaskLongSerializers.Deserializer.class)
         private final long id;
         private final String username;
 
@@ -76,8 +76,8 @@ public class IdMaskJacksonTest {
     }
 
     static class UuidUser {
-        @JsonSerialize(using = IdMaskJackson.UuidSerializer.class)
-        @JsonDeserialize(using = IdMaskJackson.UuidDeserializer.class)
+        @JsonSerialize(using = MyIdMaskUuidSerializers.Serializer.class)
+        @JsonDeserialize(using = MyIdMaskUuidSerializers.Deserializer.class)
         private final UUID id;
         private final String username;
 
@@ -111,8 +111,8 @@ public class IdMaskJacksonTest {
     }
 
     static class BigIntUser {
-        @JsonSerialize(using = IdMaskJackson.BigIntegerSerializer.class)
-        @JsonDeserialize(using = IdMaskJackson.BigIntegerDeserializer.class)
+        @JsonSerialize(using = MyIdMaskBigIntegerSerializers.Serializer.class)
+        @JsonDeserialize(using = MyIdMaskBigIntegerSerializers.Deserializer.class)
         private final BigInteger id;
         private final String username;
 

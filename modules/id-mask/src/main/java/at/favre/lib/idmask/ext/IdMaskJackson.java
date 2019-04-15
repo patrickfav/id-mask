@@ -1,9 +1,6 @@
 package at.favre.lib.idmask.ext;
 
-import at.favre.lib.bytes.Bytes;
-import at.favre.lib.idmask.Config;
 import at.favre.lib.idmask.IdMask;
-import at.favre.lib.idmask.IdMasks;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -15,38 +12,91 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.UUID;
 
+/**
+ * Default implementations for Jackson serializers & deserializers. The jackson dependency is optional so you have
+ * to add them to maven yourself if you want to use this class. The following modules are required:
+ * <ul>
+ * <li>com.fasterxml.jackson.core:jackson-core</li>
+ * <li>com.fasterxml.jackson.core:jackson-databind</li>
+ * </ul>
+ * <p>
+ * Tested with version 2.9.8 at the time of writing (2019).
+ * <p>
+ * You may use this for transparently converting your model id to a json string representation.
+ * <p>
+ * Example:
+ * <p>
+ * Extend the respective serializer/deserializer and provide your IDMask instance (or use DI to inject).
+ * It is important to provide a no-arg constructor:
+ *
+ * <code>
+ * public final class MyIdMaskLongSerializers {
+ * private MyIdMaskLongSerializers() {
+ * }
+ *
+ * @Inject private final byte[] key;
+ * <p>
+ * public static final class Serializer extends IdMaskJackson.LongSerializer {
+ * public Serializer() {
+ * super(IdMasks.forLongIds(Config.builder(key).build()));
+ * }
+ * }
+ * <p>
+ * public static final class Deserializer extends IdMaskJackson.LongDeserializer {
+ * public Deserializer() {
+ * super(IdMasks.forLongIds(Config.builder(key).build()));
+ * }
+ * }
+ * }
+ * </code>
+ * <p>
+ * Annotate your model
+ * <code>
+ * public class LongIdUser {
+ * @JsonSerialize(using = MyIdMaskLongSerializers.Serializer.class)
+ * @JsonDeserialize(using = MyIdMaskLongSerializers.Deserializer.class)
+ * private final long id;
+ * <p>
+ * ...
+ * }
+ * </code>
+ */
+@SuppressWarnings("WeakerAccess")
 public final class IdMaskJackson {
+    private IdMaskJackson() {
+    }
 
+    /**
+     * Used to serialize long to string
+     */
     public static class LongSerializer extends Serializer<Long> {
-        public LongSerializer() {
-            this(IdMasks.forLongIds(Config.builder(Bytes.parseHex("a3a5a7a9a1a0abea7aa8aaa3afaaaaaa").array()).build()));
-        }
-
         public LongSerializer(IdMask<Long> idMask) {
             super(idMask, Long.class);
         }
     }
 
+    /**
+     * Used to serialize {@link UUID} to string
+     */
     public static class UuidSerializer extends Serializer<UUID> {
-        public UuidSerializer() {
-            this(IdMasks.forUuids(Config.builder(Bytes.parseHex("a3a5a7a9a1a0abea7aa8aaa3afaaaaaa").array()).build()));
-        }
-
         public UuidSerializer(IdMask<UUID> idMask) {
             super(idMask, UUID.class);
         }
     }
 
+    /**
+     * Used to serialize {@link BigInteger} to string
+     */
     public static class BigIntegerSerializer extends Serializer<BigInteger> {
-        public BigIntegerSerializer() {
-            this(IdMasks.forBigInteger(Config.builder(Bytes.parseHex("a3a5a7a9a1a0abea7aa8aaa3afaaaaaa").array()).build()));
-        }
-
         public BigIntegerSerializer(IdMask<BigInteger> idMask) {
             super(idMask, BigInteger.class);
         }
     }
 
+    /**
+     * Base serializer
+     * @param <T> type to serialize
+     */
     public abstract static class Serializer<T> extends StdSerializer<T> {
         private final IdMask<T> idMask;
 
@@ -62,36 +112,37 @@ public final class IdMaskJackson {
         }
     }
 
+    /**
+     * Used to deserialize string to long
+     */
     public static class LongDeserializer extends Deserializer<Long> {
-        public LongDeserializer() {
-            this(IdMasks.forLongIds(Config.builder(Bytes.parseHex("a3a5a7a9a1a0abea7aa8aaa3afaaaaaa").array()).build()));
-        }
-
         public LongDeserializer(IdMask<Long> idMask) {
             super(idMask, Long.class);
         }
     }
 
+    /**
+     * Used to deserialize string to {@link UUID}
+     */
     public static class UuidDeserializer extends Deserializer<UUID> {
-        public UuidDeserializer() {
-            this(IdMasks.forUuids(Config.builder(Bytes.parseHex("a3a5a7a9a1a0abea7aa8aaa3afaaaaaa").array()).build()));
-        }
-
         public UuidDeserializer(IdMask<UUID> idMask) {
             super(idMask, UUID.class);
         }
     }
 
+    /**
+     * Used to deserialize string to {@link BigInteger}
+     */
     public static class BigIntegerDeserializer extends Deserializer<BigInteger> {
-        public BigIntegerDeserializer() {
-            this(IdMasks.forBigInteger(Config.builder(Bytes.parseHex("a3a5a7a9a1a0abea7aa8aaa3afaaaaaa").array()).build()));
-        }
-
         public BigIntegerDeserializer(IdMask<BigInteger> idMask) {
             super(idMask, BigInteger.class);
         }
     }
 
+    /**
+     * Base deserializer
+     * @param <T> type to serialize
+     */
     public abstract static class Deserializer<T> extends StdDeserializer<T> {
         private final IdMask<T> idMask;
 
