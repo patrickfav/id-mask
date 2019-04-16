@@ -415,7 +415,7 @@ Add dependency to your `pom.xml`:
 
 Add to your `build.gradle` module dependencies:
 
-    compile group: 'at.favre.lib', name: 'id-mask', version: '{latest-version}'
+    implementation group: 'at.favre.lib', name: 'id-mask', version: '{latest-version}'
 
 ### Local Jar
 
@@ -427,12 +427,12 @@ Add to your `build.gradle` module dependencies:
 
 IDMask can be used in an environment, where you want to protect the knowledge of the value of your IDs. Usually a very
 easy workaround would be to add another column in your database and randomly create UUIDs and use this instead of your
-e.g. numeric ids. However sometimes this is not feasible (e.g. having millions of rows) or cannot change the DB schema.
+e.g. numeric ids. However sometimes this is not feasible (e.g. having millions of rows) or you cannot change the DB schema.
 Additionally IDMask can make IDs appear random, a feature which cannot be satisfied with the above approach.
 
 #### When to use IDMask
 
-* If IDs are used which are easily guessable (ie. simple sequence) and knowledge of this ID might reveal confident information
+* If IDs are used which are easily guessable (ie. simple sequence) and knowledge of this ID might reveal confidential information
 * If IDs expose row count in a database table, which in turn reveals business intelligence (e.g. how many orders per day, etc.)
 * For creating ad-hoc shareable links which should appear random to the public
 * For creating single-use tokens for various use cases
@@ -444,20 +444,21 @@ Additionally IDMask can make IDs appear random, a feature which cannot be satisf
 
 ### Performance
 
-IDMask requires a non-trivial amount of work to encrypt ids. The 8-byte-schema only needs to encrypt a single AES block (which should be hardware accelerated with most CPUs). The 16-byte schema is more expensive, since it requires encryption of an AES block, one HKDF expand and a HMAC calculation. According to the JMH benchmark, you can expect multiple hundreds encryption/decryption per ms. Compared to the performance HashIds, which is faster by a factor of about 1000, IDMask seems extremely slow, but in the grant scheme of things it probably doesn't make a difference if masking of a single id costs 2µs or 0.002µs.
+IDMask requires a non-trivial amount of work to encrypt ids. The 8-byte-schema only needs to encrypt a single AES block (which should be hardware accelerated with most CPUs). The 16-byte schema is more expensive, since it requires encryption of an AES block, one HKDF expand and a HMAC calculation. According to the JMH benchmark, you can expect multiple hundreds encryption/decryption per ms. Compared to the performance HashIds, which is faster by a factor of about 1000, IDMask seems extremely slow, but in the grant scheme of things it probably doesn't make a difference if masking of a single id costs 2µs or 0.002µs - there will be no performance bottleneck either way.
 
 #### JMH Benchmark
 
 Here is an benchmark done on a [i7-7700k](https://ark.intel.com/content/www/us/en/ark/products/97129/intel-core-i7-7700k-processor-8m-cache-up-to-4-50-ghz.html):
 
 ```
-Benchmark                                               Mode  Cnt      Score     Error  Units
-IdMaskAndHashIdsBenchmark.benchmarkHashIdEncode         avgt    3      2,313 ±   0,125  ns/op
-IdMaskAndHashIdsBenchmark.benchmarkHashIdEncodeDecode   avgt    3      3,279 ±   0,182  ns/op
-IdMaskAndHashIdsBenchmark.benchmarkIdMask16Byte         avgt    3   7500,178 ± 397,964  ns/op
-IdMaskAndHashIdsBenchmark.benchmarkIdMask8Byte          avgt    3   1841,921 ± 199,976  ns/op
-IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask16Byte  avgt    3  14964,914 ± 702,110  ns/op
-IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask8Byte   avgt    3   4032,200 ±  23,610  ns/op
+Benchmark                                               Mode  Cnt      Score      Error  Units
+IdMaskAndHashIdsBenchmark.benchmarkHashIdEncode         avgt    3      2,372 ±    0,282  ns/op
+IdMaskAndHashIdsBenchmark.benchmarkHashIdEncodeDecode   avgt    3      3,396 ±    0,965  ns/op
+IdMaskAndHashIdsBenchmark.benchmarkIdMask16Byte         avgt    3   7530,858 ±  761,871  ns/op
+IdMaskAndHashIdsBenchmark.benchmarkIdMask8Byte          avgt    3   2863,481 ±  183,189  ns/op
+IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask16Byte  avgt    3  15054,198 ± 2030,344  ns/op
+IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask8Byte   avgt    3   4707,021 ±  164,998  ns/op
+
 ```
 
 ### Encryption Schema
