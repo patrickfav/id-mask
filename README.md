@@ -3,7 +3,7 @@
 
 # IDMask - Encryption and Obfuscation of IDs
 
-IDMask is a library for masking **internal ids** (e.g. from your DB) when they need to be publicly published to **hide their actual value and to prevent forging**. This should make it very hard for an attacker to understand provided ids (e.g. by witnessing a sequence, deducting how many order you had, etc.) and **prevent guessing** of possible valid IDs. Masking is **fully reversible** and also supports optional **randomization** for e.g. **shareable links** or **one-time tokens**. It has a wide support for various **Java types** including `long`, `UUID` and `BigInteger`. This library bases its security on **strong cryptographic primitives** ([AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard), [HMAC](https://en.wikipedia.org/wiki/HMAC), [HKDF](https://en.wikipedia.org/wiki/HKDF)) to create a secure encryption schema. It was inspired by [HashIds](https://hashids.org/) but tries to tackle most of it's shortcomings.
+IDMask is a Java library for masking **internal ids** (e.g. from your DB) when they need to be publicly published to **hide their actual value and to prevent forging**. This should make it very hard for an attacker to **understand** provided IDs (e.g. by witnessing a sequence, deducting how many order you had, etc.) and **prevent guessing** of possible valid ones. Masking is **fully reversible** and also supports optional **randomization** for e.g. **shareable links** or **one-time tokens**. It has a wide support for various **Java types** including `long`, `UUID` and `BigInteger`. This library bases its security on **strong cryptographic primitives** ([AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard), [HMAC](https://en.wikipedia.org/wiki/HMAC), [HKDF](https://en.wikipedia.org/wiki/HKDF)) to create a secure encryption schema. It was inspired by [HashIds](https://hashids.org/) but tries to tackle most of it's shortcomings.
 
 
 [![Download](https://api.bintray.com/packages/patrickfav/maven/id-mask/images/download.svg)](https://bintray.com/patrickfav/maven/id-mask/_latestVersion)
@@ -19,9 +19,9 @@ IDMask is a library for masking **internal ids** (e.g. from your DB) when they n
 * **Full support of types**: no arbitrary restrictions like "only positive longs", etc.
 * **ID randomization**: if enabled, will create IDs which appear uncorrelated with the same underlying value.
 * **No collisions possible**: because the IDs are not hashed or otherwise compressed, collisions are impossible
-* **Built-in caching support**: To increase performance a simple caching framework can be facilitated.
+* **Built-in caching support**: to increase performance a simple caching framework can be facilitated.
 * **Lightweight & Easy-to-use**: the library has only minimal dependencies and a straight forward API
-* **Fast**: 8 byte ids take about `2µs` and 16 byte ids `7µs` to mask on a fast desktop machine (see JMH benchmark)
+* **Fast**: 8 byte ids take about `2µs` and 16 byte ids `7µs` to mask on a fast desktop machine (see [_JMH Benchmarks_](https://github.com/patrickfav/id-mask/tree/master/misc/jmh-reports))
 * **Supports multiple encodings**: Depending on your requirement (short IDs vs. readability vs. should not contain words) multiple encodings are available including [Base64](https://en.wikipedia.org/wiki/Base64), [Base32](https://en.wikipedia.org/wiki/Base32) and [Hex](https://en.wikipedia.org/wiki/Hexadecimal) with the option of providing a custom one.
 
 The code is compiled with target [Java 7](https://en.wikipedia.org/wiki/Java_version_history#Java_SE_7) to keep backwards compatibility with *Android* and older *Java* applications.
