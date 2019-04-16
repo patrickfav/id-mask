@@ -11,8 +11,6 @@ IDMask is a library for masking **internal ids** (e.g. from your DB) when they n
 [![Coverage Status](https://coveralls.io/repos/github/patrickfav/id-mask/badge.svg?branch=master)](https://coveralls.io/github/patrickfav/id-mask?branch=master) [![Maintainability](https://api.codeclimate.com/v1/badges/fc50d911e4146a570d4e/maintainability)](https://codeclimate.com/github/patrickfav/id-mask/maintainability)
 
 
-
-
 ## Feature Overview
 
 * **Secure**: Creates encrypted IDs with **no-nonsense cryptography** ([AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard), [HKDF](https://en.wikipedia.org/wiki/HKDF)) including **forgery protection** ([HMAC](https://en.wikipedia.org/wiki/HMAC))
@@ -458,7 +456,6 @@ IdMaskAndHashIdsBenchmark.benchmarkIdMask16Byte         avgt    3   7530,858 ± 
 IdMaskAndHashIdsBenchmark.benchmarkIdMask8Byte          avgt    3   2863,481 ±  183,189  ns/op
 IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask16Byte  avgt    3  15054,198 ± 2030,344  ns/op
 IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask8Byte   avgt    3   4707,021 ±  164,998  ns/op
-
 ```
 
 ### Encryption Schema
@@ -526,17 +523,47 @@ This schema uses the following cryptographic primitives:
 * [HMAC-SHA256](https://en.wikipedia.org/wiki/HMAC)
 * [HKDF-HMAC-SHA512](https://en.wikipedia.org/wiki/HKDF)
 
+The basic scheme works as follows:
 
-     ciphertext_d = AES_CBC( iv , id )
-     mac_d = HMAC(ciphertext_d)
-     maskeId_msg_d= ciphertext_d | mac_d[0-8]
+First create the required keys and nonce:
 
+```
+okm = hkdf.expand(key, entropy, 64);
+key_s = okm[0-16];
+iv_s = okm[16-32];
+mac_key_s = okm[32-64];
 
+key ......... provided secret key
+entropy ..... 8 byte value. For randomized-ids it is a random value, otherwise zero bytes 
+```       
+
+Then encrypt the id:
+
+```
+ciphertext = AES_CBC( iv_s , id ^ entropy)
+mac = HMAC(ciphertext)
+maskedId_msg= ciphertext | mac[0-8]
+
+id .......... id to mask (aka plaintext)
+```
+
+optionally if randomized ids are enabled, also append `entropy` to the output:
+
+```
+maskedId_msg_r = entropy | maskedId_msg
+```
+
+Finally append the version byte (see explanation in 8 byte schema). Use either the randomized or deterministic version:
+
+```
+maskeId_msg_r = obfuscated_version_byte | maskedId_msg_r
+maskeId_msg_d = obfuscated_version_byte | maskedId_msg
+```
 
 ### IDMask vs HashIds
 
 One of the reasons this library was created, was that the author was not happy how HashIds solved the issue of
-obfuscating/encryption of IDs. Here are the main criticism:
+obfuscating/encryption of IDs. These are the main criticism:
 
 #### Weak, home-brew cryptography
 
@@ -552,7 +579,7 @@ In summary, here is simple comparison table of the main points:
 |                    | IDMask                                    | HashId                       |
 |--------------------|-------------------------------------------|------------------------------|
 | Supported Types    | long, UUID, BigInteger, byte[], LongTuple | long, long[]                 |
-| Type Limitations   | long: none, BigInteger: max 15 byte       | only positive and max 2^53   |
+| Type Limitations   | long: none, BigInteger: max 15 byte, byte[]: max 16 byte       | only positive and max 2^53   |
 | Randomized IDs     | optional                                  | no                           |
 | Output Length      | fixed length                              | variable length              |
 | Encryption         | AES + HMAC                                | encoding + shuffled alphabet |

@@ -383,6 +383,54 @@ public interface IdMaskEngine {
         }
     }
 
+    /**
+     * Engine for handling 16-byte long ids.
+     * <p>
+     * This schema uses the following cryptographic primitives:
+     *
+     * <ul>
+     * <li>AES-128 + CBC</li>
+     * <li>HMAC-SHA256</li>
+     * <li>HKDF-HMAC-SHA512</li>
+     * </ul>
+     * <p>
+     * The basic scheme works as follows:
+     * <p>
+     * First create the required keys and nonce:
+     *
+     * <pre>
+     * okm = hkdf.expand(key, entropy, 64);
+     * key_s = okm[0-16];
+     * iv_s = okm[16-32];
+     * mac_key_s = okm[32-64];
+     *
+     * key ......... provided secret key
+     * entropy ..... 8 byte value. For randomized-ids it is a random value, otherwise zero bytes
+     * </pre>
+     * <p>
+     * Then encrypt the id:
+     *
+     * <pre>
+     * ciphertext = AES_CBC( iv_s , id ^ entropy)
+     * mac = HMAC(ciphertext)
+     * maskedId_msg= ciphertext | mac[0-8]
+     *
+     * id .......... id to mask (aka plaintext)
+     * </pre>
+     * <p>
+     * optionally if randomized ids are enabled, also append `entropy` to the output:
+     *
+     * <pre>
+     * maskedId_msg_r = entropy | maskedId_msg
+     * </pre>
+     * <p>
+     * Finally append the version byte (see explanation in 8 byte schema). Use either the randomized or deterministic version:
+     *
+     * <pre>
+     * maskeId_msg_r = obfuscated_version_byte | maskedId_msg_r
+     * maskeId_msg_d = obfuscated_version_byte | maskedId_msg
+     * </pre>
+     */
     @SuppressWarnings("WeakerAccess")
     final class SixteenByteEngine extends BaseEngine implements IdMaskEngine {
         private static final String ALGORITHM = "AES/CBC/NoPadding";
