@@ -12,7 +12,7 @@ IDMask is a library for masking **internal ids** (e.g. from your DB) when they n
 [![Coverage Status](https://coveralls.io/repos/github/patrickfav/id-mask/badge.svg?branch=master)](https://coveralls.io/github/patrickfav/id-mask?branch=master) [![Maintainability](https://api.codeclimate.com/v1/badges/fc50d911e4146a570d4e/maintainability)](https://codeclimate.com/github/patrickfav/id-mask/maintainability)
 
 
-## Feature OverviewK
+## Feature Overview
 
 * **Secure**: Creates encrypted IDs with **no-nonsense cryptography** ([AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard), [HKDF](https://en.wikipedia.org/wiki/HKDF)) including **forgery protection** ([HMAC](https://en.wikipedia.org/wiki/HMAC))
 * **Wide range of Java type support**: mask ids from `long`, `UUID`, `BigInteger`, `LongTuple` and `byte[]`
