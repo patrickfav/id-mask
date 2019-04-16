@@ -7,6 +7,9 @@ package at.favre.lib.idmask;
  */
 public class IdMaskSecurityException extends SecurityException {
 
+    /**
+     * Technical reason of the exception
+     */
     public enum Reason {
 
         /**

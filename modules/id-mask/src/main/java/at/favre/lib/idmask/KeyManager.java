@@ -250,6 +250,9 @@ public interface KeyManager {
             keyManager.clear();
         }
 
+        /**
+         * Simple interface for deriving keys used in {@link CachedKdfConverter}.
+         */
         public interface KdfConverter {
             byte[] convert(IdSecretKey idSecretKey);
         }
