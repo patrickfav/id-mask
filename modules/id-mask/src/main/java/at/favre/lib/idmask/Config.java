@@ -114,6 +114,9 @@ public abstract class Config {
         return builder(KeyManager.Factory.with(key));
     }
 
+    /**
+     * Class for creating configurations for IdMas. See {@link #builder(KeyManager)}.
+     */
     @AutoValue.Builder
     public abstract static class Builder {
 
@@ -141,6 +144,12 @@ public abstract class Config {
          *    new ByteToTextEncoding.Base32Rfc4648()
          * </pre>
          *
+         *  The library internally converts everything to bytes, encrypts it and then requires an encoding schema to make
+         *  the output printable. Per default the url-safe version of Base64 (RFC4648) is used. This is a well supported,
+         *  fast and reasonable space efficient (needs ~25% more storage than the raw bytes) encoding. Note that the
+         *  output size is constant using the same settings a type and does _not_ grow or shrink depending on e.g.
+         *  how big the number is.
+         *
          * @param encoding to use
          * @return builder
          */
@@ -149,6 +158,16 @@ public abstract class Config {
 
         /**
          * If better security settings should be used sacrificing output size and / or performance.
+         *
+         * Only applicable with 16 byte ids (e.g. <code>UUID</code>, <code>byte[]</code>, <code>BigInteger</code>, ...)
+         * it is optionally possible to increase the security  strength of the masked id in expense for increased id lengths.
+         * By default a 8-byte MAC is appended to the ID and, if randomization is enabled, a 8-byte random nonce is prepended.
+         * In high security mode these  numbers double to 16 byte, therefore high security IDs are 16 bytes longer.
+         * If you generate a massive amount of ids or don't mind the longer output length, high security mode is recommended.
+         *
+         * Issue with smaller MAC is increased chance of not recognizing a forgery and issue with smaller randomization nonce is higher
+         * chance of finding duplicated randomization values and recognizing equal ids (chance of duplicate after 5,000,000,000 randomized ids
+         * with 8 byte nonce is 50%). Increasing these numbers to 16 bytes make both those issue negligible.
          *
          * @param isHighSecurityMode true if enabled
          * @return builder
