@@ -13,7 +13,7 @@ import java.math.BigInteger;
 import java.util.UUID;
 
 /**
- * Default implementations for Jackson serializers & deserializers. The jackson dependency is optional so you have
+ * Default implementations for Jackson serializers &amp; deserializers. The jackson dependency is optional so you have
  * to add them to maven yourself if you want to use this class. The following modules are required:
  * <ul>
  * <li>com.fasterxml.jackson.core:jackson-core</li>
@@ -29,37 +29,38 @@ import java.util.UUID;
  * Extend the respective serializer/deserializer and provide your IDMask instance (or use DI to inject).
  * It is important to provide a no-arg constructor:
  *
- * <code>
+ * <pre>
  * public final class MyIdMaskLongSerializers {
- * private MyIdMaskLongSerializers() {
- * }
+ *      private MyIdMaskLongSerializers() {
+ *      }
  *
- * @Inject private final byte[] key;
+ *      &#64;Inject private final byte[] key;
+ *
+ *      public static final class Serializer extends IdMaskJackson.LongSerializer {
+ *          public Serializer() {
+ *              super(IdMasks.forLongIds(Config.builder(key).build()));
+ *          }
+ *      }
+ *
+ *      public static final class Deserializer extends IdMaskJackson.LongDeserializer {
+ *          public Deserializer() {
+ *              super(IdMasks.forLongIds(Config.builder(key).build()));
+ *          }
+ *      }
+ * }
+ * </pre>
  * <p>
- * public static final class Serializer extends IdMaskJackson.LongSerializer {
- * public Serializer() {
- * super(IdMasks.forLongIds(Config.builder(key).build()));
- * }
- * }
- * <p>
- * public static final class Deserializer extends IdMaskJackson.LongDeserializer {
- * public Deserializer() {
- * super(IdMasks.forLongIds(Config.builder(key).build()));
- * }
- * }
- * }
- * </code>
- * <p>
- * Annotate your model
- * <code>
+ *
+ * Annotate your model:
+ *
+ * <pre>
  * public class LongIdUser {
- * @JsonSerialize(using = MyIdMaskLongSerializers.Serializer.class)
- * @JsonDeserialize(using = MyIdMaskLongSerializers.Deserializer.class)
- * private final long id;
- * <p>
+ *      &#64;JsonSerialize(using = MyIdMaskLongSerializers.Serializer.class)
+ *      &#64;JsonDeserialize(using = MyIdMaskLongSerializers.Deserializer.class)
+ *      private final long id;
  * ...
  * }
- * </code>
+ * </pre>
  */
 @SuppressWarnings("WeakerAccess")
 public final class IdMaskJackson {

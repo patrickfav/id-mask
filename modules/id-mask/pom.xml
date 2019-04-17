@@ -159,6 +159,7 @@
             <artifactId>utils-lrucache</artifactId>
             <version>1.0.1</version>
         </dependency>
+
         <!-- optional dependencies -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -172,6 +173,13 @@
             <version>${jackson.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <version>2.1.1</version>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- test -->
         <dependency>
             <groupId>junit</groupId>
