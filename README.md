@@ -293,7 +293,7 @@ Config.builder(key)
 
 #### Q4: Any other Advanced Security Features required?
 
-You may provide your own [JCA provider](https://docs.oracle.com/javase/7/docs/technotes/guides/security/crypto/CryptoSpec.html) (like [BouncyCastle](https://www.bouncycastle.org/)) or your own cryptographically secure pseudorandom number generator
+You may provide your own [JCA provider](https://docs.oracle.com/javase/7/docs/technotes/guides/security/crypto/CryptoSpec.html) (like [BouncyCastle](https://www.bouncycastle.org/)) or your own cryptographically secure pseudo-random number generator
 (i.e. a [SecureRandom](https://docs.oracle.com/javase/8/docs/api/java/security/SecureRandom.html) implementation). The provider is used to encrypt/decrypt with [AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard) and to calculate [HMACs](https://en.wikipedia.org/wiki/HMAC)
 
 Example:
