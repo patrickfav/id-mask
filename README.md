@@ -26,6 +26,7 @@ IDMask is a Java library for masking **internal IDs** (e.g. from your DB) when t
 * **Lightweight & Easy-to-use**: the library has only minimal dependencies and a straight forward API
 * **Fast**: 8 byte IDs take about `2µs` and 16 byte IDs `7µs` to mask on a fast desktop machine (see [_JMH Benchmarks_](https://github.com/patrickfav/id-mask/tree/master/misc/jmh-reports))
 * **Supports multiple encodings**: Depending on your requirement (short IDs vs. readability vs. should not contain words) multiple encodings are available including [Base64](https://en.wikipedia.org/wiki/Base64), [Base32](https://en.wikipedia.org/wiki/Base32) and [Hex](https://en.wikipedia.org/wiki/Hexadecimal) with the option of providing a custom one.
+* **Includes default implementations for various serializer**: Jackson serializer, JAX-RS `ParamConverter`
 
 The code is compiled with target [Java 7](https://en.wikipedia.org/wiki/Java_version_history#Java_SE_7) to keep backwards compatibility with *Android* and older *Java* applications.
 
