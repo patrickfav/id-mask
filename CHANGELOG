@@ -1,6 +1,11 @@
 # Releases
 
-## v0.2.0
+## v0.4.0
+
+* add Jackson serializers/deserializer implementations for IdMask
+* add JAX-RS ParamConverter<T> implementations for IdMask
+
+## v0.3.0
 
 * add auto wipe memory feature
 * fix flatten pom issue
