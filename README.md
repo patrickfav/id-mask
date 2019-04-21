@@ -11,7 +11,8 @@ IDMask is a Java library for masking **internal IDs** (e.g. from your DB) when t
 [![Download](https://api.bintray.com/packages/patrickfav/maven/id-mask/images/download.svg)](https://bintray.com/patrickfav/maven/id-mask/_latestVersion)
 [![Build Status](https://travis-ci.org/patrickfav/id-mask.svg?branch=master)](https://travis-ci.org/patrickfav/id-mask)
 [![Javadocs](https://www.javadoc.io/badge/at.favre.lib/id-mask.svg)](https://www.javadoc.io/doc/at.favre.lib/id-mask)
-[![Coverage Status](https://coveralls.io/repos/github/patrickfav/id-mask/badge.svg?branch=master)](https://coveralls.io/github/patrickfav/id-mask?branch=master) [![Maintainability](https://api.codeclimate.com/v1/badges/fc50d911e4146a570d4e/maintainability)](https://codeclimate.com/github/patrickfav/id-mask/maintainability)
+[![Coverage Status](https://coveralls.io/repos/github/patrickfav/id-mask/badge.svg?branch=master)](https://coveralls.io/github/patrickfav/id-mask?branch=master)
+[![Maintainability](https://api.codeclimate.com/v1/badges/fc50d911e4146a570d4e/maintainability)](https://codeclimate.com/github/patrickfav/id-mask/maintainability)
 
 
 ## Feature Overview
@@ -25,6 +26,7 @@ IDMask is a Java library for masking **internal IDs** (e.g. from your DB) when t
 * **Lightweight & Easy-to-use**: the library has only minimal dependencies and a straight forward API
 * **Fast**: 8 byte IDs take about `2µs` and 16 byte IDs `7µs` to mask on a fast desktop machine (see [_JMH Benchmarks_](https://github.com/patrickfav/id-mask/tree/master/misc/jmh-reports))
 * **Supports multiple encodings**: Depending on your requirement (short IDs vs. readability vs. should not contain words) multiple encodings are available including [Base64](https://en.wikipedia.org/wiki/Base64), [Base32](https://en.wikipedia.org/wiki/Base32) and [Hex](https://en.wikipedia.org/wiki/Hexadecimal) with the option of providing a custom one.
+* **Includes default implementations for various serializer**: Jackson serializer, JAX-RS `ParamConverter`
 
 The code is compiled with target [Java 7](https://en.wikipedia.org/wiki/Java_version_history#Java_SE_7) to keep backwards compatibility with *Android* and older *Java* applications.
 
@@ -70,8 +72,21 @@ Examples for other java types (e.g. [`BigInteger`](https://docs.oracle.com/javas
 The following section explains in detail how to use and configure IDMask:
 
 * **Step 1:** How to create your secret key
+    * Option A: Random Number Generator CLI
+    * Option B: Generate a Random Key within a Java Runtime
 * **Step 2:** Select the Java type to use
+    * Option A: `long`
+    * Option B: `UUID` 
+    * Option C: `BigInteger`
+    * Option D: `LongTuple`
+    * Option E: `byte[]`
+    * Option F: multiple `int`
 * **Step 3:** Adjust the configuration to your needs
+    * Q1: Deterministic or Random?
+    * Q2: Which encoding?
+    * Q3: Caching?
+    * Q4: Advanced Security Features?
+* **Additional Features**: key migration, error-handling, converter for Jackson and JAX-RS
 
 ### Step 1: Create a Secret Key
 
@@ -293,7 +308,7 @@ Config.builder(key)
 
 #### Q4: Any other Advanced Security Features required?
 
-You may provide your own [JCA provider](https://docs.oracle.com/javase/7/docs/technotes/guides/security/crypto/CryptoSpec.html) (like [BouncyCastle](https://www.bouncycastle.org/)) or your own cryptographically secure pseudorandom number generator
+You may provide your own [JCA provider](https://docs.oracle.com/javase/7/docs/technotes/guides/security/crypto/CryptoSpec.html) (like [BouncyCastle](https://www.bouncycastle.org/)) or your own cryptographically secure pseudo-random number generator
 (i.e. a [SecureRandom](https://docs.oracle.com/javase/8/docs/api/java/security/SecureRandom.html) implementation). The provider is used to encrypt/decrypt with [AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard) and to calculate [HMACs](https://en.wikipedia.org/wiki/HMAC)
 
 Example:
@@ -400,6 +415,83 @@ The first will be thrown on basic parameter validation errors which usually stem
 masked id too long or short, null reference, etc.). The second are errors thrown from the id masking decryption logic which may be security
 relevant. It would make sense to at least catch and log them. The `IdMaskSecurityException.getReason()` can be used to group
 detailed causes.
+
+### Using in your Application
+
+Various default implementation for value converter exist in the `ext.*` package. All dependencies for these converters
+are set to `provided` which means the caller needs to provide their own. This will prevent unnecessary dependencies for
+project that use different frameworks.
+
+#### Jackson JSON Serializer/Deserializer
+
+The [object serialization framework Jackson](https://github.com/FasterXML/jackson) (most often used with JSON serialization) has 
+a serializer/deserializer feature. A way to use it, is to extend any of the pre-implemented serializers found in `IdMaskJackson`
+and provide it with a IdMask instance:
+
+```java
+public final class MyIdMaskLongSerializers {
+     private MyIdMaskLongSerializers() {
+     }
+ 
+     @Inject
+     private IdMask<Long> idMask;
+ 
+     public static final class Serializer extends IdMaskJackson.LongSerializer {
+         public Serializer() {
+             super(idMask);
+         }
+     }
+ 
+     public static final class Deserializer extends IdMaskJackson.LongDeserializer {
+         public Deserializer() {
+             super(idMask);
+         }
+     }
+}
+```
+
+and then add the annotations to the id you want to mask:
+
+```java
+public class LongIdUser {
+     @JsonSerialize(using = MyIdMaskLongSerializers.Serializer.class)
+     @JsonDeserialize(using = MyIdMaskLongSerializers.Deserializer.class)
+     private final long id;
+...
+}
+```
+
+#### JAX-RS 2 Parameter Converter
+
+The [Java API for RESTful Web Services ](https://en.wikipedia.org/wiki/Java_API_for_RESTful_Web_Services), JAX-RS 2 provides 
+the possibility to define so called [`ParamConverter<T>`](https://docs.oracle.com/javaee/7/api/javax/ws/rs/ext/ParamConverter.html) which
+can be used to transparently convert between java types and string representations for query, path, header, cookie and header parameter.
+
+The `IdMaskParamConverters` class contains various default implementations for the most used types. To make it work, you have
+to define a `ParamConverterProvider` and return the appropriate converter like so:
+
+```java
+@Provider
+public static class MyParamConverterProvider implements ParamConverterProvider {
+
+    @Inject
+    private IdMask<Long> idMask;
+
+    @Override
+    public <T> ParamConverter<T> getConverter(Class<T> aClass, Type type, Annotation[] annotations) {
+
+        if (aClass.equals(MaskedLongId.class)) {
+            return (ParamConverter<T>) new IdMaskMaskedLongIdParamConverter(idMask);
+        } else if (aClass.equals(Long.class)) {
+            return (ParamConverter<T>) new IdMaskLongIdParamConverter(idMask);
+        }
+        ...
+    }
+}
+```
+
+Note that maybe you don't want to convert ALL long type values, so there is a simple wrapper class `MaskedLongId` which can
+be used for easier type mapping instead of just `Long`.
 
 ## Download
 
