@@ -163,7 +163,7 @@ public abstract class Config {
          * it is optionally possible to increase the security  strength of the masked id in expense for increased id lengths.
          * By default a 8-byte MAC is appended to the ID and, if randomization is enabled, a 8-byte random nonce is prepended.
          * In high security mode these  numbers double to 16 byte, therefore high security IDs are 16 bytes longer.
-         * If you generate a massive amount of ids or don't mind the longer output length, high security mode is recommended.
+         * If you generate a massive amount of ids (more than 2^32) or don't mind the longer output length, high security mode is recommended.
          *
          * Issue with smaller MAC is increased chance of not recognizing a forgery and issue with smaller randomization nonce is higher
          * chance of finding duplicated randomization values and recognizing equal ids (chance of duplicate after 5,000,000,000 randomized ids
