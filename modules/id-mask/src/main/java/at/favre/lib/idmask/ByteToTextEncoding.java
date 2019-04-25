@@ -73,11 +73,11 @@ public interface ByteToTextEncoding {
      * Base32 encoding dialect with some letters removed so to omit the accidental creation of english
      * curse words. Also does not include usual letters/digits which can easily be confused (1,l,O,0,etc)
      * <p>
-     * Example: <code>9RzRnY7XxzDYa5x3zxZ7PeE6yB</code>
+     * Example: <code>jKVJx8yQPP8wkBNQhZBkJr6vKhwH</code>
      */
     class CleanBase32Encoding extends BaseMod8Encoding {
         public CleanBase32Encoding() {
-            super("abeknpqrwxyzBDEGKMPRVXYZ23456789".toCharArray(), null);
+            super("bghjkmnprvwxyzBGHJKMNPQRVWXYZ689".toCharArray(), null);
         }
     }
 

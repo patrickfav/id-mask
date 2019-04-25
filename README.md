@@ -262,7 +262,7 @@ or require some maximum length. The library includes some built-in encodings whi
 |------------------------|-------------------|------------------------------------|----------|-------------------------------------------------|--------------------------------------------------|--------------------------------------|
 | Hex                    | no                | yes                                | yes      | 34/50                                           | 50/82                                            | `e5e53e09bbd37f8d8b9afdfbed776de6fe` |
 | Base32                 | yes               | yes                  | yes      | 28/40                                           | 40/66                                            | `XS6GLNDNQ2NSBWJRMWM3U72FTLLA`       |
-| Base32 (Safe Alphabet) | no curse words    | contains upper and lowercase       | yes      | 28/40                                           | 40/66                                            | `pVY2YYbV8GyzaEZ3aB5b87EeP4Da`       |
+| Base32 (Safe Alphabet) | no curse words    | contains upper and lowercase       | yes      | 28/40                                           | 40/66                                            | `jKVJx8yQPP8wkBNQhZBkJr6vKhwH`       |
 | Base64                 | yes               | no                                 | yes      | 23/34                                           | 34/55                                            | `SkqktDj1MVEkiPMrwg1blfA`            |
 
 If IDs should be as short as possible, you may look into using [Ascii85/Base85](https://en.wikipedia.org/wiki/Ascii85) with a Java implementation [here](https://github.com/fzakaria/ascii85); expect around 8% better space efficiency compared to Base64. 
@@ -284,7 +284,7 @@ For IDs that are better readable for humans you can use the `ByteToTextEncoding.
 
 For example with Base32 this could look like this
 
-    SH4RT-7LNHU7X-X3TMJ-OJYNMDS-ETVQ
+    SE4RT-7LNHU7X-X3TMJ-OJYNMDS-ETVQ
 
 #### Q3: Do you need Caching?
 
