@@ -5,7 +5,7 @@
 <img src="https://github.com/patrickfav/id-mask/blob/master/misc/icon_sm.png?raw=true" align="right"
      alt="IDMask Logo" width="128" height="128" style="padding: 0px 8px 0 8px;">
 
-IDMask is a Java library for masking **internal IDs** (e.g. from your DB) when they need to be publicly published to **hide their actual value and to prevent forging**. This should make it very hard for an attacker to **understand** provided IDs (e.g. by witnessing a sequence, deducting how many order you had, etc.) and **prevent guessing** of possible valid ones. Masking is **fully reversible** and also supports optional **randomization** for e.g. **shareable links** or **one-time tokens**. It has a wide support for various **Java types** including `long`, `UUID` and `BigInteger`. This library bases its security on **strong cryptographic primitives** ([AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard), [HMAC](https://en.wikipedia.org/wiki/HMAC), [HKDF](https://en.wikipedia.org/wiki/HKDF)) to create a secure encryption schema. It was inspired by [HashIds](https://hashids.org/) but tries to tackle most of it's shortcomings.
+IDMask is a Java library for masking **internal IDs** (e.g. from your DB) when they need to be publicly published to **hide their actual value and to prevent forging**. This should make it very hard for an attacker to **understand** provided IDs (e.g. by witnessing a sequence, deducting how many orders you had, etc.) and **prevent guessing** of possible valid ones. Masking is **fully reversible** and also supports optional **randomization** for e.g. **shareable links** or **one-time tokens**. It has a wide support for various **Java types** including `long`, `UUID` and `BigInteger`. This library bases its security on **strong cryptographic primitives** ([AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard), [HMAC](https://en.wikipedia.org/wiki/HMAC), [HKDF](https://en.wikipedia.org/wiki/HKDF)) to create a secure encryption schema. It was inspired by [HashIds](https://hashids.org/) but tries to tackle most of it's shortcomings.
 
 
 [![Download](https://api.bintray.com/packages/patrickfav/maven/id-mask/images/download.svg)](https://bintray.com/patrickfav/maven/id-mask/_latestVersion)
@@ -740,6 +740,10 @@ Use the Maven wrapper to create a jar including all dependencies
 * Maven
 
 ## Further Reading
+
+## Main Article
+
+* [A Better Way to Protect Your IDs](https://medium.com/@patrickfav/a-better-way-to-protect-your-database-ids-a33fa9867552)
 
 ### Discussions
 
