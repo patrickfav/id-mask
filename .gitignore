@@ -37,3 +37,4 @@ keystore.jks
 ci-settings.xml
 secrets.tar
 .flattened-pom.xml
+pom.xml.versionsBackup
