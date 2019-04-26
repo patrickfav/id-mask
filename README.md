@@ -741,7 +741,7 @@ Use the Maven wrapper to create a jar including all dependencies
 
 ## Further Reading
 
-## Main Article
+### Main Article
 
 * [A Better Way to Protect Your IDs](https://medium.com/@patrickfav/a-better-way-to-protect-your-database-ids-a33fa9867552)
 
