@@ -1,14 +1,15 @@
 package at.favre.lib.idmask.ref;
 
+import at.favre.lib.bytes.Bytes;
 import at.favre.lib.idmask.IdMask;
 import org.junit.Test;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.*;
 
 /**
  * Tests with reference values. Use this to check for possible regression issues or
@@ -141,11 +142,53 @@ public class IdMaskReferenceTests {
             new Ref<>(UUID.fromString("33a7b4b1-4827-4438-baa6-d9cdcf16f734"), "q6o_7f6L2BrYIURPNDPZ9eC8_HgWY4vaOA"),
             new Ref<>(UUID.fromString("45495c3b-f4e1-4555-a133-c3484c1e1443"), "FRRyv4tX2wCny-LAsMaO8OWsGAvlQHZ_RA")
     );
+
     private final List<Ref<UUID>> uuidMaskRefConfig4Random = Arrays.asList(
             new Ref<>(UUID.fromString("ea9ab093-3514-4dd4-88fe-f42d177d5a80"), "ZnHwgVT_Ud7rTRB4M_FJarlncT0YIxHTMa17cuF6Msj_qjJi6GHtgd0"),
             new Ref<>(UUID.fromString("6133b08f-f0f4-4f72-ba49-2adfd74aab88"), "4CqBt-MZB3_kLLsR0_ovuIvhbwHKtOIMr97-PxuJQX2Bm5JSLvdk98Y"),
             new Ref<>(UUID.fromString("13f40cb7-bb52-4531-94ea-68250cf18c97"), "5fVtImKgS6850ENTNHpR4oTkGdaLfvvR5k99aQU4XRPCkL4jZWRFJPs"),
             new Ref<>(UUID.fromString("6fb986a4-5787-4193-8753-78a5e24d24c4"), "HiXGNNhYzKA22_83mX3_cksfyxluDGngiKdLQuixy-_FRTvFH9hrpoM")
+    );
+
+    private final List<Ref<UUID>> uuidMaskRefConfig5HighSecurity = Arrays.asList(
+            new Ref<>(UUID.fromString("0fb38faf-c2f1-4ee9-97ac-11c327a4cc5f"), "-fjMUaTtB9HUeG_NkjjQkQLpe8Zi_029iE1Xzd-WdeTs"),
+            new Ref<>(UUID.fromString("7580ce3c-d04a-46ee-98d3-7a83b2e2816f"), "nJ1whAJFhGk5JZTlog4PDQT37DzPWwEZwWnx4UgcGDia"),
+            new Ref<>(UUID.fromString("5f7f3d41-f37e-4a89-a184-7c31f43dba72"), "v77lhQAJ94H6GaASSXJU3xh10LqnJHTrAIXxo9yopP9r"),
+            new Ref<>(UUID.fromString("c1fbec8b-63be-40d1-b4fb-1bdb5ba73ff9"), "p6YyyBUUb7KCDKr4X1io9BAXtUFLGRCpUy9xOQJGyp0P"),
+            new Ref<>(UUID.fromString("338c8646-0332-4a22-9116-0d5b3cc628bf"), "c3JPXtzBQCQiv1zl4OSQ3m2Up8kE5Uptr0GFgzC4Ice5"),
+            new Ref<>(UUID.fromString("2fd48591-9a44-472d-b208-358c0617fba9"), "EBEJ726fQfqF1dvtPtGPpsyQeIotMhKdk0l1qgf_eupL"),
+            new Ref<>(UUID.fromString("ecc670f0-5651-4c6c-9ace-d69d22972430"), "SUgSQ3lMZUObA9VJAloxstZPuPcgt5WmkP8IP9jLXlBS"),
+            new Ref<>(UUID.fromString("015c9484-4772-4c72-9c66-f507f6d3e685"), "AQDJ3V6rAY1aLeyniXpnX1L5rWrYPvpiW-eMm95x5UZJ"),
+            new Ref<>(UUID.fromString("860b6910-998d-45eb-a0dd-50eca9d25dca"), "8vNg_w9lO5QwaYylHH1W5M0HatZ59ab2FfBisUpqdKwL"),
+            new Ref<>(UUID.fromString("d75fb4af-9d7a-4370-b3d1-56cede2bfeaa"), "i4o8m94T6lx9vSoIHQx3Z6CYt7JzzeL41N9tymI-SLQx"),
+            new Ref<>(UUID.fromString("5608cd3e-bdda-4cff-8323-83e68d9c4855"), "yMny0tqK_Exa-7YuO3UlhXaEiLVeRxg1ZSAx4k8gBQ0w"),
+            new Ref<>(UUID.fromString("6a2a9177-f534-410c-b867-093bf58f9f7e"), "R0b8LxVKI6ibdhUp4FblbSlUcvxvMQPGqgTea-prN6wV"),
+            new Ref<>(UUID.fromString("26695aaa-ff80-419e-9135-8acc0202d8d0"), "DA04svRZCEPzHkUKt6wGFVtke1uF9rZVxFCqWUjTmxtm"),
+            new Ref<>(UUID.fromString("dfbbbc7c-0b7d-4dea-8e8c-7e4206f97a28"), "iotFTA8I-DEzu1YiiGUcTw-MZswNC3CIlq8eKcLR-jYt"),
+            new Ref<>(UUID.fromString("87bd8ae2-3aea-4644-811e-d5718cbebadf"), "Y2JfOcejD-SBHV_wL7BsWa7BBKZQrrpZLUHUAZQcpOuF"),
+            new Ref<>(UUID.fromString("87618fb6-68e8-4194-b7ad-e1f0023c24be"), "29rzXDblGa4XUk1wXApAJyUk2SrZNmDvuCppFtryhR4_")
+    );
+
+    private final List<Ref<BigInteger>> bigIntegerMaskRefConfig1 = Arrays.asList(
+            new Ref<>(new BigInteger("105553770177495"), "CQgYqqHF6TY73llTvTvaYJ98a-NwpyE-dg"),
+            new Ref<>(new BigInteger("1906419158208488013786"), "AQCRCRXGoCY-AYT_DID0ssFKAUS_EiHN4Q"),
+            new Ref<>(new BigInteger("172268414386"), "ExJNDXHsoXh5O6dxsn_e5oaTChjmvhn-eQ"),
+            new Ref<>(new BigInteger("-1438038716"), "c3JMr160EH9C9vtPQOgephz2SGXf0sDAQw"),
+            new Ref<>(new BigInteger("3210714877303297897"), "Ozpzl1-iPLVi1k5cpiymXDOObvDu51g5XA"),
+            new Ref<>(new BigInteger("258"), "VVRHTyeLmgxtTo0fZlIxcFfHtGlJo5IyhQ"),
+            new Ref<>(new BigInteger("-102156455271390838530260344"), "wcCoRohQUvIfOkWUn6ualYHU6Uwem-0vVg"),
+            new Ref<>(new BigInteger("-1146857189"), "MDHsEbn2xoP1xLesOTR9ZI5KDilCwgs1yA")
+    );
+
+    private final List<Ref<byte[]>> byteArrayMaskRefConfig1 = Arrays.asList(
+            new Ref<>(Bytes.parseHex("1694bfba57009a05a9d9fa858c87bf35").array(), "amthd_b4azYqGWjqr91zfTkIhecGovdYgg"),
+            new Ref<>(Bytes.parseHex("7fda28ebc01e4fafb4a87e9b1d7a05e6").array(), "8PHLunfjabvhUAh8T5AfxoS5zicUTr-Ptw"),
+            new Ref<>(Bytes.parseHex("0ecf16594c6e85c2c368faf39d42d69f").array(), "jI2lIXW0iHuie_RDp2nqJ28Q57ApUH3Cfg"),
+            new Ref<>(Bytes.parseHex("e1dba934e24987069a1442bb6c85cfe5").array(), "1dQzW1PVCrTFOsghZ74ycQbkoGXsI0XfnA"),
+            new Ref<>(Bytes.parseHex("eda54c13baee8087c2477e34bfc3723f").array(), "XF0-blv46hsA9vbZwHuW1-WVc1gF_epT4g"),
+            new Ref<>(Bytes.parseHex("f1fcffe66fc023d0e1bd8916d15929a0").array(), "LSzt3NxQYM2jqeqWxXvtis0577NAXvJZSw"),
+            new Ref<>(Bytes.parseHex("a4321e5a577fbbe8b17a8e0808bc0af4").array(), "ExLorAYdmmKRL1j_juHxpmPbOyILpCwqLA"),
+            new Ref<>(Bytes.parseHex("8499d3621689570fd06edb74a47103e8").array(), "pqdUVesH-er4cIOzF3RyGWcAyXoVs0Tocg")
     );
 
     @Test
@@ -162,12 +205,26 @@ public class IdMaskReferenceTests {
         checkReferenceTests(IdMaskRefConfigs.idMaskUuidRefConfig2, uuidMaskRefConfig2);
         checkReferenceTests(IdMaskRefConfigs.idMaskUuidRefConfig3, uuidMaskRefConfig3);
         checkRandomReferenceTests(IdMaskRefConfigs.idMaskUuidRefConfig4Random, uuidMaskRefConfig4Random);
+        checkReferenceTests(IdMaskRefConfigs.idMaskUuidRefConfig5HighSecurity, uuidMaskRefConfig5HighSecurity);
+    }
+
+    @Test
+    public void testOtherTypesReferenceTests() {
+        checkReferenceTests(IdMaskRefConfigs.idMaskBigIntegerRefConfig, bigIntegerMaskRefConfig1);
+        checkByteArrayReferenceTests(IdMaskRefConfigs.idMaskByteArrayRefConfig, byteArrayMaskRefConfig1);
     }
 
     private <T> void checkReferenceTests(IdMask<T> idMask, List<Ref<T>> refList) {
         for (Ref<T> longRef : refList) {
             assertEquals(longRef.getEncoded(), idMask.mask(longRef.getId()));
             assertEquals(longRef.getId(), idMask.unmask(longRef.getEncoded()));
+        }
+    }
+
+    private void checkByteArrayReferenceTests(IdMask<byte[]> idMask, List<Ref<byte[]>> refList) {
+        for (Ref<byte[]> longRef : refList) {
+            assertEquals(longRef.getEncoded(), idMask.mask(longRef.getId()));
+            assertArrayEquals(longRef.getId(), idMask.unmask(longRef.getEncoded()));
         }
     }
 

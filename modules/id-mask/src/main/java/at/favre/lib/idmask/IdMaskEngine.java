@@ -458,7 +458,7 @@ public interface IdMaskEngine {
             Objects.requireNonNull(plainId, "id");
 
             if (plainId.length != getSupportedIdByteLength()) {
-                throw new IllegalArgumentException(String.format("id length must be between 1 and %d bytes", getSupportedIdByteLength()));
+                throw new IllegalArgumentException(String.format("id length must be exactly %d bytes in length", getSupportedIdByteLength()));
             }
 
             byte[] entropy = null;

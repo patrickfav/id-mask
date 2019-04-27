@@ -559,7 +559,7 @@ IdMaskAndHashIdsBenchmark.benchmarkMaskAndUnmask8Byte   avgt    3   4707,021 ± 
 ### Encryption Schema
 
 Two slightly different encryption schemes are used to optimize for performance and output size for the specific case. 
-For each of these schemes two variation exist for deterministic and randomized encryption. 
+For each of these schemes two variation exist for deterministic and randomized encryption. As reference here are some [test-vectors](https://github.com/patrickfav/id-mask/wiki/test-vectors).
 
 #### 8 Byte Encryption Schema
 

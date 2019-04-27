@@ -7,12 +7,14 @@ import at.favre.lib.idmask.IdMask;
 import at.favre.lib.idmask.IdMasks;
 import org.junit.Test;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 public final class IdMaskRefConfigs {
-
+    private static final Random rnd = new Random(19827362L);
 
     static final IdMask<Long> idMaskLongRefConfig1 = IdMasks.forLongIds(
             Config.builder(Bytes.parseHex("2a5a967e4669510560b73ce5c026d5f5").array())
@@ -52,9 +54,24 @@ public final class IdMaskRefConfigs {
                     .encoding(new ByteToTextEncoding.Base64Url())
                     .randomizedIds(true)
                     .build());
+    static final IdMask<UUID> idMaskUuidRefConfig5HighSecurity = IdMasks.forUuids(
+            Config.builder(Bytes.parseHex("62ce5d63824b697e17bbd3d778467af9").array())
+                    .encoding(new ByteToTextEncoding.Base64Url())
+                    .highSecurityMode(true)
+                    .build());
+
+    static final IdMask<BigInteger> idMaskBigIntegerRefConfig = IdMasks.forBigInteger(
+            Config.builder(Bytes.parseHex("3d6c822e98047306cbee02b7b6a9a0e9").array())
+                    .encoding(new ByteToTextEncoding.Base64Url())
+                    .build());
+
+    static final IdMask<byte[]> idMaskByteArrayRefConfig = IdMasks.for128bitNumbers(
+            Config.builder(Bytes.parseHex("2dabb10b91aa663b852f5b3a0f4fbf0d").array())
+                    .encoding(new ByteToTextEncoding.Base64Url())
+                    .build());
 
     private static final List<IdMask<Long>> allLongConfigs = Arrays.asList(idMaskLongRefConfig1, idMaskLongRefConfig2, idMaskLongRefConfig3);
-    private static final List<IdMask<UUID>> allUuidConfigs = Arrays.asList(idMaskUuidRefConfig1, idMaskUuidRefConfig2, idMaskUuidRefConfig3);
+    private static final List<IdMask<UUID>> allUuidConfigs = Arrays.asList(idMaskUuidRefConfig1, idMaskUuidRefConfig2, idMaskUuidRefConfig3, idMaskUuidRefConfig5HighSecurity);
 
     @Test
     public void printLongReferenceTests() {
@@ -69,11 +86,10 @@ public final class IdMaskRefConfigs {
 
     private void printLongReg(IdMask<Long> config, Long id) {
         String masked = config.mask(id);
-        StringBuilder sb = new StringBuilder();
-        sb.append("new Ref<>(");
-        sb.append(id).append("L, \"").append(masked).append("\"");
-        sb.append("),");
-        System.out.println(sb.toString());
+        String sb = "new Ref<>(" +
+                id + "L, \"" + masked + "\"" +
+                "),";
+        System.out.println(sb);
     }
 
     @Test
@@ -89,11 +105,10 @@ public final class IdMaskRefConfigs {
 
     private void printUuidRef(IdMask<UUID> config, UUID id) {
         String masked = config.mask(id);
-        StringBuilder sb = new StringBuilder();
-        sb.append("new Ref<>(");
-        sb.append("UUID.fromString(\"").append(id).append("\"), \"").append(masked).append("\"");
-        sb.append("),");
-        System.out.println(sb.toString());
+        String sb = "new Ref<>(" +
+                "UUID.fromString(\"" + id + "\"), \"" + masked + "\"" +
+                "),";
+        System.out.println(sb);
     }
 
     @Test
@@ -104,5 +119,39 @@ public final class IdMaskRefConfigs {
         for (int i = 0; i < 4; i++) {
             printUuidRef(idMaskUuidRefConfig4Random, UUID.randomUUID());
         }
+    }
+
+    @Test
+    public void printBigIntegerReferenceTests() {
+        System.out.println();
+        for (int i = 0; i < 8; i++) {
+            BigInteger id = new BigInteger(Bytes.random(rnd.nextInt(14) + 1).array());
+            printBigInteger(idMaskBigIntegerRefConfig, id);
+        }
+    }
+
+    private void printBigInteger(IdMask<BigInteger> config, BigInteger id) {
+        String masked = config.mask(id);
+        String sb = "new Ref<>(" +
+                "new BigInteger(\"" + id.toString() + "\"), \"" + masked + "\"" +
+                "),";
+        System.out.println(sb);
+    }
+
+    @Test
+    public void printByteArrayReferenceTests() {
+        System.out.println();
+        for (int i = 0; i < 8; i++) {
+            byte[] id = Bytes.random(16).array();
+            printByteArrayRef(idMaskByteArrayRefConfig, id);
+        }
+    }
+
+    private void printByteArrayRef(IdMask<byte[]> config, byte[] id) {
+        String masked = config.mask(id);
+        String sb = "new Ref<>(" +
+                "Bytes.parseHex(\"" + Bytes.wrap(id).encodeHex() + "\").array(), \"" + masked + "\"" +
+                "),";
+        System.out.println(sb);
     }
 }
