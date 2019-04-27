@@ -142,14 +142,12 @@ public class IdMaskReferenceTests {
             new Ref<>(UUID.fromString("33a7b4b1-4827-4438-baa6-d9cdcf16f734"), "q6o_7f6L2BrYIURPNDPZ9eC8_HgWY4vaOA"),
             new Ref<>(UUID.fromString("45495c3b-f4e1-4555-a133-c3484c1e1443"), "FRRyv4tX2wCny-LAsMaO8OWsGAvlQHZ_RA")
     );
-
     private final List<Ref<UUID>> uuidMaskRefConfig4Random = Arrays.asList(
             new Ref<>(UUID.fromString("ea9ab093-3514-4dd4-88fe-f42d177d5a80"), "ZnHwgVT_Ud7rTRB4M_FJarlncT0YIxHTMa17cuF6Msj_qjJi6GHtgd0"),
             new Ref<>(UUID.fromString("6133b08f-f0f4-4f72-ba49-2adfd74aab88"), "4CqBt-MZB3_kLLsR0_ovuIvhbwHKtOIMr97-PxuJQX2Bm5JSLvdk98Y"),
             new Ref<>(UUID.fromString("13f40cb7-bb52-4531-94ea-68250cf18c97"), "5fVtImKgS6850ENTNHpR4oTkGdaLfvvR5k99aQU4XRPCkL4jZWRFJPs"),
             new Ref<>(UUID.fromString("6fb986a4-5787-4193-8753-78a5e24d24c4"), "HiXGNNhYzKA22_83mX3_cksfyxluDGngiKdLQuixy-_FRTvFH9hrpoM")
     );
-
     private final List<Ref<UUID>> uuidMaskRefConfig5HighSecurity = Arrays.asList(
             new Ref<>(UUID.fromString("0fb38faf-c2f1-4ee9-97ac-11c327a4cc5f"), "-fjMUaTtB9HUeG_NkjjQkQLpe8Zi_029iE1Xzd-WdeTs"),
             new Ref<>(UUID.fromString("7580ce3c-d04a-46ee-98d3-7a83b2e2816f"), "nJ1whAJFhGk5JZTlog4PDQT37DzPWwEZwWnx4UgcGDia"),
@@ -167,6 +165,12 @@ public class IdMaskReferenceTests {
             new Ref<>(UUID.fromString("dfbbbc7c-0b7d-4dea-8e8c-7e4206f97a28"), "iotFTA8I-DEzu1YiiGUcTw-MZswNC3CIlq8eKcLR-jYt"),
             new Ref<>(UUID.fromString("87bd8ae2-3aea-4644-811e-d5718cbebadf"), "Y2JfOcejD-SBHV_wL7BsWa7BBKZQrrpZLUHUAZQcpOuF"),
             new Ref<>(UUID.fromString("87618fb6-68e8-4194-b7ad-e1f0023c24be"), "29rzXDblGa4XUk1wXApAJyUk2SrZNmDvuCppFtryhR4_")
+    );
+    private final List<Ref<UUID>> uuidMaskRefConfig6RandomHighSecurity = Arrays.asList(
+            new Ref<>(UUID.fromString("29aeb3c8-eb0e-47bf-9c22-cccbbe3f591f"), "mSBmzRntXqoHMJiGb4QsyTOYdxyBUjF97O6-9-IbEzrTcEXs7_EAjTgV3uJPo4cPfQ"),
+            new Ref<>(UUID.fromString("0e4e012d-cec6-47f2-8364-c063c6de8634"), "MJIZAN2ZjI9dsFM_U0MFXT4xfs9Fk9BBC-r_ymDhsk2EqcY1vrSi7rra1WrKuhb3Ng"),
+            new Ref<>(UUID.fromString("96fbc735-29e4-49e4-8078-f1c9963aad66"), "eNZMg1HYALdFM6hpr77n7aZ5n6UU_nelpUf7aYUwXB6u52kep6_cx5JTD8KTUA_QRA"),
+            new Ref<>(UUID.fromString("7d65916f-f0e0-4ef9-8e32-d122200aa45f"), "lZtXq-6n4netmYIiR3MbD-GUcxzjlgLvxYIcqlKMU95ZqqZhbzAndRRSm7b6dgHGNg")
     );
 
     private final List<Ref<BigInteger>> bigIntegerMaskRefConfig1 = Arrays.asList(
@@ -206,6 +210,7 @@ public class IdMaskReferenceTests {
         checkReferenceTests(IdMaskRefConfigs.idMaskUuidRefConfig3, uuidMaskRefConfig3);
         checkRandomReferenceTests(IdMaskRefConfigs.idMaskUuidRefConfig4Random, uuidMaskRefConfig4Random);
         checkReferenceTests(IdMaskRefConfigs.idMaskUuidRefConfig5HighSecurity, uuidMaskRefConfig5HighSecurity);
+        checkRandomReferenceTests(IdMaskRefConfigs.idMaskUuidRefConfig6RandomHighSecurity, uuidMaskRefConfig6RandomHighSecurity);
     }
 
     @Test

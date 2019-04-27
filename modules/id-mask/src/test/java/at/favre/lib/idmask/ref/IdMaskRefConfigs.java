@@ -59,6 +59,12 @@ public final class IdMaskRefConfigs {
                     .encoding(new ByteToTextEncoding.Base64Url())
                     .highSecurityMode(true)
                     .build());
+    static final IdMask<UUID> idMaskUuidRefConfig6RandomHighSecurity = IdMasks.forUuids(
+            Config.builder(Bytes.parseHex("cc850e72a98c55ac6f0f845ac3a15c46").array())
+                    .encoding(new ByteToTextEncoding.Base64Url())
+                    .highSecurityMode(true)
+                    .randomizedIds(true)
+                    .build());
 
     static final IdMask<BigInteger> idMaskBigIntegerRefConfig = IdMasks.forBigInteger(
             Config.builder(Bytes.parseHex("3d6c822e98047306cbee02b7b6a9a0e9").array())
@@ -118,6 +124,9 @@ public final class IdMaskRefConfigs {
         }
         for (int i = 0; i < 4; i++) {
             printUuidRef(idMaskUuidRefConfig4Random, UUID.randomUUID());
+        }
+        for (int i = 0; i < 4; i++) {
+            printUuidRef(idMaskUuidRefConfig6RandomHighSecurity, UUID.randomUUID());
         }
     }
 
