@@ -39,39 +39,68 @@ public interface IdMask<T> {
     T unmask(String encoded);
 
     /**
+     * Simple interface that defines how a java types is converted to a byte array and vice versa.
+     *
+     * @param <T> to convert to
+     */
+    interface TypeConverter<T> {
+        /**
+         * Converts given byte array to a type´.
+         *
+         * @param raw to convert
+         * @return the type representation of given byte array
+         */
+        T convertFromBytes(byte[] raw);
+
+        /**
+         * Converts given java type to it's byte array representation
+         *
+         * @param typed to convert
+         * @return the byte array representation of given java type
+         */
+        byte[] convertToBytes(T typed);
+    }
+
+    /**
      * Base implementation
      */
-    abstract class BaseIdMask {
+    abstract class BaseIdMask<T> implements IdMask<T> {
         private final IdMaskEngine engine;
         private final Config config;
+        private final TypeConverter<T> typeConverter;
 
-        BaseIdMask(IdMaskEngine engine, Config config) {
+        BaseIdMask(IdMaskEngine engine, TypeConverter<T> typeConverter, Config config) {
             this.engine = engine;
+            this.typeConverter = typeConverter;
             this.config = config;
         }
 
-        String _encode(byte[] id) {
+        @Override
+        public String mask(T id) {
+            final byte[] idAsBytes = typeConverter.convertToBytes(id);
+
             String encoded;
             if (config.enableCache() && !config.randomizedIds()) {
-                if ((encoded = config.cacheImpl().getEncoded(id)) != null) {
+                if ((encoded = config.cacheImpl().getEncoded(idAsBytes)) != null) {
                     return encoded;
                 }
             }
 
-            encoded = engine.mask(id).toString();
+            encoded = engine.mask(idAsBytes).toString();
 
             if (config.enableCache()) {
-                config.cacheImpl().cache(id, encoded);
+                config.cacheImpl().cache(idAsBytes, encoded);
             }
 
             return encoded;
         }
 
-        byte[] _decode(String encoded) {
+        @Override
+        public T unmask(String encoded) {
             byte[] raw;
             if (config.enableCache() && !config.randomizedIds()) {
                 if ((raw = config.cacheImpl().getBytes(encoded)) != null) {
-                    return Bytes.wrap(raw).copy().array();
+                    return typeConverter.convertFromBytes(Bytes.wrap(raw).copy().array());
                 }
             }
 
@@ -81,51 +110,57 @@ public interface IdMask<T> {
                 config.cacheImpl().cache(raw, encoded);
             }
 
-            return raw;
+            return typeConverter.convertFromBytes(raw);
         }
     }
 
     /**
      * Implementation which handles long type ids (64 bit integers)
      */
-    final class LongIdMask extends BaseIdMask implements IdMask<Long> {
+    final class LongIdMask extends BaseIdMask<Long> {
 
         LongIdMask(Config config) {
             super(new IdMaskEngine.EightByteEncryptionEngine(config.keyManager(), config.securityProvider(),
-                    config.secureRandom(), config.encoding(), config.randomizedIds(), config.autoWipeMemory()), config);
+                            config.secureRandom(), config.encoding(), config.randomizedIds(), config.autoWipeMemory()),
+                    new LongTypeConverter(),
+                    config);
         }
 
-        @Override
-        public String mask(Long id) {
-            return _encode(Bytes.from(id).array());
-        }
+        private static final class LongTypeConverter implements TypeConverter<Long> {
+            @Override
+            public byte[] convertToBytes(Long typed) {
+                return Bytes.from(typed).array();
+            }
 
-        @Override
-        public Long unmask(String encoded) {
-            byte[] out = _decode(encoded);
-            return Bytes.wrap(out).toLong();
+            @Override
+            public Long convertFromBytes(byte[] raw) {
+                return Bytes.wrap(raw).toLong();
+            }
         }
     }
 
     /**
      * Implementation which handles two long ids (2x 64 bit ids)
      */
-    final class LongIdTupleMask extends BaseIdMask implements IdMask<LongTuple> {
+    final class LongIdTupleMask extends BaseIdMask<LongTuple> {
 
         LongIdTupleMask(Config config) {
             super(new IdMaskEngine.SixteenByteEngine(config.keyManager(), config.highSecurityMode(), config.encoding(),
-                    config.secureRandom(), config.securityProvider(), config.randomizedIds(), config.autoWipeMemory()), config);
+                            config.secureRandom(), config.securityProvider(), config.randomizedIds(), config.autoWipeMemory()),
+                    new LongIdTupleConverter(),
+                    config);
         }
 
-        @Override
-        public String mask(LongTuple id) {
-            return _encode(Bytes.from(id.getNum1(), id.getNum2()).array());
-        }
+        private static final class LongIdTupleConverter implements TypeConverter<LongTuple> {
+            @Override
+            public byte[] convertToBytes(LongTuple id) {
+                return Bytes.from(id.getNum1(), id.getNum2()).array();
+            }
 
-        @Override
-        public LongTuple unmask(String encoded) {
-            Bytes out = Bytes.wrap(_decode(encoded));
-            return new LongTuple(out.longAt(0), out.longAt(8));
+            @Override
+            public LongTuple convertFromBytes(byte[] out) {
+                return new LongTuple(Bytes.wrap(out).longAt(0), Bytes.wrap(out).longAt(8));
+            }
         }
     }
 
@@ -135,22 +170,25 @@ public interface IdMask<T> {
      * You can use {@link UUID#fromString(String)} to parse a string representation
      * to the typed version.
      */
-    final class UuidMask extends BaseIdMask implements IdMask<UUID> {
+    final class UuidMask extends BaseIdMask<UUID> {
 
         UuidMask(Config config) {
             super(new IdMaskEngine.SixteenByteEngine(config.keyManager(), config.highSecurityMode(), config.encoding(),
-                    config.secureRandom(), config.securityProvider(), config.randomizedIds(), config.autoWipeMemory()), config);
+                            config.secureRandom(), config.securityProvider(), config.randomizedIds(), config.autoWipeMemory()),
+                    new UuidConverter(),
+                    config);
         }
 
-        @Override
-        public String mask(UUID id) {
-            return _encode(Bytes.from(id).array());
-        }
+        private static final class UuidConverter implements TypeConverter<UUID> {
+            @Override
+            public byte[] convertToBytes(UUID id) {
+                return Bytes.from(id).array();
+            }
 
-        @Override
-        public UUID unmask(String encoded) {
-            byte[] out = _decode(encoded);
-            return Bytes.wrap(out).toUUID();
+            @Override
+            public UUID convertFromBytes(byte[] out) {
+                return Bytes.wrap(out).toUUID();
+            }
         }
     }
 
@@ -158,75 +196,90 @@ public interface IdMask<T> {
      * Implementation which handles a generic 128 bit integer
      * (or other 16 byte long array)
      */
-    final class ByteArray128bitMask extends BaseIdMask implements IdMask<byte[]> {
+    final class ByteArray128bitMask extends BaseIdMask<byte[]> {
 
         ByteArray128bitMask(Config config) {
             super(new IdMaskEngine.SixteenByteEngine(config.keyManager(), config.highSecurityMode(), config.encoding(),
-                    config.secureRandom(), config.securityProvider(), config.randomizedIds(), config.autoWipeMemory()), config);
+                            config.secureRandom(), config.securityProvider(), config.randomizedIds(), config.autoWipeMemory()),
+                    new ByteArrayConverter(),
+                    config);
         }
 
-        @Override
-        public String mask(byte[] id) {
-            return _encode(Bytes.from(id).array());
-        }
+        private static final class ByteArrayConverter implements TypeConverter<byte[]> {
+            @Override
+            public byte[] convertToBytes(byte[] id) {
+                return id;
+            }
 
-        @Override
-        public byte[] unmask(String encoded) {
-            return _decode(encoded);
+            @Override
+            public byte[] convertFromBytes(byte[] out) {
+                return out;
+            }
         }
     }
 
     /**
      * Implementation which handles a big integer up to 15 byte two complements representation
      */
-    final class BigIntegerIdMask extends BaseIdMask implements IdMask<BigInteger> {
+    final class BigIntegerIdMask extends BaseIdMask<BigInteger> {
         private static final int SUPPORTED_LENGTH = 15;
 
         BigIntegerIdMask(Config config) {
             super(new IdMaskEngine.SixteenByteEngine(config.keyManager(), config.highSecurityMode(), config.encoding(),
-                    config.secureRandom(), config.securityProvider(), config.randomizedIds(), config.autoWipeMemory()), config);
+                            config.secureRandom(), config.securityProvider(), config.randomizedIds(), config.autoWipeMemory()),
+                    new BigIntegerConverter(),
+                    config);
         }
 
-        @Override
-        public String mask(BigInteger id) {
-            Bytes bytes = Bytes.from(id);
-            if (bytes.length() > SUPPORTED_LENGTH) {
-                throw new IllegalArgumentException("biginteger only support up to " + SUPPORTED_LENGTH + " byte two-complements representation");
+        private static final class BigIntegerConverter implements TypeConverter<BigInteger> {
+            @Override
+            public byte[] convertToBytes(BigInteger id) {
+                Bytes bytes = Bytes.from(id);
+                if (bytes.length() > SUPPORTED_LENGTH) {
+                    throw new IllegalArgumentException("biginteger only supports up to " + SUPPORTED_LENGTH + " byte two-complements representation");
+                }
+
+                ByteBuffer bb = ByteBuffer.allocate(SUPPORTED_LENGTH + 1);
+                bb.put((byte) bytes.length());
+                bb.put(bytes.resize(SUPPORTED_LENGTH).array());
+                return bb.array();
             }
 
-            ByteBuffer bb = ByteBuffer.allocate(SUPPORTED_LENGTH + 1);
-            bb.put((byte) bytes.length());
-            bb.put(bytes.resize(SUPPORTED_LENGTH).array());
-
-            return _encode(bb.array());
-        }
-
-        @Override
-        public BigInteger unmask(String encoded) {
-            ByteBuffer bb = ByteBuffer.wrap(_decode(encoded));
-            int length = bb.get();
-            byte[] number = new byte[bb.remaining()];
-            bb.get(number);
-            return Bytes.wrap(number).resize(length).toBigInteger();
+            @Override
+            public BigInteger convertFromBytes(byte[] out) {
+                ByteBuffer bb = ByteBuffer.wrap(out);
+                int length = bb.get();
+                byte[] number = new byte[bb.remaining()];
+                bb.get(number);
+                return Bytes.wrap(number).resize(length).toBigInteger();
+            }
         }
     }
 
-    final class AesSivMask extends BaseIdMask implements IdMask<Long> {
+    final class AesSivMask extends BaseIdMask<Long> {
 
         AesSivMask(Config config) {
-            super(new IdMaskEngine.AesSivEngine(config.keyManager()), config);
+            super(new IdMaskEngine.AesSivEngine(config.keyManager()),
+                    new LongTypeConverter(),
+                    config);
         }
 
-        @Override
-        public String mask(Long id) {
-            return _encode(Bytes.from(id).array());
-        }
+        private static final class LongTypeConverter implements TypeConverter<Long> {
+            @Override
+            public byte[] convertToBytes(Long typed) {
+                return Bytes.from(typed).array();
+            }
 
-        @Override
-        public Long unmask(String encoded) {
-            byte[] out = _decode(encoded);
-            return Bytes.wrap(out).toLong();
+            @Override
+            public Long convertFromBytes(byte[] raw) {
+                return Bytes.wrap(raw).toLong();
+            }
         }
     }
 
+    final class CustomIdMaskEngine<T> extends BaseIdMask<T> {
+        CustomIdMaskEngine(IdMaskEngine idMaskEngine, TypeConverter<T> typeConverter, Config config) {
+            super(idMaskEngine, typeConverter, config);
+        }
+    }
 }

@@ -673,7 +673,7 @@ public interface IdMaskEngine {
         }
 
         private int entropyLength() {
-            return 16;
+            return 8;
         }
 
         @Override
