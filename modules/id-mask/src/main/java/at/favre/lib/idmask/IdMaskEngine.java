@@ -739,7 +739,6 @@ public interface IdMaskEngine {
             }
         }
 
-
         private synchronized SivMode getSiv() {
             if (sivModeThreadLocal.get() == null) {
 
