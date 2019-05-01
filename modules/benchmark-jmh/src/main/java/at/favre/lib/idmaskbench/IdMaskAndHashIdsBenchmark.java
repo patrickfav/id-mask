@@ -44,7 +44,7 @@ public class IdMaskAndHashIdsBenchmark {
         private long id;
         private IdMask<Long> idMaskEngine;
         private IdMask<byte[]> idMaskEngine16Byte;
-        private Hashids hashids;
+//        private Hashids hashids;
 
         @Setup
         public void setup() {
@@ -53,7 +53,7 @@ public class IdMaskAndHashIdsBenchmark {
                 id = new Random().nextLong();
             } while (id > Hashids.MAX_NUMBER - (long) Integer.MAX_VALUE);
 
-            idMaskEngine = IdMasks.forLongIds(
+            idMaskEngine = IdMasks.forSiv(
                     Config.builder(Bytes.random(16).array())
                             .enableCache(false)
                             .build());
@@ -61,7 +61,7 @@ public class IdMaskAndHashIdsBenchmark {
                     Config.builder(Bytes.random(16).array())
                             .enableCache(false)
                             .build());
-            hashids = new Hashids(Bytes.random(16).encodeBase64());
+//            hashids = new Hashids(Bytes.random(16).encodeBase64());
         }
     }
 
@@ -77,11 +77,11 @@ public class IdMaskAndHashIdsBenchmark {
         state.id++;
     }
 
-    @Benchmark
-    public void benchmarkHashIdEncode(BenchmarkState state, Blackhole blackhole) {
-        blackhole.consume(state.hashids.encode(state.id));
-        state.id++;
-    }
+//    @Benchmark
+//    public void benchmarkHashIdEncode(BenchmarkState state, Blackhole blackhole) {
+//        blackhole.consume(state.hashids.encode(state.id));
+//        state.id++;
+//    }
 
     @Benchmark
     public void benchmarkMaskAndUnmask8Byte(BenchmarkState state, Blackhole blackhole) {
@@ -97,10 +97,10 @@ public class IdMaskAndHashIdsBenchmark {
         state.id++;
     }
 
-    @Benchmark
-    public void benchmarkHashIdEncodeDecode(BenchmarkState state, Blackhole blackhole) {
-        String encoded = state.hashids.encode(state.id);
-        blackhole.consume(state.hashids.decode(encoded));
-        state.id++;
-    }
+//    @Benchmark
+//    public void benchmarkHashIdEncodeDecode(BenchmarkState state, Blackhole blackhole) {
+//        String encoded = state.hashids.encode(state.id);
+//        blackhole.consume(state.hashids.decode(encoded));
+//        state.id++;
+//    }
 }

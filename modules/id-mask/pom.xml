@@ -159,6 +159,11 @@
             <artifactId>utils-lrucache</artifactId>
             <version>1.0.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.cryptomator</groupId>
+            <artifactId>siv-mode</artifactId>
+            <version>1.3.0</version>
+        </dependency>
 
         <!-- optional dependencies -->
         <dependency>

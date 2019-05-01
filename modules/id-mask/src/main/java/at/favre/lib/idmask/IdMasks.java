@@ -63,4 +63,8 @@ public final class IdMasks {
     public static IdMask<BigInteger> forBigInteger(Config config) {
         return new IdMask.BigIntegerIdMask(config);
     }
+
+    public static IdMask<Long> forSiv(Config config) {
+        return new IdMask.AesSivMask(config);
+    }
 }

@@ -211,4 +211,22 @@ public interface IdMask<T> {
         }
     }
 
+    final class AesSivMask extends BaseIdMask implements IdMask<Long> {
+
+        AesSivMask(Config config) {
+            super(new IdMaskEngine.AesSivEngine(config.keyManager(), config.encoding()), config);
+        }
+
+        @Override
+        public String mask(Long id) {
+            return _encode(Bytes.from(id).array());
+        }
+
+        @Override
+        public Long unmask(String encoded) {
+            byte[] out = _decode(encoded);
+            return Bytes.wrap(out).toLong();
+        }
+    }
+
 }

@@ -2,8 +2,11 @@ package at.favre.lib.idmask;
 
 import at.favre.lib.bytes.Bytes;
 import at.favre.lib.crypto.HKDF;
+import org.cryptomator.siv.SivMode;
+import org.cryptomator.siv.UnauthenticCiphertextException;
 
 import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
@@ -633,6 +636,56 @@ public interface IdMaskEngine {
         @Override
         protected byte engineId() {
             return ENGINE_ID;
+        }
+    }
+
+    final class AesSivEngine implements IdMaskEngine {
+
+        private final ThreadLocal<SivMode> sivModeThreadLocal = new ThreadLocal<>();
+        private final HKDF hkdf;
+        private final KeyManager keyManager;
+        private final ByteToTextEncoding encoding;
+
+        public AesSivEngine(KeyManager keyManager, ByteToTextEncoding encoding) {
+            this.keyManager = keyManager;
+            this.encoding = encoding;
+            hkdf = HKDF.fromHmacSha512();
+        }
+
+        @Override
+        public CharSequence mask(byte[] plainId) {
+            Objects.requireNonNull(plainId, "id");
+
+            byte[] keys = hkdf.expand(keyManager.getActiveKey().getKeyBytes(), Bytes.allocate(16).array(), 64);
+
+            SivMode sivMode = getSiv();
+            byte[] encrypted = sivMode.encrypt(
+                    Bytes.from(keys, 0, 16).array(),
+                    Bytes.from(keys, 16, 32).array(),
+                    plainId);
+            return encoding.encode(encrypted);
+        }
+
+        @Override
+        public byte[] unmask(CharSequence maskedId) {
+            byte[] keys = hkdf.expand(keyManager.getActiveKey().getKeyBytes(), Bytes.allocate(16).array(), 64);
+            SivMode sivMode = getSiv();
+
+            try {
+                return sivMode.decrypt(
+                        Bytes.from(keys, 0, 16).array(),
+                        Bytes.from(keys, 16, 32).array(),
+                        encoding.decode(maskedId));
+            } catch (UnauthenticCiphertextException | IllegalBlockSizeException e) {
+                throw new IdMaskSecurityException("could not decrypt", IdMaskSecurityException.Reason.AUTH_TAG_DOES_NOT_MATCH_OR_INVALID_KEY, e);
+            }
+        }
+
+        private synchronized SivMode getSiv() {
+            if (sivModeThreadLocal.get() == null) {
+                sivModeThreadLocal.set(new SivMode());
+            }
+            return sivModeThreadLocal.get();
         }
     }
 }
