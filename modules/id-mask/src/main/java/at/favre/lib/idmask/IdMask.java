@@ -214,7 +214,7 @@ public interface IdMask<T> {
     final class AesSivMask extends BaseIdMask implements IdMask<Long> {
 
         AesSivMask(Config config) {
-            super(new IdMaskEngine.AesSivEngine(config.keyManager(), config.encoding()), config);
+            super(new IdMaskEngine.AesSivEngine(config.keyManager()), config);
         }
 
         @Override

@@ -640,52 +640,200 @@ public interface IdMaskEngine {
     }
 
     final class AesSivEngine implements IdMaskEngine {
+        private static final int ENGINE_ID = 2;
+        static int MAX_MASKED_ID_ENCODED_LENGTH = 768;
+        static int MIN_MASKED_ID_ENCODED_LENGTH = 8;
 
         private final ThreadLocal<SivMode> sivModeThreadLocal = new ThreadLocal<>();
         private final HKDF hkdf;
         private final KeyManager keyManager;
         private final ByteToTextEncoding encoding;
+        private final boolean randomizeIds;
+        private final Provider provider;
+        private final SecureRandom secureRandom;
+        private final int supportedIdByteLength;
 
-        public AesSivEngine(KeyManager keyManager, ByteToTextEncoding encoding) {
-            this.keyManager = keyManager;
+        AesSivEngine(KeyManager keyManager) {
+            this(keyManager, new ByteToTextEncoding.Base64Url(), false, new SecureRandom(), null);
+        }
+
+        AesSivEngine(KeyManager keyManager, ByteToTextEncoding encoding, boolean randomizeIds, SecureRandom secureRandom, Provider provider) {
+            this.keyManager = KeyManager.CachedKdfConverter.wrap(keyManager, new KeyManager.CachedKdfConverter.KdfConverter() {
+                @Override
+                public byte[] convert(KeyManager.IdSecretKey original) {
+                    return hkdf.extract(Bytes.from(original.getKeyId()).array(), original.getKeyBytes());
+                }
+            });
+            this.supportedIdByteLength = 8;
             this.encoding = encoding;
-            hkdf = HKDF.fromHmacSha512();
+            this.randomizeIds = randomizeIds;
+            this.hkdf = HKDF.fromHmacSha512();
+            this.secureRandom = secureRandom;
+            this.provider = provider;
+        }
+
+        private int entropyLength() {
+            return 16;
         }
 
         @Override
         public CharSequence mask(byte[] plainId) {
-            Objects.requireNonNull(plainId, "id");
+            if (Objects.requireNonNull(plainId, "id").length != supportedIdByteLength) {
+                throw new IllegalArgumentException(String.format("id length must be exactly %d bytes in length", supportedIdByteLength));
+            }
 
-            byte[] keys = hkdf.expand(keyManager.getActiveKey().getKeyBytes(), Bytes.allocate(16).array(), 64);
+            byte[] entropy = getEntropyBytes(entropyLength());
+            byte[] keys = hkdf.expand(keyManager.getActiveKey().getKeyBytes(), entropy, 48);
 
             SivMode sivMode = getSiv();
-            byte[] encrypted = sivMode.encrypt(
+            byte[] cipherText = sivMode.encrypt(
                     Bytes.from(keys, 0, 16).array(),
                     Bytes.from(keys, 16, 32).array(),
-                    plainId);
-            return encoding.encode(encrypted);
+                    plainId,
+                    Bytes.from((byte) keyManager.getActiveKeyId(), engineId()).array());
+
+            ByteBuffer bb;
+            byte version = createVersionByte((byte) keyManager.getActiveKeyId(), cipherText);
+
+            if (randomizeIds) {
+                bb = ByteBuffer.allocate(1 + entropy.length + cipherText.length);
+                bb.put(version);
+                bb.put(entropy);
+                bb.put(cipherText);
+            } else {
+                bb = ByteBuffer.allocate(1 + cipherText.length);
+                bb.put(version);
+                bb.put(cipherText);
+            }
+
+            return encoding.encode(bb.array());
         }
 
         @Override
         public byte[] unmask(CharSequence maskedId) {
-            byte[] keys = hkdf.expand(keyManager.getActiveKey().getKeyBytes(), Bytes.allocate(16).array(), 64);
+            checkInput(maskedId);
+
+            ByteBuffer bb = ByteBuffer.wrap(encoding.decode(maskedId));
+
+            byte version = bb.get();
+            byte[] entropy = getEntropyBytes(entropyLength());
+            if (randomizeIds) {
+                bb.get(entropy);
+            }
+            byte[] cipherText = new byte[bb.remaining()];
+            bb.get(cipherText);
+
+            KeyManager.IdSecretKey currentKey = checkAndGetCurrentKey(version, cipherText);
+
+            byte[] keys = hkdf.expand(currentKey.getKeyBytes(), entropy, 48);
             SivMode sivMode = getSiv();
 
             try {
                 return sivMode.decrypt(
                         Bytes.from(keys, 0, 16).array(),
                         Bytes.from(keys, 16, 32).array(),
-                        encoding.decode(maskedId));
+                        cipherText,
+                        Bytes.from((byte) currentKey.getKeyId(), engineId()).array());
             } catch (UnauthenticCiphertextException | IllegalBlockSizeException e) {
                 throw new IdMaskSecurityException("could not decrypt", IdMaskSecurityException.Reason.AUTH_TAG_DOES_NOT_MATCH_OR_INVALID_KEY, e);
             }
         }
 
+
         private synchronized SivMode getSiv() {
             if (sivModeThreadLocal.get() == null) {
-                sivModeThreadLocal.set(new SivMode());
+
+                try {
+                    if (provider != null) {
+                        throw new UnsupportedOperationException("currently setting custom provider is not supported");
+                    } else {
+                        sivModeThreadLocal.set(new SivMode());
+                    }
+                } catch (Exception e) {
+                    throw new IllegalStateException("could not get cipher instance", e);
+                }
             }
             return sivModeThreadLocal.get();
+        }
+
+        byte[] getEntropyBytes(int size) {
+            if (randomizeIds) {
+                byte[] rnd = new byte[size];
+                secureRandom.nextBytes(rnd);
+                return rnd;
+            } else {
+                return Bytes.allocate(size).array();
+            }
+        }
+
+        /**
+         * Creates a version byte encoding keyId and cipherText
+         *
+         * @param keyId      to encode in version (encoded to first 4 bit)
+         * @param cipherText to encode in version (encoded to last 4 bit)
+         * @return version byte
+         */
+        byte createVersionByte(byte keyId, byte[] cipherText) {
+            byte engineId = engineId();
+            if (keyId < 0 || keyId > MAX_KEY_ID || engineId < 0 || engineId > MAX_ENGINE_ID) {
+                throw new IllegalArgumentException("key and engine id must can only be 4 bit long");
+            }
+
+            return Bytes.from(keyId).leftShift(4).or(Bytes.from(engineId)).xor(Bytes.from(cipherText, 0, 1)).toByte();
+        }
+
+        /**
+         * Checks given version byte if it matches current implementation
+         *
+         * @param version    to decode
+         * @param cipherText used to de obfuscate version byte
+         * @return secret key to decode
+         */
+        KeyManager.IdSecretKey checkAndGetCurrentKey(byte version, byte[] cipherText) {
+            byte versionEngineId = getEngineIdFromVersion(version, cipherText);
+            if (versionEngineId != engineId()) {
+                throw new IdMaskSecurityException("wrong idMask engine used according to version byte - expected '" + engineId() + "' got '" + versionEngineId + "'",
+                        IdMaskSecurityException.Reason.UNKNOWN_ENGINE_ID);
+            }
+            byte keyId = getKeyIdFromVersion(version, cipherText);
+            KeyManager.IdSecretKey currentSecretKey = getKeyForId(keyId);
+
+            if (currentSecretKey == null || currentSecretKey.getKeyBytes() == null) {
+                throw new IdMaskSecurityException("unknown key id '" + keyId + "'", IdMaskSecurityException.Reason.UNKNOWN_KEY_ID);
+            }
+            return currentSecretKey;
+        }
+
+        private byte engineId() {
+            return ENGINE_ID;
+        }
+
+        byte getKeyIdFromVersion(byte obfuscatedVersion, byte[] cipherText) {
+            return Bytes.from(obfuscatedVersion).xor(Bytes.from(cipherText, 0, 1)).rightShift(4).and(Bytes.from((byte) 0b00001111)).toByte();
+        }
+
+        byte getEngineIdFromVersion(byte obfuscatedVersion, byte[] cipherText) {
+            return Bytes.from(obfuscatedVersion).xor(Bytes.from(cipherText, 0, 1)).and(Bytes.from((byte) 0b00001111)).toByte();
+        }
+
+        KeyManager.IdSecretKey getKeyForId(byte keyId) {
+            KeyManager.IdSecretKey key;
+            if ((key = keyManager.getById(keyId)) == null) {
+                return null;
+            }
+            return key;
+        }
+
+        /**
+         * Parameter input validation for masked ids
+         *
+         * @param maskedId to validate
+         * @throws IllegalArgumentException if input is not valid
+         */
+        void checkInput(CharSequence maskedId) {
+            if (Objects.requireNonNull(maskedId, "maskedId").length() > MAX_MASKED_ID_ENCODED_LENGTH || maskedId.length() < MIN_MASKED_ID_ENCODED_LENGTH) {
+                throw new IllegalArgumentException("encoded masked id too long or short, must be between " + MIN_MASKED_ID_ENCODED_LENGTH + " and " + MAX_MASKED_ID_ENCODED_LENGTH + " chars");
+            }
         }
     }
 }
