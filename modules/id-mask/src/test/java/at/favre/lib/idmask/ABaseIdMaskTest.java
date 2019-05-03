@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 public abstract class ABaseIdMaskTest {
@@ -24,7 +25,12 @@ public abstract class ABaseIdMaskTest {
     <T> void maskAndUnmask(IdMask<T> idMask, T id) {
         String encoded = idMask.mask(id);
         T refId = idMask.unmask(encoded);
-        assertEquals(id, refId);
+
+        if (id.getClass().isArray()) {
+            assertArrayEquals((byte[]) id, (byte[]) refId);
+        } else {
+            assertEquals(id, refId);
+        }
 
         System.out.println(encoded);
     }

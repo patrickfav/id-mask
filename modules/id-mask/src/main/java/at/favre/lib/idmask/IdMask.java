@@ -115,13 +115,38 @@ public interface IdMask<T> {
     }
 
     /**
+     * Implementation which handles int type ids (32 bit integers)
+     */
+    final class IntIdMask extends BaseIdMask<Integer> {
+
+        IntIdMask(Config config) {
+            super(new IdMaskEngine.AesSivEngine(config.keyManager(), IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_4_BYTE,
+                            config.encoding(), config.randomizedIds(), config.secureRandom(), config.securityProvider()),
+                    new IntTypeConverter(),
+                    config);
+        }
+
+        private static final class IntTypeConverter implements TypeConverter<Integer> {
+            @Override
+            public byte[] convertToBytes(Integer typed) {
+                return Bytes.from(typed).array();
+            }
+
+            @Override
+            public Integer convertFromBytes(byte[] raw) {
+                return Bytes.wrap(raw).toInt();
+            }
+        }
+    }
+
+    /**
      * Implementation which handles long type ids (64 bit integers)
      */
     final class LongIdMask extends BaseIdMask<Long> {
 
         LongIdMask(Config config) {
-            super(new IdMaskEngine.EightByteEncryptionEngine(config.keyManager(), config.securityProvider(),
-                            config.secureRandom(), config.encoding(), config.randomizedIds(), config.autoWipeMemory()),
+            super(new IdMaskEngine.AesSivEngine(config.keyManager(), IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_8_BYTE,
+                            config.encoding(), config.randomizedIds(), config.secureRandom(), config.securityProvider()),
                     new LongTypeConverter(),
                     config);
         }
@@ -145,8 +170,8 @@ public interface IdMask<T> {
     final class LongIdTupleMask extends BaseIdMask<LongTuple> {
 
         LongIdTupleMask(Config config) {
-            super(new IdMaskEngine.SixteenByteEngine(config.keyManager(), config.highSecurityMode(), config.encoding(),
-                            config.secureRandom(), config.securityProvider(), config.randomizedIds(), config.autoWipeMemory()),
+            super(new IdMaskEngine.AesSivEngine(config.keyManager(), IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_16_BYTE,
+                            config.encoding(), config.randomizedIds(), config.secureRandom(), config.securityProvider()),
                     new LongIdTupleConverter(),
                     config);
         }
@@ -173,8 +198,8 @@ public interface IdMask<T> {
     final class UuidMask extends BaseIdMask<UUID> {
 
         UuidMask(Config config) {
-            super(new IdMaskEngine.SixteenByteEngine(config.keyManager(), config.highSecurityMode(), config.encoding(),
-                            config.secureRandom(), config.securityProvider(), config.randomizedIds(), config.autoWipeMemory()),
+            super(new IdMaskEngine.AesSivEngine(config.keyManager(), IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_16_BYTE,
+                            config.encoding(), config.randomizedIds(), config.secureRandom(), config.securityProvider()),
                     new UuidConverter(),
                     config);
         }
@@ -199,8 +224,8 @@ public interface IdMask<T> {
     final class ByteArray128bitMask extends BaseIdMask<byte[]> {
 
         ByteArray128bitMask(Config config) {
-            super(new IdMaskEngine.SixteenByteEngine(config.keyManager(), config.highSecurityMode(), config.encoding(),
-                            config.secureRandom(), config.securityProvider(), config.randomizedIds(), config.autoWipeMemory()),
+            super(new IdMaskEngine.AesSivEngine(config.keyManager(), IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_16_BYTE,
+                            config.encoding(), config.randomizedIds(), config.secureRandom(), config.securityProvider()),
                     new ByteArrayConverter(),
                     config);
         }
@@ -225,8 +250,8 @@ public interface IdMask<T> {
         private static final int SUPPORTED_LENGTH = 15;
 
         BigIntegerIdMask(Config config) {
-            super(new IdMaskEngine.SixteenByteEngine(config.keyManager(), config.highSecurityMode(), config.encoding(),
-                            config.secureRandom(), config.securityProvider(), config.randomizedIds(), config.autoWipeMemory()),
+            super(new IdMaskEngine.AesSivEngine(config.keyManager(), IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_16_BYTE,
+                            config.encoding(), config.randomizedIds(), config.secureRandom(), config.securityProvider()),
                     new BigIntegerConverter(),
                     config);
         }
@@ -256,24 +281,17 @@ public interface IdMask<T> {
         }
     }
 
-    final class AesSivMask extends BaseIdMask<Long> {
+    /**
+     * Implementation which handles a generic 256 bit integer
+     * (or other 32 byte long array)
+     */
+    final class ByteArray256bitMask extends BaseIdMask<byte[]> {
 
-        AesSivMask(Config config) {
-            super(new IdMaskEngine.AesSivEngine(config.keyManager()),
-                    new LongTypeConverter(),
+        ByteArray256bitMask(Config config) {
+            super(new IdMaskEngine.AesSivEngine(config.keyManager(), IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_32_BYTE,
+                            config.encoding(), config.randomizedIds(), config.secureRandom(), config.securityProvider()),
+                    new ByteArray128bitMask.ByteArrayConverter(),
                     config);
-        }
-
-        private static final class LongTypeConverter implements TypeConverter<Long> {
-            @Override
-            public byte[] convertToBytes(Long typed) {
-                return Bytes.from(typed).array();
-            }
-
-            @Override
-            public Long convertFromBytes(byte[] raw) {
-                return Bytes.wrap(raw).toLong();
-            }
         }
     }
 

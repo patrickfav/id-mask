@@ -13,6 +13,16 @@ public final class IdMasks {
     }
 
     /**
+     * Create new id mask for masking 32 bit integers.
+     *
+     * @param config to adjust settings
+     * @return new instance
+     */
+    public static IdMask<Integer> forIntIds(Config config) {
+        return new IdMask.IntIdMask(config);
+    }
+
+    /**
      * Create new id mask for masking 64 bit integers.
      *
      * @param config to adjust settings
@@ -62,10 +72,6 @@ public final class IdMasks {
      */
     public static IdMask<BigInteger> forBigInteger(Config config) {
         return new IdMask.BigIntegerIdMask(config);
-    }
-
-    public static IdMask<Long> forSiv(Config config) {
-        return new IdMask.AesSivMask(config);
     }
 
     /**

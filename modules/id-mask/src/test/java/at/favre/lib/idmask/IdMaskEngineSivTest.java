@@ -8,17 +8,30 @@ import java.security.SecureRandom;
 import static org.junit.Assert.*;
 
 public class IdMaskEngineSivTest {
-    private IdMaskEngine idMaskEngine = new IdMaskEngine.AesSivEngine(KeyManager.Factory.withRandom());
+    private IdMaskEngine idMaskEngine = new IdMaskEngine.AesSivEngine(KeyManager.Factory.withRandom(), IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_8_BYTE);
 
     @Test
     public void testFixedIdsAndKey() {
         byte[] id = Bytes.from(397849238741629487L).array();
-        IdMaskEngine idMaskEngine = new IdMaskEngine.AesSivEngine(KeyManager.Factory.withRandom());
-        for (int i = 0; i < 10; i++) {
-            CharSequence maskedId = idMaskEngine.mask(id);
-            assertNotNull(maskedId);
-            assertArrayEquals(id, idMaskEngine.unmask(maskedId));
-            System.out.println(maskedId);
+        IdMaskEngine idMaskEngine = new IdMaskEngine.AesSivEngine(KeyManager.Factory.withRandom(), IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_8_BYTE);
+
+        CharSequence maskedId = idMaskEngine.mask(id);
+        assertNotNull(maskedId);
+        assertArrayEquals(id, idMaskEngine.unmask(maskedId));
+        System.out.println(maskedId);
+    }
+
+    @Test
+    public void testAllIdLengthConfigsWithRandomId() {
+        for (IdMaskEngine.AesSivEngine.IdEncConfig config : IdMaskEngine.AesSivEngine.IdEncConfig.values()) {
+            for (int i = 0; i < 3; i++) {
+                byte[] id = Bytes.random(config.valueLengthBytes).array();
+                IdMaskEngine idMaskEngine = new IdMaskEngine.AesSivEngine(KeyManager.Factory.withRandom(), config);
+                CharSequence maskedId = idMaskEngine.mask(id);
+                assertNotNull(maskedId);
+                assertArrayEquals(id, idMaskEngine.unmask(maskedId));
+                System.out.println(maskedId);
+            }
         }
     }
 
@@ -27,8 +40,8 @@ public class IdMaskEngineSivTest {
         KeyManager key = KeyManager.Factory.withRandom();
         byte[] id = Bytes.from(Bytes.from(9182746139874612986L)).array();
 
-        IdMaskEngine idMaskRandomized = new IdMaskEngine.AesSivEngine(key, new ByteToTextEncoding.Base64Url(), true, new SecureRandom(), null);
-        IdMaskEngine idMaskDeterministic = new IdMaskEngine.AesSivEngine(key, new ByteToTextEncoding.Base64Url(), false, new SecureRandom(), null);
+        IdMaskEngine idMaskRandomized = new IdMaskEngine.AesSivEngine(key, IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_8_BYTE, new ByteToTextEncoding.Base64Url(), true, new SecureRandom(), null);
+        IdMaskEngine idMaskDeterministic = new IdMaskEngine.AesSivEngine(key, IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_8_BYTE, new ByteToTextEncoding.Base64Url(), false, new SecureRandom(), null);
 
         CharSequence maskedId1 = idMaskRandomized.mask(id);
         CharSequence maskedId2 = idMaskDeterministic.mask(id);
@@ -43,7 +56,7 @@ public class IdMaskEngineSivTest {
     @Test
     public void testRandomizedIdsShouldNotReturnSameMaskedId() {
         IdMaskEngine idMaskEngine = new IdMaskEngine.AesSivEngine(KeyManager.Factory.withRandom(),
-                new ByteToTextEncoding.Base64Url(), true, new SecureRandom(), null);
+                IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_8_BYTE, new ByteToTextEncoding.Base64Url(), true, new SecureRandom(), null);
         byte[] id = Bytes.from(7239562391234L).array();
 
         CharSequence maskedId1 = idMaskEngine.mask(id);
@@ -70,7 +83,7 @@ public class IdMaskEngineSivTest {
 
     @Test
     public void testDeterministicIdsShouldReturnSameMaskedId() {
-        IdMaskEngine idMaskEngine = new IdMaskEngine.AesSivEngine(KeyManager.Factory.withRandom());
+        IdMaskEngine idMaskEngine = new IdMaskEngine.AesSivEngine(KeyManager.Factory.withRandom(), IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_8_BYTE);
         byte[] id = Bytes.from(7239562391234L).array();
 
         CharSequence maskedId1 = idMaskEngine.mask(id);
@@ -96,22 +109,10 @@ public class IdMaskEngineSivTest {
     }
 
     @Test
-    public void testWithRandomId() {
-        IdMaskEngine idMaskEngine = new IdMaskEngine.AesSivEngine(KeyManager.Factory.withRandom());
-        for (int i = 0; i < 10; i++) {
-            byte[] id = Bytes.random(8).array();
-            CharSequence maskedId = idMaskEngine.mask(id);
-            assertNotNull(maskedId);
-            assertArrayEquals(id, idMaskEngine.unmask(maskedId));
-            System.out.println(maskedId);
-        }
-    }
-
-    @Test
     public void testVariousKeyIds() {
         byte[] id = Bytes.from(93875623985763L).array();
         for (int i = 0; i < 16; i++) {
-            IdMaskEngine idMaskEngine = new IdMaskEngine.AesSivEngine(KeyManager.Factory.with(i, Bytes.random(16).array()));
+            IdMaskEngine idMaskEngine = new IdMaskEngine.AesSivEngine(KeyManager.Factory.with(i, Bytes.random(16).array()), IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_8_BYTE);
             CharSequence maskedId = idMaskEngine.mask(id);
             assertNotNull(maskedId);
             assertArrayEquals(id, idMaskEngine.unmask(maskedId));
@@ -127,9 +128,9 @@ public class IdMaskEngineSivTest {
         KeyManager.IdSecretKey k2 = new KeyManager.IdSecretKey(1, Bytes.random(16).array());
         KeyManager.IdSecretKey k3 = new KeyManager.IdSecretKey(2, Bytes.random(16).array());
 
-        IdMaskEngine engine1 = new IdMaskEngine.AesSivEngine(KeyManager.Factory.with(k1));
-        IdMaskEngine engine2 = new IdMaskEngine.AesSivEngine(KeyManager.Factory.withKeyAndLegacyKeys(k2, k1));
-        IdMaskEngine engine3 = new IdMaskEngine.AesSivEngine(KeyManager.Factory.withKeyAndLegacyKeys(k3, k2, k1));
+        IdMaskEngine engine1 = new IdMaskEngine.AesSivEngine(KeyManager.Factory.with(k1), IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_8_BYTE);
+        IdMaskEngine engine2 = new IdMaskEngine.AesSivEngine(KeyManager.Factory.withKeyAndLegacyKeys(k2, k1), IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_8_BYTE);
+        IdMaskEngine engine3 = new IdMaskEngine.AesSivEngine(KeyManager.Factory.withKeyAndLegacyKeys(k3, k2, k1), IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_8_BYTE);
 
         // encrypt with 3 different keys, having backwards compatibility
         CharSequence maskedId1 = engine1.mask(id);
@@ -172,8 +173,23 @@ public class IdMaskEngineSivTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testTooLongId() {
-        idMaskEngine.mask(Bytes.allocate(17).array());
+    public void testTooLongId1() {
+        new IdMaskEngine.AesSivEngine(KeyManager.Factory.withRandom(), IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_16_BYTE).mask(Bytes.allocate(5).array());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testTooLongId2() {
+        idMaskEngine.mask(Bytes.allocate(7).array());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testTooLongId3() {
+        new IdMaskEngine.AesSivEngine(KeyManager.Factory.withRandom(), IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_16_BYTE).mask(Bytes.allocate(17).array());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testTooLongId4() {
+        new IdMaskEngine.AesSivEngine(KeyManager.Factory.withRandom(), IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_32_BYTE).mask(Bytes.allocate(33).array());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -198,13 +214,13 @@ public class IdMaskEngineSivTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testUnmaskEncodedTooLong() {
-        idMaskEngine.unmask(Bytes.allocate(IdMaskEngine.BaseEngine.MAX_MASKED_ID_ENCODED_LENGTH / 2 + 1).encodeHex());
+        idMaskEngine.unmask(Bytes.allocate(IdMaskEngine.AesSivEngine.MAX_MASKED_ID_ENCODED_LENGTH / 2 + 1).encodeHex());
     }
 
     @Test
     public void testForgeryAttempt1() {
         byte[] id = Bytes.from(103876123987523049L).array();
-        IdMaskEngine idMaskEngine = new IdMaskEngine.AesSivEngine(KeyManager.Factory.withRandom());
+        IdMaskEngine idMaskEngine = new IdMaskEngine.AesSivEngine(KeyManager.Factory.withRandom(), IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_8_BYTE);
         CharSequence maskedId = idMaskEngine.mask(id);
 
         byte[] raw = new ByteToTextEncoding.Base64Url().decode(maskedId);
@@ -223,7 +239,7 @@ public class IdMaskEngineSivTest {
     @Test
     public void testForgeryAttempt2() {
         byte[] id = Bytes.from(70366123987523049L).array();
-        IdMaskEngine idMaskEngine = new IdMaskEngine.AesSivEngine(KeyManager.Factory.withRandom());
+        IdMaskEngine idMaskEngine = new IdMaskEngine.AesSivEngine(KeyManager.Factory.withRandom(), IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_8_BYTE);
         CharSequence maskedId = idMaskEngine.mask(id);
 
         byte[] raw = new ByteToTextEncoding.Base64Url().decode(maskedId);
@@ -242,7 +258,7 @@ public class IdMaskEngineSivTest {
     @Test
     public void testKeyIdTooBig() {
         try {
-            new IdMaskEngine.EightByteEncryptionEngine(KeyManager.Factory.with(16, Bytes.random(16).array()));
+            new IdMaskEngine.AesSivEngine(KeyManager.Factory.with(16, Bytes.random(16).array()), IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_8_BYTE);
             fail();
         } catch (IllegalArgumentException ignored) {
         }
@@ -251,12 +267,12 @@ public class IdMaskEngineSivTest {
     @Test
     public void testIncorrectKey() {
         KeyManager manager1 = KeyManager.Factory.with(0, Bytes.random(16).array());
-        IdMaskEngine idMaskEngine = new IdMaskEngine.EightByteEncryptionEngine(manager1);
+        IdMaskEngine idMaskEngine = new IdMaskEngine.AesSivEngine(manager1, IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_8_BYTE);
         byte[] id = Bytes.from(509186513786L).array();
         CharSequence masked = idMaskEngine.mask(id);
 
         KeyManager manager2 = KeyManager.Factory.with(0, Bytes.random(16).array());
-        idMaskEngine = new IdMaskEngine.EightByteEncryptionEngine(manager2);
+        idMaskEngine = new IdMaskEngine.AesSivEngine(manager2, IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_8_BYTE);
 
         try {
             idMaskEngine.unmask(masked);
