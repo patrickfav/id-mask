@@ -1,6 +1,7 @@
 package at.favre.lib.idmask;
 
 import at.favre.lib.bytes.Bytes;
+import at.favre.lib.bytes.BytesTransformer;
 import org.junit.Test;
 
 import java.security.SecureRandom;
@@ -31,6 +32,23 @@ public class IdMaskEngineSivTest {
                 assertNotNull(maskedId);
                 assertArrayEquals(id, idMaskEngine.unmask(maskedId));
                 System.out.println(maskedId);
+            }
+        }
+    }
+
+    @Test
+    public void testIncrementingIds() {
+        for (IdMaskEngine.AesSivEngine.IdEncConfig config : IdMaskEngine.AesSivEngine.IdEncConfig.values()) {
+            IdMaskEngine idMaskEngine = new IdMaskEngine.AesSivEngine(KeyManager.Factory.withRandom(), config);
+            CharSequence maskedIdBefore = null;
+            for (int i = 0; i < 16; i++) {
+                byte[] id = Bytes.from(i).resize(config.valueLengthBytes, BytesTransformer.ResizeTransformer.Mode.RESIZE_KEEP_FROM_MAX_LENGTH).array();
+                CharSequence maskedId = idMaskEngine.mask(id);
+                assertNotNull(maskedId);
+                assertArrayEquals(id, idMaskEngine.unmask(maskedId));
+                assertNotEquals(maskedIdBefore, maskedId);
+                maskedIdBefore = maskedId;
+                System.out.println(String.format("%2d", i) + ": " + maskedId);
             }
         }
     }
