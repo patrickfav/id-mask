@@ -77,7 +77,7 @@ public class IdMaskAndHashIdsBenchmark {
         state.id++;
     }
 
-    @Benchmark
+    //    @Benchmark
     public void benchmarkHashIdEncode(BenchmarkState state, Blackhole blackhole) {
         blackhole.consume(state.hashids.encode(state.id));
         state.id++;
@@ -97,7 +97,7 @@ public class IdMaskAndHashIdsBenchmark {
         state.id++;
     }
 
-    @Benchmark
+    //    @Benchmark
     public void benchmarkHashIdEncodeDecode(BenchmarkState state, Blackhole blackhole) {
         String encoded = state.hashids.encode(state.id);
         blackhole.consume(state.hashids.decode(encoded));
