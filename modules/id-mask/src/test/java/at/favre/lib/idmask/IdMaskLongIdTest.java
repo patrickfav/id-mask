@@ -78,7 +78,7 @@ public class IdMaskLongIdTest extends ABaseIdMaskTest {
     @Test
     public void testIncorrectId() {
         try {
-            idMask.unmask("MB8GIdO1rkNLN88yCLaxB_U");
+            idMask.unmask("ErvZWpS8x6cCBUPnihxklXsJH8yFq4F0nw");
             fail();
         } catch (IdMaskSecurityException e) {
             assertEquals(IdMaskSecurityException.Reason.UNKNOWN_ENGINE_ID, e.getReason());

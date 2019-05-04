@@ -58,8 +58,8 @@ public class IdMaskEngineSivTest {
         KeyManager key = KeyManager.Factory.withRandom();
         byte[] id = Bytes.from(Bytes.from(9182746139874612986L)).array();
 
-        IdMaskEngine idMaskRandomized = new IdMaskEngine.AesSivEngine(key, IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_8_BYTE, new ByteToTextEncoding.Base64Url(), true, new SecureRandom(), null);
-        IdMaskEngine idMaskDeterministic = new IdMaskEngine.AesSivEngine(key, IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_8_BYTE, new ByteToTextEncoding.Base64Url(), false, new SecureRandom(), null);
+        IdMaskEngine idMaskRandomized = new IdMaskEngine.AesSivEngine(key, IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_8_BYTE, Bytes.allocate(8).array(), new ByteToTextEncoding.Base64Url(), true, new SecureRandom(), null);
+        IdMaskEngine idMaskDeterministic = new IdMaskEngine.AesSivEngine(key, IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_8_BYTE, Bytes.allocate(8).array(), new ByteToTextEncoding.Base64Url(), false, new SecureRandom(), null);
 
         CharSequence maskedId1 = idMaskRandomized.mask(id);
         CharSequence maskedId2 = idMaskDeterministic.mask(id);
@@ -74,7 +74,7 @@ public class IdMaskEngineSivTest {
     @Test
     public void testRandomizedIdsShouldNotReturnSameMaskedId() {
         IdMaskEngine idMaskEngine = new IdMaskEngine.AesSivEngine(KeyManager.Factory.withRandom(),
-                IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_8_BYTE, new ByteToTextEncoding.Base64Url(), true, new SecureRandom(), null);
+                IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_8_BYTE, Bytes.allocate(8).array(), new ByteToTextEncoding.Base64Url(), true, new SecureRandom(), null);
         byte[] id = Bytes.from(7239562391234L).array();
 
         CharSequence maskedId1 = idMaskEngine.mask(id);
@@ -303,7 +303,7 @@ public class IdMaskEngineSivTest {
     @Test
     public void testWrongId() {
         try {
-            idMaskEngine.unmask("MB8GIdO1rkNLN88yCLaxB_U");
+            idMaskEngine.unmask("HyFTDJKjEQHz75GQ4F-SUMXtMnAbfPVI3Q");
             fail();
         } catch (IdMaskSecurityException e) {
             assertEquals(IdMaskSecurityException.Reason.UNKNOWN_ENGINE_ID, e.getReason());

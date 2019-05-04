@@ -121,7 +121,7 @@ public interface IdMask<T> {
 
         IntIdMask(Config config) {
             super(new IdMaskEngine.AesSivEngine(config.keyManager(), IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_4_BYTE,
-                            config.encoding(), config.randomizedIds(), config.secureRandom(), config.securityProvider()),
+                            config.obfuscationSalt(), config.encoding(), config.randomizedIds(), config.secureRandom(), config.securityProvider()),
                     new IntTypeConverter(),
                     config);
         }
@@ -146,7 +146,7 @@ public interface IdMask<T> {
 
         LongIdMask(Config config) {
             super(new IdMaskEngine.AesSivEngine(config.keyManager(), IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_8_BYTE,
-                            config.encoding(), config.randomizedIds(), config.secureRandom(), config.securityProvider()),
+                            config.obfuscationSalt(), config.encoding(), config.randomizedIds(), config.secureRandom(), config.securityProvider()),
                     new LongTypeConverter(),
                     config);
         }
@@ -171,7 +171,7 @@ public interface IdMask<T> {
 
         LongIdTupleMask(Config config) {
             super(new IdMaskEngine.AesSivEngine(config.keyManager(), IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_16_BYTE,
-                            config.encoding(), config.randomizedIds(), config.secureRandom(), config.securityProvider()),
+                            config.obfuscationSalt(), config.encoding(), config.randomizedIds(), config.secureRandom(), config.securityProvider()),
                     new LongIdTupleConverter(),
                     config);
         }
@@ -199,7 +199,7 @@ public interface IdMask<T> {
 
         UuidMask(Config config) {
             super(new IdMaskEngine.AesSivEngine(config.keyManager(), IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_16_BYTE,
-                            config.encoding(), config.randomizedIds(), config.secureRandom(), config.securityProvider()),
+                            config.obfuscationSalt(), config.encoding(), config.randomizedIds(), config.secureRandom(), config.securityProvider()),
                     new UuidConverter(),
                     config);
         }
@@ -225,7 +225,7 @@ public interface IdMask<T> {
 
         ByteArray128bitMask(Config config) {
             super(new IdMaskEngine.AesSivEngine(config.keyManager(), IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_16_BYTE,
-                            config.encoding(), config.randomizedIds(), config.secureRandom(), config.securityProvider()),
+                            config.obfuscationSalt(), config.encoding(), config.randomizedIds(), config.secureRandom(), config.securityProvider()),
                     new ByteArrayConverter(),
                     config);
         }
@@ -251,7 +251,7 @@ public interface IdMask<T> {
 
         BigIntegerIdMask(Config config) {
             super(new IdMaskEngine.AesSivEngine(config.keyManager(), IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_16_BYTE,
-                            config.encoding(), config.randomizedIds(), config.secureRandom(), config.securityProvider()),
+                            config.obfuscationSalt(), config.encoding(), config.randomizedIds(), config.secureRandom(), config.securityProvider()),
                     new BigIntegerConverter(),
                     config);
         }
@@ -289,7 +289,7 @@ public interface IdMask<T> {
 
         ByteArray256bitMask(Config config) {
             super(new IdMaskEngine.AesSivEngine(config.keyManager(), IdMaskEngine.AesSivEngine.IdEncConfig.INTEGER_32_BYTE,
-                            config.encoding(), config.randomizedIds(), config.secureRandom(), config.securityProvider()),
+                            config.obfuscationSalt(), config.encoding(), config.randomizedIds(), config.secureRandom(), config.securityProvider()),
                     new ByteArray128bitMask.ByteArrayConverter(),
                     config);
         }

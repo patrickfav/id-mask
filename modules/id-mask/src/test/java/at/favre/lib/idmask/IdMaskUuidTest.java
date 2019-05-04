@@ -32,7 +32,7 @@ public class IdMaskUuidTest extends ABaseIdMaskTest {
     @Test
     public void testIncorrectId() {
         try {
-            idMask.unmask("dGlxN7fmLBvpKKOCDi3Ps1m_-sxvPcbFzg");
+            idMask.unmask("WuMYXrMf3nFsIYKy_PGNpmkwUUO4V5HsKtHEVsOvd3R3");
             fail();
         } catch (IdMaskSecurityException e) {
             assertEquals(IdMaskSecurityException.Reason.UNKNOWN_ENGINE_ID, e.getReason());

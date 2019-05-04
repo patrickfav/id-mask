@@ -60,12 +60,13 @@ public interface IdMaskEngine {
         private final Provider provider;
         private final SecureRandom secureRandom;
         private final IdEncConfig idEncConfig;
+        private final byte[] obfuscationKey;
 
         AesSivEngine(KeyManager keyManager, IdEncConfig idEncConfig) {
-            this(keyManager, idEncConfig, new ByteToTextEncoding.Base64Url(), false, new SecureRandom(), null);
+            this(keyManager, idEncConfig, Bytes.allocate(8).array(), new ByteToTextEncoding.Base64Url(), false, new SecureRandom(), null);
         }
 
-        AesSivEngine(KeyManager keyManager, IdEncConfig idEncConfig, ByteToTextEncoding encoding, boolean randomizeIds, SecureRandom secureRandom, Provider provider) {
+        AesSivEngine(KeyManager keyManager, IdEncConfig idEncConfig, byte[] obfuscationKey, ByteToTextEncoding encoding, boolean randomizeIds, SecureRandom secureRandom, Provider provider) {
             this.keyManager = KeyManager.CachedKdfConverter.wrap(keyManager, new KeyManager.CachedKdfConverter.KdfConverter() {
                 @Override
                 public byte[] convert(KeyManager.IdSecretKey original) {
@@ -78,10 +79,15 @@ public interface IdMaskEngine {
             this.hkdf = HKDF.fromHmacSha512();
             this.secureRandom = secureRandom;
             this.provider = provider;
+            this.obfuscationKey = hkdf.expand(obfuscationKey, null, outputLength());
         }
 
         private int entropyLength() {
             return idEncConfig.randomizedIdLengthBytes;
+        }
+
+        private int outputLength() {
+            return idEncConfig.valueLengthBytes + idEncConfig.macLengthBytes + 1 + (randomizeIds ? idEncConfig.randomizedIdLengthBytes : 0);
         }
 
         @Override
@@ -91,14 +97,14 @@ public interface IdMaskEngine {
             }
 
             byte[] entropy = getEntropyBytes(entropyLength());
-            byte[] keys = hkdf.expand(keyManager.getActiveKey().getKeyBytes(), entropy, 48);
+            byte[] keys = keyManager.getActiveKey().getKeyBytes();
 
             SivMode sivMode = getSiv();
             byte[] cipherText = sivMode.encrypt(
                     Bytes.from(keys, 0, 16).array(),
-                    Bytes.from(keys, 16, 32).array(),
+                    Bytes.from(keys, 16, 16).array(),
                     plainId,
-                    Bytes.from((byte) keyManager.getActiveKeyId(), engineId()).array());
+                    Bytes.from((byte) keyManager.getActiveKeyId(), engineId()).append(entropy).array());
 
             ByteBuffer bb;
             byte version = createVersionByte((byte) keyManager.getActiveKeyId(), cipherText);
@@ -114,14 +120,19 @@ public interface IdMaskEngine {
                 bb.put(cipherText);
             }
 
-            return encoding.encode(bb.array());
+            return encoding.encode(Bytes.from(bb).xor(obfuscationKey).array());
         }
 
         @Override
         public byte[] unmask(CharSequence maskedId) {
             checkInput(maskedId);
+            byte[] decoded = encoding.decode(maskedId);
 
-            ByteBuffer bb = ByteBuffer.wrap(encoding.decode(maskedId));
+            if (decoded.length != outputLength()) {
+                throw new IllegalArgumentException("unexpected decoded length '" + decoded.length + "' expected '" + outputLength() + "'");
+            }
+
+            ByteBuffer bb = ByteBuffer.wrap(Bytes.wrap(decoded).xor(obfuscationKey).array());
 
             byte version = bb.get();
             byte[] entropy = getEntropyBytes(entropyLength());
@@ -133,15 +144,15 @@ public interface IdMaskEngine {
 
             KeyManager.IdSecretKey currentKey = checkAndGetCurrentKey(version, cipherText);
 
-            byte[] keys = hkdf.expand(currentKey.getKeyBytes(), entropy, 48);
+            byte[] keys = currentKey.getKeyBytes();
             SivMode sivMode = getSiv();
 
             try {
                 return sivMode.decrypt(
                         Bytes.from(keys, 0, 16).array(),
-                        Bytes.from(keys, 16, 32).array(),
+                        Bytes.from(keys, 16, 16).array(),
                         cipherText,
-                        Bytes.from((byte) currentKey.getKeyId(), engineId()).array());
+                        Bytes.from((byte) currentKey.getKeyId(), engineId()).append(entropy).array());
             } catch (UnauthenticCiphertextException | IllegalBlockSizeException e) {
                 throw new IdMaskSecurityException("could not decrypt", IdMaskSecurityException.Reason.AUTH_TAG_DOES_NOT_MATCH_OR_INVALID_KEY, e);
             }
@@ -244,8 +255,8 @@ public interface IdMaskEngine {
         }
 
         public enum IdEncConfig {
-            INTEGER_4_BYTE(0, 4, 12, 10),
-            INTEGER_8_BYTE(1, 8, 12, 12),
+            INTEGER_4_BYTE(0, 4, 16, 10),
+            INTEGER_8_BYTE(1, 8, 16, 12),
             INTEGER_16_BYTE(2, 16, 16, 16),
             INTEGER_32_BYTE(4, 32, 16, 16),
             ;

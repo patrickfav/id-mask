@@ -1,5 +1,6 @@
 package at.favre.lib.idmask;
 
+import at.favre.lib.bytes.Bytes;
 import com.google.auto.value.AutoValue;
 import org.jetbrains.annotations.Nullable;
 
@@ -78,6 +79,14 @@ public abstract class Config {
     abstract boolean autoWipeMemory();
 
     /**
+     * The salt used to seed the simple id obfuscation phase.
+     * If this salt is changed, previous ids cannot be unmaseked.
+     *
+     * @return salt as byte array
+     */
+    abstract byte[] obfuscationSalt();
+
+    /**
      * Creates a new build with the following defaults:
      *
      * <ul>
@@ -101,6 +110,7 @@ public abstract class Config {
                 .cacheImpl(new Cache.SimpleLruMemCache())
                 .enableCache(true)
                 .autoWipeMemory(false)
+                .obfuscationSalt(122390292423221352L)
                 .secureRandom(new SecureRandom());
     }
 
@@ -143,12 +153,12 @@ public abstract class Config {
          * <pre>
          *    new ByteToTextEncoding.Base32Rfc4648()
          * </pre>
-         *
-         *  The library internally converts everything to bytes, encrypts it and then requires an encoding schema to make
-         *  the output printable. Per default the url-safe version of Base64 (RFC4648) is used. This is a well supported,
-         *  fast and reasonable space efficient (needs ~25% more storage than the raw bytes) encoding. Note that the
-         *  output size is constant using the same settings a type and does _not_ grow or shrink depending on e.g.
-         *  how big the number is.
+         * <p>
+         * The library internally converts everything to bytes, encrypts it and then requires an encoding schema to make
+         * the output printable. Per default the url-safe version of Base64 (RFC4648) is used. This is a well supported,
+         * fast and reasonable space efficient (needs ~25% more storage than the raw bytes) encoding. Note that the
+         * output size is constant using the same settings a type and does _not_ grow or shrink depending on e.g.
+         * how big the number is.
          *
          * @param encoding to use
          * @return builder
@@ -158,13 +168,13 @@ public abstract class Config {
 
         /**
          * If better security settings should be used sacrificing output size and / or performance.
-         *
+         * <p>
          * Only applicable with 16 byte ids (e.g. <code>UUID</code>, <code>byte[]</code>, <code>BigInteger</code>, ...)
          * it is optionally possible to increase the security  strength of the masked id in expense for increased id lengths.
          * By default a 8-byte MAC is appended to the ID and, if randomization is enabled, a 8-byte random nonce is prepended.
          * In high security mode these  numbers double to 16 byte, therefore high security IDs are 16 bytes longer.
          * If you generate a massive amount of ids (more than 2^32) or don't mind the longer output length, high security mode is recommended.
-         *
+         * <p>
          * Issue with smaller MAC is increased chance of not recognizing a forgery and issue with smaller randomization nonce is higher
          * chance of finding duplicated randomization values and recognizing equal ids (chance of duplicate after 5,000,000,000 randomized ids
          * with 8 byte nonce is 50%). Increasing these numbers to 16 bytes make both those issue negligible.
@@ -245,6 +255,27 @@ public abstract class Config {
          * @return builder
          */
         public abstract Builder autoWipeMemory(boolean shouldAutoWipe);
+
+
+        /**
+         * The salt used to seed the simple id obfuscation phase.
+         * If this salt is changed, previous ids cannot be unmasked.
+         *
+         * @param salt as long
+         * @return builder
+         */
+        public Builder obfuscationSalt(long salt) {
+            return obfuscationSalt(Bytes.from(salt).array());
+        }
+
+        /**
+         * The salt used to seed the simple id obfuscation phase.
+         * If this salt is changed, previous ids cannot be unmasked.
+         *
+         * @param salt as byte array
+         * @return builder
+         */
+        public abstract Builder obfuscationSalt(byte[] salt);
 
         /**
          * Create config

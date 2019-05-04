@@ -5,7 +5,7 @@
 <img src="https://github.com/patrickfav/id-mask/blob/master/misc/icon_sm.png?raw=true" align="right"
      alt="IDMask Logo" width="128" height="128" style="padding: 0px 8px 0 8px;">
 
-IDMask is a Java library for masking **internal IDs** (e.g. from your DB) when they need to be publicly published to **hide their actual value and to prevent forging**. This should make it very hard for an attacker to **understand** provided IDs (e.g. by witnessing a sequence, deducting how many orders you had, etc.) and **prevent guessing** of possible valid ones. Masking is **fully reversible** and also supports optional **randomization** for e.g. **shareable links** or **one-time tokens**. It has a wide support for various **Java types** including `long`, `UUID` and `BigInteger`. This library bases its security on **strong cryptographic primitives** ([AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard), [HMAC](https://en.wikipedia.org/wiki/HMAC), [HKDF](https://en.wikipedia.org/wiki/HKDF)) to create a secure encryption schema. It was inspired by [HashIds](https://hashids.org/) but tries to tackle most of it's shortcomings.
+IDMask is a Java library for masking **internal IDs** (e.g. from your DB) when they need to be publicly published to **hide their actual value and to prevent forging**. This should make it very hard for an attacker to **understand** provided IDs (e.g. by witnessing a sequence, deducting how many orders you had, etc.) and **prevent guessing** of possible valid ones. Masking is **fully reversible** and also supports optional **randomization** for e.g. **shareable links** or **one-time tokens**. It has a wide support for various **Java types** including `long`, `UUID` and `BigInteger`. This library bases its security on **strong cryptographic primitives** ([RFC 5297 AES-SIV](https://tools.ietf.org/html/rfc5297), [HKDF](https://en.wikipedia.org/wiki/HKDF)) to create a secure encryption schema. It was inspired by [HashIds](https://hashids.org/) but tries to tackle most of it's shortcomings.
 
 
 [![Download](https://api.bintray.com/packages/patrickfav/maven/id-mask/images/download.svg)](https://bintray.com/patrickfav/maven/id-mask/_latestVersion)
@@ -17,7 +17,7 @@ IDMask is a Java library for masking **internal IDs** (e.g. from your DB) when t
 
 ## Feature Overview
 
-* **Secure**: Creates encrypted IDs with **no-nonsense cryptography** ([AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard), [HKDF](https://en.wikipedia.org/wiki/HKDF)) including **forgery protection** ([HMAC](https://en.wikipedia.org/wiki/HMAC))
+* **Secure**: Creates encrypted IDs with **no-nonsense cryptography** ([RFC 5297 AES-SIV](https://tools.ietf.org/html/rfc5297) including **forgery protection** and [HKDF](https://en.wikipedia.org/wiki/HKDF))
 * **Wide range of Java type support**: mask IDs from `long`, `UUID`, `BigInteger`, `LongTuple` and `byte[]`
 * **Full support of types**: no arbitrary restrictions like "only positive longs", etc.
 * **ID randomization**: if enabled, will create IDs which appear uncorrelated with the same underlying value.
@@ -617,8 +617,7 @@ the output reasonable small with 16 + 1 byte.
 
 This schema uses the following cryptographic primitives:
 
-* [AES-128](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard) + [CBC](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Cipher_Block_Chaining_(CBC)) + [No Padding](https://en.wikipedia.org/wiki/Padding_(cryptography))
-* [HMAC-SHA256](https://en.wikipedia.org/wiki/HMAC)
+* [[RFC 5297 AES-SIV](https://tools.ietf.org/html/rfc5297)](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard)
 * [HKDF-HMAC-SHA512](https://en.wikipedia.org/wiki/HKDF)
 
 The basic scheme works as follows:
@@ -680,7 +679,7 @@ In summary, here is simple comparison table of the main points:
 | Type Limitations   | long: none, BigInteger: max 15 byte, byte[]: max 16 byte       | only positive and max 2^53   |
 | Randomized IDs     | optional                                  | no                           |
 | Output Length      | fixed length                              | variable length              |
-| Encryption         | AES + HMAC                                | encoding + shuffled alphabet |
+| Encryption         | AES-SIV                                   | encoding + shuffled alphabet |
 | Performance        | 2-7 µs/op                                 | 0.003 µs/op                  |
 | Collision possible | no                                        | no                           |
 | Caching            | Built-In                                  | no                           |

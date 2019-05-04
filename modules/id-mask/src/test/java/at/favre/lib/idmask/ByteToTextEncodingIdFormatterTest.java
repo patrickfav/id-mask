@@ -8,10 +8,7 @@ import static org.junit.Assert.fail;
 
 public class ByteToTextEncodingIdFormatterTest {
 
-    private final ByteToTextEncoding encoding;
-
     public ByteToTextEncodingIdFormatterTest() {
-        this.encoding = ByteToTextEncoding.IdFormatter.wrap(new ByteToTextEncoding.Base32Rfc4648());
     }
 
     @Test
