@@ -398,8 +398,8 @@ String maskKey2 = idMask2.mask(id);
 Unmasking however will reveal the same underlying id, no matter if it was masked with `key1` or `key2`.
 
 ```java
-// the new instance can unmask the old an new key
-assert idMask2.unmask(maskKey1).equals(idMask2.unmask(maskKey2));
+// the new instance can unmask the old and new key
+assert Arrays.equals(idMask2.unmask(maskKey1), idMask2.unmask(maskKey2));
 ```
 
 _Be aware that changing the secret key, will destroy equality of masked IDs cached with clients or elsewhere._
