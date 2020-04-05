@@ -18,7 +18,7 @@
 
     <properties>
         <maven.deploy.skip>false</maven.deploy.skip>
-        <jackson.version>2.9.8</jackson.version>
+        <jackson.version>2.10.0</jackson.version>
     </properties>
 
     <build>
@@ -34,7 +34,7 @@
                     <dependency>
                         <groupId>com.puppycrawl.tools</groupId>
                         <artifactId>checkstyle</artifactId>
-                        <version>8.18</version>
+                        <version>8.31</version>
                     </dependency>
                 </dependencies>
             </plugin>
