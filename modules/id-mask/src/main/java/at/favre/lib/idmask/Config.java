@@ -155,7 +155,6 @@ public abstract class Config {
          */
         public abstract Builder encoding(ByteToTextEncoding encoding);
 
-
         /**
          * If better security settings should be used sacrificing output size and / or performance.
          *
@@ -211,7 +210,6 @@ public abstract class Config {
          * @return builder
          */
         public abstract Builder secureRandom(SecureRandom secureRandom);
-
 
         /**
          * Optionally provide your own cache implementation.
