@@ -254,7 +254,6 @@ public abstract class Config {
          */
         public abstract Builder autoWipeMemory(boolean shouldAutoWipe);
 
-
         /**
          * The salt used to seed the simple id obfuscation phase.
          * If this salt is changed, previous ids cannot be unmasked.
