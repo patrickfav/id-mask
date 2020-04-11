@@ -38,3 +38,5 @@ ci-settings.xml
 secrets.tar
 .flattened-pom.xml
 pom.xml.versionsBackup
+
+pom.xml.versionsBackup
