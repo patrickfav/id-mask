@@ -34,11 +34,13 @@ The code is compiled with target [Java 7](https://en.wikipedia.org/wiki/Java_ver
 
 Add the dependency to your `pom.xml` ([check latest release](https://github.com/patrickfav/id-mask/releases)):
 
-    <dependency>
-        <groupId>at.favre.lib</groupId>
-        <artifactId>id-mask</artifactId>
-        <version>{latest-version}</version>
-    </dependency>
+```xml
+<dependency>
+    <groupId>at.favre.lib</groupId>
+    <artifactId>id-mask</artifactId>
+    <version>{latest-version}</version>
+</dependency>
+```
 
 A very simple example using 64 bit integers ([`long`](https://docs.oracle.com/javase/7/docs/api/java/lang/Long.html)):
 
@@ -501,12 +503,13 @@ The artifacts are deployed to [jcenter](https://bintray.com/bintray/jcenter) and
 
 Add dependency to your `pom.xml`:
 
-    <dependency>
-        <groupId>at.favre.lib</groupId>
-        <artifactId>id-mask</artifactId>
-        <version>{latest-version}</version>
-    </dependency>
-
+```xml
+<dependency>
+    <groupId>at.favre.lib</groupId>
+    <artifactId>id-mask</artifactId>
+    <version>{latest-version}</version>
+</dependency>
+```
 ### Gradle
 
 Add to your `build.gradle` module dependencies:
