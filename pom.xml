@@ -110,6 +110,6 @@
 
     <ciManagement>
         <system>Travis</system>
-        <url>https://travis-ci.org/patrickfav/id-mask</url>
+        <url>https://travis-ci.com/patrickfav/id-mask</url>
     </ciManagement>
 </project>
