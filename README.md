@@ -7,8 +7,7 @@
 
 IDMask is a Java library for masking **internal IDs** (e.g. from your DB) when they need to be publicly published to **hide their actual value and to prevent forging**. This should make it very hard for an attacker to **understand** provided IDs (e.g. by witnessing a sequence, deducting how many orders you had, etc.) and **prevent guessing** of possible valid ones. Masking is **fully reversible** and also supports optional **randomization** for e.g. **shareable links** or **one-time tokens**. It has a wide support for various **Java types** including `long`, `UUID` and `BigInteger`. This library bases its security on **strong cryptographic primitives** ([AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard), [HMAC](https://en.wikipedia.org/wiki/HMAC), [HKDF](https://en.wikipedia.org/wiki/HKDF)) to create a secure encryption schema. It was inspired by [HashIds](https://hashids.org/) but tries to tackle most of it's shortcomings.
 
-
-[![Download](https://api.bintray.com/packages/patrickfav/maven/id-mask/images/download.svg)](https://bintray.com/patrickfav/maven/id-mask/_latestVersion)
+[![Maven Central](https://img.shields.io/maven-central/v/at.favre.lib/id-mask)](https://mvnrepository.com/artifact/at.favre.lib/id-mask)
 [![Build Status](https://travis-ci.com/patrickfav/id-mask.svg?branch=master)](https://travis-ci.com/patrickfav/id-mask)
 [![Javadocs](https://www.javadoc.io/badge/at.favre.lib/id-mask.svg)](https://www.javadoc.io/doc/at.favre.lib/id-mask)
 [![Coverage Status](https://coveralls.io/repos/github/patrickfav/id-mask/badge.svg?branch=master)](https://coveralls.io/github/patrickfav/id-mask?branch=master)
