@@ -6,7 +6,7 @@
     <parent>
         <groupId>at.favre.lib</groupId>
         <artifactId>common-parent</artifactId>
-        <version>12</version>
+        <version>19</version>
     </parent>
 
     <artifactId>id-mask-parent</artifactId>
