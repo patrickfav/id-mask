@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+    <suppress>
+        <cve>CVE-2022-45688</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[This suppresses all CVE entries that have a score below CVSS x.]]></notes>
+        <cvssBelow>5</cvssBelow>
+    </suppress>
+</suppressions>
