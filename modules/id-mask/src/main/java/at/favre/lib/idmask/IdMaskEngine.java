@@ -1,7 +1,7 @@
 package at.favre.lib.idmask;
 
 import at.favre.lib.bytes.Bytes;
-import at.favre.lib.crypto.HKDF;
+import at.favre.lib.hkdf.HKDF;
 
 import javax.crypto.Cipher;
 import javax.crypto.Mac;

@@ -2,10 +2,10 @@
 
 # IDMask - Encryption and Obfuscation of IDs
 
-<img src="https://github.com/patrickfav/id-mask/blob/master/misc/icon_sm.png?raw=true" align="right"
+<img src="https://raw.githubusercontent.com/patrickfav/id-mask/main/misc/icon_sm.png" align="right"
      alt="IDMask Logo" width="128" height="128" style="padding: 0px 8px 0 8px;">
 
-IDMask is a Java library for masking **internal IDs** (e.g. from your DB) when they need to be publicly published to **hide their actual value and to prevent forging**. This should make it very hard for an attacker to **understand** provided IDs (e.g. by witnessing a sequence, deducting how many orders you had, etc.) and **prevent guessing** of possible valid ones. Masking is **fully reversible** and also supports optional **randomization** for e.g. **shareable links** or **one-time tokens**. It has a wide support for various **Java types** including `long`, `UUID` and `BigInteger`. This library bases its security on **strong cryptographic primitives** ([AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard), [HMAC](https://en.wikipedia.org/wiki/HMAC), [HKDF](https://en.wikipedia.org/wiki/HKDF)) to create a secure encryption schema. It was inspired by [HashIds](https://hashids.org/) but tries to tackle most of it's shortcomings.
+IDMask is a Java library for masking **internal IDs** (e.g. from your DB) when they need to be publicly published to **hide their actual value and to prevent forging**. This should make it very hard for an attacker to **understand** provided IDs (e.g. by witnessing a sequence, deducting how many orders you had, etc.) and **prevent guessing** of possible valid ones. Masking is **fully reversible** and also supports optional **randomization** for e.g. **shareable links** or **one-time tokens**. It has a wide support for various **Java types** including `long`, `UUID` and `BigInteger`. This library bases its security on **strong cryptographic primitives** ([AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard), [HMAC](https://en.wikipedia.org/wiki/HMAC), [HKDF](https://en.wikipedia.org/wiki/HKDF)) to create a secure encryption schema. It was inspired by [HashIds](https://hashids.org/) but tries to tackle most of its shortcomings.
 
 [![Maven Central](https://img.shields.io/maven-central/v/at.favre.lib/id-mask)](https://mvnrepository.com/artifact/at.favre.lib/id-mask)
 [![Github Actions](https://github.com/patrickfav/id-mask/actions/workflows/build_deploy.yml/badge.svg)](https://github.com/patrickfav/id-mask/actions)
@@ -40,7 +40,7 @@ Add the dependency to your `pom.xml` ([check latest release](https://github.com/
 </dependency>
 ```
 
-A very simple example using 64 bit integers ([`long`](https://docs.oracle.com/javase/7/docs/api/java/lang/Long.html)):
+A very simple example using 64-bit integers ([`long`](https://docs.oracle.com/javase/7/docs/api/java/lang/Long.html)):
 
 ```java
 byte[] key = Bytes.random(16).array();
@@ -90,7 +90,7 @@ The following section explains in detail how to use and configure IDMask:
 
 ### Step 1: Create a Secret Key
 
-IDMask's security relies on the strength of the used cryptographic key. In it's rawest from, a secret key is basically just a random byte array. A provided key should be at least 16 bytes long (longer _usually_ doesn't translate to better security). IDMask requires it to be between 12 and 64. There are multiple ways to manage secret keys, if your project already has a managed [`KeyStore`](https://docs.oracle.com/javase/7/docs/api/java/security/KeyStore.html) or similar, use it. Otherwise you could just hardcode the key in your code. This, of course, only makes sense where the client doesn't have access to the source or binary (i.e. in a backend scenario). Here are some suggestion on how to create your secret key:
+IDMask's security relies on the strength of the used cryptographic key. In its rawest from, a secret key is basically just a random byte array. A provided key should be at least 16 bytes long (longer _usually_ doesn't translate to better security). IDMask requires it to be between 12 and 64. There are multiple ways to manage secret keys, if your project already has a managed [`KeyStore`](https://docs.oracle.com/javase/7/docs/api/java/security/KeyStore.html) or similar, use it. Otherwise, you could just hardcode the key in your code. This, of course, only makes sense where the client doesn't have access to the source or binary (i.e. in a backend scenario). Here are some suggestion on how to create your secret key:
 
 #### Option A: Use Random Number Generator CLI
 
@@ -181,7 +181,7 @@ String masked = idMask.mask(new LongTuple(182736128L, 33516718189976L));
 
 #### Option E: 16 byte (128 bit) byte array
 
-**Only for advanced use cases.** The most generic way to represent a 128 bit id is as a byte array. Basically you may provide any data as long as it fits in 16 bytes. *Note, that this is not a general purpose encryption schema and your data might not be secure!* 
+**Only for advanced use cases.** The most generic way to represent a 128-bit id is as a byte array. Basically you may provide any data as long as it fits in 16 bytes. *Note, that this is not a general purpose encryption schema and your data might not be secure!* 
 
 ```java
 IdMask<byte[]> idMask = IdMasks.for128bitNumbers(Config.builder(key).build());
@@ -232,7 +232,7 @@ Usually the default settings are fine for most use cases, however it may make se
 
 #### Q1: Should Ids be deterministic or random?
 
-By default off, the masking algorithm supports randomization of generated IDs. This is achieved by creating a random number and using it as part of the encrypt scheme as well as appending it to the output of the masked id. Therefore randomized IDs are longer than their deterministic counter part. Randomization increases the obfuscation effectiveness but makes it impossible for a client to check equality. This usually makes sense with shareable links, random access tokens, or other one-time identifiers. Randomized IDs within models are probably a bad idea. 
+By default, off, the masking algorithm supports randomization of generated IDs. This is achieved by creating a random number and using it as part of the encrypt scheme as well as appending it to the output of the masked id. Therefore, randomized IDs are longer than their deterministic counterpart. Randomization increases the obfuscation effectiveness but makes it impossible for a client to check equality. This usually makes sense with shareable links, random access tokens, or other one-time identifiers. Randomized IDs within models are probably a bad idea. 
 
 For instance these masked IDs all represent the same original id `70366123987523049`:
 
@@ -252,9 +252,9 @@ Config.builder(key)
 
 #### Q2: What encoding should I choose?
 
-The library internally converts everything to bytes, encrypts it and then requires an encoding schema to make the output printable. Per default the url-safe version of Base64 ([RFC4648](https://tools.ietf.org/html/rfc4648)) is used. This is a well supported, fast and reasonable space efficient (needs ~25% more storage than the raw bytes) encoding. Note that the output size is constant using the same settings a type and does _not_ grow or shrink depending on e.g. how big the number is.
+The library internally converts everything to bytes, encrypts it and then requires an encoding schema to make the output printable. Per default the url-safe version of Base64 ([RFC4648](https://tools.ietf.org/html/rfc4648)) is used. This is a well-supported, fast and reasonable space efficient (needs ~25% more storage than the raw bytes) encoding. Note that the output size is constant using the same settings a type and does _not_ grow or shrink depending on e.g. how big the number is.
 
-However depending on your use case, you may want Ids that are easy to type, do not contain possible problematic words
+However, depending on your use case, you may want Ids that are easy to type, do not contain possible problematic words
 or require some maximum length. The library includes some built-in encodings which satisfy different requirements:
 
 
@@ -288,7 +288,7 @@ For example with Base32 this could look like this
 
 #### Q3: Do you need Caching?
 
- By default a simple in-memory [lru cache](https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)) is enabled. This cache improves performance if recurring IDs are encoded/decoded - if this is not the case the cache should be disabled to safe memory.
+ By default, a simple in-memory [lru cache](https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)) is enabled. This cache improves performance if recurring IDs are encoded/decoded - if this is not the case the cache should be disabled to safe memory.
 
 This setting is responsible for disabling the cache:
 
@@ -322,8 +322,8 @@ Config.builder(key)
 #### High Security Mode
 
 Only applicable with 16 byte IDs (e.g. `UUID`, `byte[]`, `BigInteger`, ...) it is optionally possible to increase the security
-strength of the masked id in expense for increased id lengths. By default a 8-byte [MAC](https://en.wikipedia.org/wiki/Message_authentication_code)
- is appended to the ID and, if randomization is enabled, a 8-byte random nonce is prepended. In high security mode these 
+strength of the masked id in expense for increased id lengths. By default, an 8-byte [MAC](https://en.wikipedia.org/wiki/Message_authentication_code)
+ is appended to the ID and, if randomization is enabled, an 8-byte random nonce is prepended. In high security mode these 
  numbers double to 16 byte, therefore high security IDs are 16 bytes longer. If you generate a massive amount of IDs (more than 2^32) or don't 
  mind the longer output length, high security mode is recommended.
 
@@ -398,7 +398,7 @@ String maskKey2 = idMask2.mask(id);
 Unmasking however will reveal the same underlying id, no matter if it was masked with `key1` or `key2`.
 
 ```java
-// the new instance can unmask the old an new key
+// the new instance can unmask the old a new key
 assert idMask2.unmask(maskKey1).equals(idMask2.unmask(maskKey2));
 ```
 
@@ -406,7 +406,7 @@ _Be aware that changing the secret key, will destroy equality of masked IDs cach
 
 ### Error Handling
 
-An `IdMask` instance will basically throws 2 types of _unchecked exceptions_:
+An `IdMask` instance will basically throw 2 types of _unchecked exceptions_:
 
 1) `IllegalArgumentException`
 2) `IdMaskSecurityException` (`extends SecurityException`)
@@ -516,7 +516,7 @@ Add to your `build.gradle` module dependencies:
 
 ### Local Jar
 
-[Grab jar from latest release.](https://github.com/patrickfav/id-mask/releases/latest)
+[Grab jar from the latest release.](https://github.com/patrickfav/id-mask/releases/latest)
 
 ## Description
 
@@ -525,11 +525,11 @@ Add to your `build.gradle` module dependencies:
 IDMask can be used in an environment, where you want to protect the knowledge of the value of your IDs. Usually a very
 easy workaround would be to add another column in your database and randomly create UUIDs and use this instead of your
 e.g. numeric IDs. However sometimes this is not feasible (e.g. having millions of rows) or you cannot change the DB schema.
-Additionally IDMask can make IDs appear random, a feature which cannot be satisfied with the above approach.
+Additionally, IDMask can make IDs appear random, a feature which cannot be satisfied with the above approach.
 
 #### When to use IDMask
 
-* If IDs are used which are easily guessable (ie. simple sequence) and knowledge of this ID might reveal confidential information
+* If IDs are used which are easily guessable (i.e. simple sequence) and knowledge of this ID might reveal confidential information
 * If IDs expose row count in a database table, which in turn reveals business intelligence (e.g. how many orders per day, etc.)
 * For creating ad-hoc shareable links which should appear random to the public
 * For creating single-use tokens for various use cases
@@ -541,7 +541,7 @@ Additionally IDMask can make IDs appear random, a feature which cannot be satisf
 
 ### Performance
 
-IDMask requires a non-trivial amount of work to encrypt IDs. The 8-byte-schema only needs to encrypt a single AES block (which should be hardware accelerated with most CPUs). The 16-byte schema is more expensive, since it requires encryption of an AES block, one HKDF expand and a HMAC calculation. According to the JMH benchmark, you can expect multiple hundreds encryption/decryption per ms. Compared to the performance HashIds, which is faster by a factor of about 1000, IDMask seems extremely slow, but in the grant scheme of things it probably doesn't make a difference if masking of a single id costs 2µs or 0.002µs - there will be no performance bottleneck either way.
+IDMask requires a non-trivial amount of work to encrypt IDs. The 8-byte-schema only needs to encrypt a single AES block (which should be hardware accelerated with most CPUs). The 16-byte schema is more expensive, since it requires encryption of an AES block, one HKDF expand and a HMAC calculation. According to the JMH benchmark, you can expect multiple hundreds' encryption/decryption per ms. Compared to the performance HashIds, which is faster by a factor of about 1000, IDMask seems extremely slow, but in the grant scheme of things it probably doesn't make a difference if masking of a single id costs 2µs or 0.002µs - there will be no performance bottleneck either way.
 
 #### JMH Benchmark
 
@@ -568,7 +568,7 @@ This schema uses the following cryptographic primitives:
 
 * [AES-128](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard) + [ECB](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_(ECB)) + [No Padding](https://en.wikipedia.org/wiki/Padding_(cryptography))
 
-Using the a full 16 byte AES block, we create a message containing of the 8 byte id (ie. the plaintext) and an 8 byte
+Using the full 16 byte AES block, we create a message containing of the 8 byte id (i.e. the plaintext) and an 8 byte
 reference value. Then we encrypt it with AES/ECB (since we encrypt only a single block, a block mode using an IV like CBC
 wouldn't make a difference):
 
@@ -583,7 +583,7 @@ or this was a forgery attempt:
 
 ##### Deterministic
 
-In the deterministic mode the reference value is just a 8 byte long array of zeros.
+In the deterministic mode the reference value is just an 8 byte long array of zeros.
 
 ##### Randomized
 
@@ -599,7 +599,7 @@ Both modes have a version byte prepended which will be xor-ed with the first byt
 
     obfuscated_version_byte = version_byte ^ ciphertext[0]
     
-Finally the message looks like this:
+Finally, the message looks like this:
 
     maskeId_msg_d = obfuscated_version_byte | maskedId_d
     
@@ -652,7 +652,7 @@ optionally if randomized IDs are enabled, also append `entropy` to the output:
 maskedId_msg_r = entropy | maskedId_msg
 ```
 
-Finally append the version byte (see explanation in 8 byte schema). Use either the randomized or deterministic version:
+Finally, append the version byte (see explanation in 8 byte schema). Use either the randomized or deterministic version:
 
 ```
 maskeId_msg_r = obfuscated_version_byte | maskedId_msg_r
@@ -699,7 +699,7 @@ The build will fail if any issue is found.
 
 #### Signed Jar
 
-The provided JARs in the Github release page are signed with my private key:
+The provided JARs in the GitHub release page are signed with my private key:
 
     CN=Patrick Favre-Bulle, OU=Private, O=PF Github Open Source, L=Vienna, ST=Vienna, C=AT
     Validity: Thu Sep 07 16:40:57 SGT 2017 to: Fri Feb 10 16:40:57 SGT 2034
@@ -738,10 +738,10 @@ Use the Maven wrapper to create a jar including all dependencies
 ### Checkstyle Config File
 
 This project uses my [`common-parent`](https://github.com/patrickfav/mvn-common-parent) which centralized a lot of
-the plugin versions aswell as providing the checkstyle config rules. Specifically they are maintained in [`checkstyle-config`](https://github.com/patrickfav/checkstyle-config). Locally the files will be copied after you `mvnw install` into your `target` folder and is called
+the plugin versions as well as providing the checkstyle config rules. Specifically they are maintained in [`checkstyle-config`](https://github.com/patrickfav/checkstyle-config). Locally the files will be copied after you `mvnw install` into your `target` folder and is called
 `target/checkstyle-checker.xml`. So if you use a plugin for your IDE, use this file as your local configuration.
 
-## Tech Stack
+## Tech-Stack
 
 * Java 7 (+ [errorprone](https://github.com/google/error-prone) static analyzer)
 * Maven

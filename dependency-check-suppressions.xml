@@ -4,6 +4,9 @@
         <cve>CVE-2022-45688</cve>
     </suppress>
     <suppress>
+        <cve>CVE-2020-8908</cve>
+    </suppress>
+    <suppress>
         <notes><![CDATA[This suppresses all CVE entries that have a score below CVSS x.]]></notes>
         <cvssBelow>5</cvssBelow>
     </suppress>
