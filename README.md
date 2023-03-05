@@ -8,11 +8,10 @@
 IDMask is a Java library for masking **internal IDs** (e.g. from your DB) when they need to be publicly published to **hide their actual value and to prevent forging**. This should make it very hard for an attacker to **understand** provided IDs (e.g. by witnessing a sequence, deducting how many orders you had, etc.) and **prevent guessing** of possible valid ones. Masking is **fully reversible** and also supports optional **randomization** for e.g. **shareable links** or **one-time tokens**. It has a wide support for various **Java types** including `long`, `UUID` and `BigInteger`. This library bases its security on **strong cryptographic primitives** ([AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard), [HMAC](https://en.wikipedia.org/wiki/HMAC), [HKDF](https://en.wikipedia.org/wiki/HKDF)) to create a secure encryption schema. It was inspired by [HashIds](https://hashids.org/) but tries to tackle most of it's shortcomings.
 
 [![Maven Central](https://img.shields.io/maven-central/v/at.favre.lib/id-mask)](https://mvnrepository.com/artifact/at.favre.lib/id-mask)
-[![Build Status](https://travis-ci.com/patrickfav/id-mask.svg?branch=master)](https://travis-ci.com/patrickfav/id-mask)
+[![Github Actions](https://github.com/patrickfav/id-mask/actions/workflows/build_deploy.yml/badge.svg)](https://github.com/patrickfav/id-mask/actions)
 [![Javadocs](https://www.javadoc.io/badge/at.favre.lib/id-mask.svg)](https://www.javadoc.io/doc/at.favre.lib/id-mask)
-[![Coverage Status](https://coveralls.io/repos/github/patrickfav/id-mask/badge.svg?branch=master)](https://coveralls.io/github/patrickfav/id-mask?branch=master)
-[![Maintainability](https://api.codeclimate.com/v1/badges/fc50d911e4146a570d4e/maintainability)](https://codeclimate.com/github/patrickfav/id-mask/maintainability)
-
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=patrickfav_id-mask&metric=coverage)](https://sonarcloud.io/summary/new_code?id=patrickfav_id-mask)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=patrickfav_id-mask&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=patrickfav_id-mask)
 
 ## Feature Overview
 

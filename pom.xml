@@ -6,7 +6,7 @@
     <parent>
         <groupId>at.favre.lib</groupId>
         <artifactId>common-parent</artifactId>
-        <version>12</version>
+        <version>19</version>
     </parent>
 
     <artifactId>id-mask-parent</artifactId>
@@ -22,28 +22,39 @@
     <url>https://github.com/patrickfav/id-mask</url>
     <inceptionYear>2019</inceptionYear>
 
-    <modules>
-        <module>modules/id-mask</module>
-        <module>modules/benchmark-jmh</module>
-    </modules>
+    <!-- this is a workaround to be able to only deploy the main module used in deploy phase, nexus stage plugin is buggy -->
+    <profiles>
+        <profile>
+            <id>allmodules</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>modules/id-mask</module>
+                <module>modules/benchmark-jmh</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>mainmodule</id>
+            <modules>
+                <module>modules/id-mask</module>
+            </modules>
+        </profile>
+    </profiles>
 
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
         <autoValueVersion>1.6.3</autoValueVersion>
         <!-- set this to true if fail because of missing credentials -->
         <commonConfig.jarSign.skip>false</commonConfig.jarSign.skip>
+        <!-- SonarQube Config -->
+        <sonar.organization>patrickfav</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+        <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+        <sonar.coverage.jacoco.xmlReportPaths>**/target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.language>java</sonar.language>
     </properties>
-
-    <repositories>
-        <repository>
-            <id>jcenter</id>
-            <name>jcenter</name>
-            <url>https://jcenter.bintray.com</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
 
     <build>
         <plugins>
@@ -81,25 +92,13 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
             </plugin>
-            <plugin>
-                <groupId>org.eluder.coveralls</groupId>
-                <artifactId>coveralls-maven-plugin</artifactId>
-            </plugin>
         </plugins>
     </build>
 
-    <distributionManagement>
-        <repository>
-            <id>bintray-patrickfav</id>
-            <name>patrickfav-id-mask</name>
-            <url>https://api.bintray.com/maven/patrickfav/maven/id-mask/;publish=1</url>
-        </repository>
-    </distributionManagement>
 
     <scm>
-        <connection>https://github.com/patrickfav/id-mask.git</connection>
-        <developerConnection>https://github.com/patrickfav/id-mask.git</developerConnection>
-        <tag>HEAD</tag>
+        <connection>scm:git:https://github.com/patrickfav/id-mask.git</connection>
+        <developerConnection>scm:git:https://github.com/patrickfav/id-mask.git</developerConnection>
         <url>https://github.com/patrickfav/id-mask</url>
     </scm>
 
@@ -109,7 +108,7 @@
     </issueManagement>
 
     <ciManagement>
-        <system>Travis</system>
-        <url>https://travis-ci.com/patrickfav/id-mask</url>
+        <system>Github Actions</system>
+        <url>https://github.com/patrickfav/id-mask/actions</url>
     </ciManagement>
 </project>
