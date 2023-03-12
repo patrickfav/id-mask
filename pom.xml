@@ -19,7 +19,7 @@
         various Java types including long, UUID and BigInteger. This library bases its security on strong cryptographic
         primitives.
     </description>
-    <url>https://github.com/patrickfav/id-mask</url>
+    <url>https://favr.dev/opensource/id-mask</url>
     <inceptionYear>2019</inceptionYear>
 
     <!-- this is a workaround to be able to only deploy the main module used in deploy phase, nexus stage plugin is buggy -->
